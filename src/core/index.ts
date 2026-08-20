@@ -30,19 +30,20 @@ export function createStore<T extends Record<string, any>>(initial: T) {
   };
 }
 
-// ---------- 渲染引擎（支持错误边界） ----------
-function renderVNode(vnode: any): Node {
-  // 处理 null/undefined
+// ---------- 渲染引擎（包含 Diff 算法）----------
+
+// 创建真实 DOM 节点
+function createElement(vnode: VNode): Node {
   if (vnode == null || typeof vnode !== 'object' || !('type' in vnode)) {
     return document.createTextNode('');
   }
 
-  // ---------- 错误边界处理 ----------
+  // 错误边界处理（如果有）
   if (vnode.type === 'error-boundary') {
     try {
       const children = vnode.children || [];
       if (children.length > 0) {
-        return renderVNode(children[0]);
+        return createElement(children[0]);
       }
     } catch (error) {
       const fallback = vnode.props?._fallback || defaultFallback;
@@ -53,50 +54,153 @@ function renderVNode(vnode: any): Node {
       console.error(JSON.stringify({
         code: 'EIDOS_ERROR_BOUNDARY',
         message: errorObj.message,
-        fix: '检查子组件的渲染逻辑，确保所有数据都有默认值'
+        fix: '检查子组件的渲染逻辑'
       }));
-      return renderVNode(fallback(errorObj));
+      return createElement(fallback(errorObj));
     }
   }
 
-  // ---------- 正常渲染 ----------
   const el = document.createElement(vnode.type);
+  setProps(el, vnode.props || {});
+  if (vnode.children) {
+    for (const child of vnode.children) {
+      el.appendChild(createElement(child));
+    }
+  }
+  return el;
+}
 
-  if (vnode.props) {
-    for (const [key, val] of Object.entries(vnode.props)) {
-      if (key === 'style' && typeof val === 'object') {
-        Object.assign(el.style, val);
-      } else if (key === 'text') {
-        el.textContent = val;
-      } else if (key === 'onClick') {
-        el.addEventListener('click', () => {
-          window.dispatchEvent(new CustomEvent('eidos-event', {
-            detail: { type: val, target: el }
-          }));
-        });
-      } else if (key === 'onInput') {
-        el.addEventListener('input', (e) => {
-          const target = e.target as HTMLInputElement;
-          window.dispatchEvent(new CustomEvent('eidos-event', {
-            detail: { type: val, value: target.value, target: el }
-          }));
-        });
+// 设置属性（包括事件）
+function setProps(el: HTMLElement, props: Record<string, any>) {
+  for (const [key, val] of Object.entries(props)) {
+    if (key === 'style' && typeof val === 'object') {
+      Object.assign(el.style, val);
+    } else if (key === 'text') {
+      el.textContent = val;
+    } else if (key === 'onClick') {
+      el.addEventListener('click', (event) => {
+        window.dispatchEvent(new CustomEvent('eidos-event', {
+          detail: { type: val, target: el, originalEvent: event }
+        }));
+      });
+    } else if (key === 'onInput') {
+      el.addEventListener('input', (event) => {
+        const target = event.target as HTMLInputElement;
+        window.dispatchEvent(new CustomEvent('eidos-event', {
+          detail: { type: val, value: target.value, target: el, originalEvent: event }
+        }));
+      });
+    } else {
+      el.setAttribute(key, String(val));
+    }
+  }
+}
+
+// 更新属性（比较新旧 props）
+function updateProps(el: HTMLElement, oldProps: Record<string, any>, newProps: Record<string, any>) {
+  const allKeys = new Set([...Object.keys(oldProps || {}), ...Object.keys(newProps || {})]);
+  for (const key of allKeys) {
+    const oldVal = oldProps?.[key];
+    const newVal = newProps?.[key];
+    if (oldVal === newVal) continue;
+
+    // 处理特殊键
+    if (key === 'style') {
+      const oldStyle = oldVal || {};
+      const newStyle = newVal || {};
+      for (const styleKey of Object.keys({ ...oldStyle, ...newStyle })) {
+        if (oldStyle[styleKey] !== newStyle[styleKey]) {
+          if (newStyle[styleKey] != null) {
+            el.style[styleKey as any] = newStyle[styleKey];
+          } else {
+            el.style[styleKey as any] = '';
+          }
+        }
+      }
+    } else if (key === 'text') {
+      el.textContent = newVal ?? '';
+    } else if (key === 'onClick') {
+      // 简单处理：移除旧监听器，添加新监听器（实际应该使用事件委托优化，但简化）
+      // 这里我们仅模拟：因为事件是通过全局监听，所以不需要重新绑定，但为了 demo 我们保留
+      // 实际项目中，为了避免内存泄漏，我们应该在删除节点时清理监听器，但这里保持简单。
+      // 我们假设事件绑定是一次性的，通过全局 eidos-event 处理，所以不需要改变。
+    } else if (key === 'onInput') {
+      // 同 onClick
+    } else {
+      if (newVal != null && newVal !== false) {
+        el.setAttribute(key, String(newVal));
       } else {
-        el.setAttribute(key, String(val));
+        el.removeAttribute(key);
       }
     }
   }
+}
 
-  if (vnode.children && Array.isArray(vnode.children)) {
-    for (const child of vnode.children) {
-      el.appendChild(renderVNode(child));
+// ---------- Diff 算法核心 ----------
+function patch(
+  parent: Node,
+  oldVNode: VNode | null | undefined,
+  newVNode: VNode | null | undefined,
+  index: number = 0
+): Node {
+  // 如果新节点为 null/undefined，移除旧节点
+  if (newVNode == null) {
+    const child = parent.childNodes[index];
+    if (child) parent.removeChild(child);
+    return document.createTextNode(''); // placeholder
+  }
+
+  // 如果旧节点为 null/undefined，创建新节点
+  if (oldVNode == null) {
+    const newEl = createElement(newVNode);
+    parent.insertBefore(newEl, parent.childNodes[index] || null);
+    return newEl;
+  }
+
+  // 类型不同或一个是文本节点（用 type 判断），替换整个节点
+  if (oldVNode.type !== newVNode.type) {
+    const newEl = createElement(newVNode);
+    const oldChild = parent.childNodes[index];
+    if (oldChild) {
+      parent.replaceChild(newEl, oldChild);
+    } else {
+      parent.appendChild(newEl);
+    }
+    return newEl;
+  }
+
+  // 类型相同，复用节点
+  const el = parent.childNodes[index] as HTMLElement;
+  if (!el) {
+    // 理论上不应发生，但若不存在则创建
+    const newEl = createElement(newVNode);
+    parent.appendChild(newEl);
+    return newEl;
+  }
+
+  // 更新属性
+  updateProps(el, oldVNode.props || {}, newVNode.props || {});
+
+  // 递归处理子节点
+  const oldChildren = oldVNode.children || [];
+  const newChildren = newVNode.children || [];
+  const maxLen = Math.max(oldChildren.length, newChildren.length);
+  for (let i = 0; i < maxLen; i++) {
+    patch(el, oldChildren[i], newChildren[i], i);
+  }
+
+  // 如果新子节点比旧子节点少，移除多余的节点
+  if (oldChildren.length > newChildren.length) {
+    for (let i = newChildren.length; i < oldChildren.length; i++) {
+      const child = el.childNodes[i];
+      if (child) el.removeChild(child);
     }
   }
 
   return el;
 }
 
-// ---------- 默认错误降级 UI ----------
+// 默认错误降级 UI
 function defaultFallback(error: Error): VNode {
   return {
     type: 'div',
@@ -180,7 +284,6 @@ export function createRouter(
     }
   }
 
-  // 监听 hash 变化
   window.addEventListener('hashchange', () => {
     const path = getCurrentPath();
     const match = matchRoute(path);
@@ -192,7 +295,6 @@ export function createRouter(
     }
   });
 
-  // 初始化
   const initPath = getCurrentPath();
   const initMatch = matchRoute(initPath);
   if (initMatch) {
@@ -205,7 +307,7 @@ export function createRouter(
   return { navigate, getCurrentPath };
 }
 
-// ---------- 创建应用 ----------
+// ---------- 创建应用（带 Diff） ----------
 export function createApp<T extends Record<string, any>>(
   config: {
     store: ReturnType<typeof createStore<T>>;
@@ -217,14 +319,21 @@ export function createApp<T extends Record<string, any>>(
   const root = document.querySelector(container);
   if (!root) throw new Error(`[Eidos] 容器 ${container} 未找到`);
 
-  const rootElement: Element = root;
+  let prevVNode: VNode | null = null;
 
   function render() {
     const state = store.get();
-    const newTree = view(state);
-    rootElement.innerHTML = '';
-    const domNode = renderVNode(newTree);
-    rootElement.appendChild(domNode);
+    const newVNode = view(state);
+    if (prevVNode == null) {
+      // 首次渲染：直接创建
+      root.innerHTML = '';
+      const el = createElement(newVNode);
+      root.appendChild(el);
+    } else {
+      // 后续渲染：使用 patch
+      patch(root, prevVNode, newVNode, 0);
+    }
+    prevVNode = newVNode;
   }
 
   store.subscribe(render);
