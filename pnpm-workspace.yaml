@@ -1,0 +1,5 @@
+packages:
+  - "src/core"
+  - "playground"
+allowBuilds:
+  esbuild: true
