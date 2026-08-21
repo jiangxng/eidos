@@ -3,6 +3,7 @@ export type VNode = {
   type: string;
   props?: Record<string, any>;
   children?: (VNode | null | undefined)[];
+  key?: string | number;
 };
 
 // ---------- 状态管理器 ----------
@@ -33,7 +34,7 @@ export function createStore<T extends Record<string, any>>(initial: T) {
 // ---------- 渲染引擎（包含 Diff 算法）----------
 
 // 创建真实 DOM 节点
-function createElement(vnode: VNode): Node {
+function createElement(vnode: VNode | null | undefined): Node {
   if (vnode == null || typeof vnode !== 'object' || !('type' in vnode)) {
     return document.createTextNode('');
   }
@@ -136,68 +137,104 @@ function updateProps(el: HTMLElement, oldProps: Record<string, any>, newProps: R
   }
 }
 
-// ---------- Diff 算法核心 ----------
-function patch(
-  parent: Node,
+// ---------- Diff 算法核心（Key-based） ----------
+
+// patch 单个节点：给定旧 DOM（可能为 null）、旧/新 VNode，返回更新后的 DOM
+function patchNode(
+  oldEl: Node | null,
   oldVNode: VNode | null | undefined,
-  newVNode: VNode | null | undefined,
-  index: number = 0
+  newVNode: VNode | null | undefined
 ): Node {
-  // 如果新节点为 null/undefined，移除旧节点
+  // 新节点为 null/undefined：由调用方移除，这里返回占位节点
   if (newVNode == null) {
-    const child = parent.childNodes[index];
-    if (child) parent.removeChild(child);
-    return document.createTextNode(''); // placeholder
+    return document.createTextNode('');
   }
 
-  // 如果旧节点为 null/undefined，创建新节点
-  if (oldVNode == null) {
+  // 旧节点为 null，或类型不同（无法复用）：创建全新节点并替换
+  if (oldVNode == null || oldVNode.type !== newVNode.type) {
     const newEl = createElement(newVNode);
-    parent.insertBefore(newEl, parent.childNodes[index] || null);
-    return newEl;
-  }
-
-  // 类型不同或一个是文本节点（用 type 判断），替换整个节点
-  if (oldVNode.type !== newVNode.type) {
-    const newEl = createElement(newVNode);
-    const oldChild = parent.childNodes[index];
-    if (oldChild) {
-      parent.replaceChild(newEl, oldChild);
-    } else {
-      parent.appendChild(newEl);
+    if (oldEl && oldEl.parentNode) {
+      oldEl.parentNode.replaceChild(newEl, oldEl);
     }
     return newEl;
   }
 
-  // 类型相同，复用节点
-  const el = parent.childNodes[index] as HTMLElement;
-  if (!el) {
-    // 理论上不应发生，但若不存在则创建
-    const newEl = createElement(newVNode);
-    parent.appendChild(newEl);
-    return newEl;
-  }
-
-  // 更新属性
+  // 类型相同：复用旧 DOM，只更新 props 和 children
+  const el = oldEl as HTMLElement;
   updateProps(el, oldVNode.props || {}, newVNode.props || {});
+  patchChildren(el, oldVNode.children || [], newVNode.children || []);
+  return el;
+}
 
-  // 递归处理子节点
-  const oldChildren = oldVNode.children || [];
-  const newChildren = newVNode.children || [];
-  const maxLen = Math.max(oldChildren.length, newChildren.length);
-  for (let i = 0; i < maxLen; i++) {
-    patch(el, oldChildren[i], newChildren[i], i);
-  }
+// 子节点 diff：优先按 key 匹配，无 key 时按位置 fallback（类型相同才复用）
+function patchChildren(
+  el: HTMLElement,
+  oldChildren: (VNode | null | undefined)[],
+  newChildren: (VNode | null | undefined)[]
+): void {
+  // 建立旧子节点 key -> index 的映射（仅对带 key 的节点）
+  const oldKeyMap = new Map<string | number, number>();
+  oldChildren.forEach((child, i) => {
+    if (child != null && child.key != null) {
+      oldKeyMap.set(child.key, i);
+    }
+  });
 
-  // 如果新子节点比旧子节点少，移除多余的节点
-  if (oldChildren.length > newChildren.length) {
-    for (let i = newChildren.length; i < oldChildren.length; i++) {
-      const child = el.childNodes[i];
-      if (child) el.removeChild(child);
+  const used = new Array(oldChildren.length).fill(false);
+  const newNodes: Node[] = [];
+
+  for (const newChild of newChildren) {
+    // null/undefined 子节点 -> 空文本占位（与 createElement 行为一致）
+    if (newChild == null) {
+      newNodes.push(document.createTextNode(''));
+      continue;
+    }
+
+    // 1) 优先按 key 匹配
+    let matchedIndex = -1;
+    if (newChild.key != null && oldKeyMap.has(newChild.key)) {
+      const idx = oldKeyMap.get(newChild.key)!;
+      if (!used[idx]) matchedIndex = idx;
+    }
+
+    // 2) 无 key 或 key 未命中 -> 扫描式 fallback（找「未使用 + 非空 + 类型相同」的旧节点）
+    if (matchedIndex === -1) {
+      for (let j = 0; j < oldChildren.length; j++) {
+        if (used[j]) continue;
+        const oldC = oldChildren[j];
+        if (oldC != null && oldC.type === newChild.type) {
+          matchedIndex = j;
+          break;
+        }
+      }
+    }
+
+    if (matchedIndex >= 0) {
+      used[matchedIndex] = true;
+      const oldC = oldChildren[matchedIndex];
+      const oldNode = el.childNodes[matchedIndex] || null;
+      newNodes.push(patchNode(oldNode, oldC, newChild));
+    } else {
+      // 无旧节点可复用 -> 新建
+      newNodes.push(createElement(newChild));
     }
   }
 
-  return el;
+  // 删除未被复用的旧节点
+  for (let i = 0; i < oldChildren.length; i++) {
+    if (!used[i]) {
+      const oldNode = el.childNodes[i];
+      if (oldNode) el.removeChild(oldNode);
+    }
+  }
+
+  // 按新顺序重排 DOM：从后往前 insertBefore，保证最终顺序正确
+  let anchor: Node | null = null;
+  for (let i = newNodes.length - 1; i >= 0; i--) {
+    const node = newNodes[i];
+    el.insertBefore(node, anchor);
+    anchor = node;
+  }
 }
 
 // 默认错误降级 UI
@@ -316,7 +353,7 @@ export function createApp<T extends Record<string, any>>(
   }
 ) {
   const { store, view, container } = config;
-  const root = document.querySelector(container);
+  const root = document.querySelector<HTMLElement>(container);
   if (!root) throw new Error(`[Eidos] 容器 ${container} 未找到`);
 
   let prevVNode: VNode | null = null;
@@ -326,12 +363,12 @@ export function createApp<T extends Record<string, any>>(
     const newVNode = view(state);
     if (prevVNode == null) {
       // 首次渲染：直接创建
-      root.innerHTML = '';
+      root!.innerHTML = '';
       const el = createElement(newVNode);
-      root.appendChild(el);
+      root!.appendChild(el);
     } else {
-      // 后续渲染：使用 patch
-      patch(root, prevVNode, newVNode, 0);
+      // 后续渲染：使用 key-based diff
+      patchNode(root!.firstChild, prevVNode, newVNode);
     }
     prevVNode = newVNode;
   }
@@ -341,3 +378,13 @@ export function createApp<T extends Record<string, any>>(
 
   return { store, render, refresh: () => render() };
 }
+
+// ---------- 条件渲染辅助函数 ----------
+// 条件为真时返回 VNode，否则返回 null（框架会自动过滤 null 子节点）
+export function renderIf(condition: unknown, vnode: VNode): VNode | null {
+  return condition ? vnode : null;
+}
+
+// ---------- 表单模块（re-export，保持单一入口） ----------
+export { renderForm } from './form';
+export type { FormField } from './form';

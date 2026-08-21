@@ -1,10 +1,13 @@
 import { execSync } from 'child_process';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { handleBuildError } from './error-handler.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const steps = [
   {
-    name: '📦 构建核心库 @eidos/core',
+    name: '📦 构建核心库 eidos-core',
     cmd: `vite build --config ${resolve(__dirname, '../configs/build-core.ts')}`
   },
   {

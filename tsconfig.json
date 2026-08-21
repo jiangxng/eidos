@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@eidos/core": ["./src/core/index.ts"]
+      "eidos-core": ["./src/core/index.ts"]
     }
   },
   "include": ["src/**/*.ts", "playground/**/*.ts", "configs/**/*.ts", "scripts/**/*.ts"],

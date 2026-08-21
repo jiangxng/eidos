@@ -1,4 +1,4 @@
-import { VNode } from './index';
+import type { VNode } from './index';
 
 export type FormField = {
   type: 'text' | 'email' | 'password' | 'textarea' | 'select';

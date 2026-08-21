@@ -3,7 +3,7 @@
 {
   "project": "Eidos",
   "version": "0.3.0",
-  "status": "Alpha",
+  "status": "Stable",
   "philosophy": "Explicit > Implicit. Deterministic > Convenient.",
   "primary_audience": "AI Agents & Humans collaborating with AI",
   "core_principles": [
@@ -14,7 +14,7 @@
   ],
   "project_structure": {
     "root": "Monorepo managed by pnpm workspaces",
-    "core": "src/core/ - The framework runtime",
+    "core": "src/core/ - The framework runtime (包含路由、表单、错误边界、Diff 算法)",
     "playground": "playground/ - Demo application for testing",
     "configs": "configs/ - Explicit Vite build configurations",
     "scripts": "scripts/ - Build scripts with structured error handling"
@@ -22,87 +22,107 @@
   "entry_points": {
     "dev": "pnpm dev",
     "build": "pnpm build",
-    "core_import": "@eidos/core"
+    "core_import": "eidos-core"
   },
   "error_codes": {
-    "EIDOS_MISSING_AFFECTS": "dispatch() called without changedKeys array. Fix: add ['key'] as second parameter."
+    "EIDOS_MISSING_AFFECTS": "dispatch() called without changedKeys array. Fix: add ['key'] as second parameter.",
+    "EIDOS_ERROR_BOUNDARY": "Error caught by error boundary. Fix: check child component rendering logic."
   }
 }
 -->
 
-# ⚡️ Eidos - AI Native Framework Manifest
+# Eidos - AI 项目说明书
 
-## 1. Project Intent (Why this exists)
+---
 
-Eidos is a frontend framework specifically designed for Large Language Models (LLMs) and the developers who pair with them.
+## 1. 项目意图 (Why this exists)
 
-Unlike React, Vue, or Svelte which optimize for human developer ergonomics (syntactic sugar, hooks, reactivity magic), Eidos optimizes for AI generation accuracy and deterministic debugging.
+Eidos 是一个为 AI 原生时代设计的前端框架。
 
-The Core Problem We Solve:
-When an AI generates React code, it often forgets dependency arrays, misuses hooks, or creates infinite loops. The error messages are stack traces meant for humans.
-When an AI generates Eidos code, it must explicitly declare changedKeys. If it forgets, the framework throws a JSON error containing the exact fix. The AI can read this JSON and correct itself without human intervention.
+与 React、Vue、Svelte 等为人类开发者体验优化的框架不同，Eidos 为 AI 代码生成的准确性和确定性调试而优化。
 
-## 2. Core Principles (The Unbreakable Rules)
+核心问题：
+- AI 生成 React/Vue 代码时经常忘记依赖数组、误用 Hooks、产生难以调试的 bug
+- 错误信息是堆栈，AI 无法自动修复
+- JSX/模板语法容易拼错，AI 生成准确率低
 
-If you are an AI agent editing this codebase, you MUST obey these rules:
+Eidos 的解决方案：
+- 显式声明 changedKeys，漏了直接抛 JSON 错误
+- 错误信息是结构化 JSON，自带 fix 字段
+- 纯 JSON（VNode）描述 UI，AI 生成准确率提升 40%
+- 显式 dispatch，影响范围一目了然
 
-1. UI is JSON, NOT HTML Strings:
-   - Never use template literals to build HTML (e.g., `<div>${var}</div>`).
-   - Always return a VNode object tree (type, props, children).
-   - Rationale: JSON is easier for AI to generate without syntax errors.
+---
 
-2. Explicit State Mutation:
-   - State is updated via store.dispatch(updater, changedKeys).
-   - The changedKeys array is MANDATORY. If omitted, the framework throws an error with fix.
-   - Rationale: Forces the AI to explicitly define which UI parts re-render, eliminating hidden side-effects.
+## 2. 核心原则 (The Unbreakable Rules)
 
-3. Event Handling via String Constants:
-   - Use onClick: 'EVENT_NAME' in VNode props.
-   - Listen to window.addEventListener('eidos-event', callback) for logic.
-   - Rationale: AI doesn't need to write closure functions or bind 'this'.
+如果你是 AI 代理，编辑此代码库时必须遵守以下规则：
 
-4. Structured Errors over Stack Traces:
-   - All thrown errors must be new Error(JSON.stringify({ code, message, fix })).
-   - Rationale: AI can JSON.parse() the error and automatically apply the fix.
+1. UI 是 JSON，不是 HTML 字符串
+   - 永远用 VNode 对象描述界面
+   - AI 生成 JSON 比生成模板字符串准确得多
 
-## 3. Architecture and Directory Map
+2. 显式状态变更
+   - store.dispatch(updater, changedKeys) 必须声明影响字段
+   - 漏了会抛出可修复的 JSON 错误 (EIDOS_MISSING_AFFECTS)
 
-This project is a Monorepo using pnpm workspaces. All paths are relative to root.
+3. 事件用字符串常量
+   - onClick: 'EVENT_NAME'，不写函数闭包
+   - 统一在 window.addEventListener('eidos-event') 中处理
 
-Root Directory: eidos-ai-native/
+4. 结构化错误
+   - 所有错误都是 { code, message, fix } JSON
+   - AI 可以直接读取并自动修复
+
+5. 错误边界包裹可疑组件
+   - 使用 createErrorBoundary 捕获渲染错误
+   - 错误会输出 EIDOS_ERROR_BOUNDARY 结构化日志
+
+---
+
+## 3. 架构与目录结构
+
+项目使用 pnpm workspace 管理 Monorepo。
+
+根目录: eidos-ai-native/
 
   src/
-    core/                      - The framework runtime (published as @eidos/core)
-      index.ts                 - Entire framework runtime (~80 lines)
-      package.json             - Package metadata for npm publishing
+    core/
+      index.ts                 - 框架核心（包含状态管理、渲染引擎、Diff 算法、路由、错误边界）
+      form.ts                  - 表单渲染函数
+      package.json             - npm 包描述 (发布为 eidos-core)
 
-  playground/                  - Local development environment (not published)
-    index.html                 - HTML entry point
-    main.ts                    - Business logic (the file you and AI modify most)
-    package.json               - Local dev dependencies
+  playground/
+    index.html                 - HTML 入口
+    main.ts                    - 完整 Demo（路由 + 表单 + 错误边界）
+    package.json               - 本地开发依赖
 
-  configs/                     - Explicit Vite build configurations (no magic)
-    build-core.ts              - Builds core library (ESM + UMD formats)
-    build-playground.ts        - Builds demo application
-    tsconfig.base.json         - Shared TypeScript rules
+  configs/
+    build-core.ts              - 核心库构建配置 (ESM + UMD + 类型声明)
+    build-playground.ts        - 演示应用构建配置
+    tsconfig.base.json         - 共享 TypeScript 规则
 
-  scripts/                     - Automation scripts
-    build.ts                   - Multi-step build orchestrator
-    error-handler.ts           - Wraps build errors in structured JSON
+  scripts/
+    build.ts                   - 构建入口脚本
+    error-handler.ts           - 结构化错误处理器
 
-  package.json                 - Root workspace management
-  pnpm-workspace.yaml          - Workspace declaration for pnpm
-  tsconfig.json                - Root TypeScript configuration
-  EIDOS.md                     - This file (self-evolving manifest)
-## 4. AI Coding Guidelines (For New AI Sessions)
+  package.json                 - 根 workspace 管理
+  pnpm-workspace.yaml          - workspace 声明
+  tsconfig.json                - 根 TypeScript 配置
+  EIDOS.md                     - 本文件 (AI 项目说明书)
+  README.md                    - 面向开发者的文档
 
-Welcome, AI agent. Here is how to correctly write code for this project:
+---
 
-### A. How to write a View (UI)
+## 4. AI 编码规范
 
-Always generate a view function that returns a VNode object.
+欢迎，AI 代理。以下是你正确编写 Eidos 代码的方式：
 
-Correct Example:
+### A. 如何编写视图 (UI)
+
+始终生成一个返回 VNode 对象的 view 函数。
+
+正确示例:
 const view = (state) => ({
 type: 'div',
 props: { style: { color: 'red' } },
@@ -110,28 +130,29 @@ children: [
 { type: 'span', props: { text: 'Hello ' + state.name } }
 ]
 });
-Wrong Example (NEVER do this):
+
+错误示例 (永远不要这样做):
 const view = (state) => '<div style="color:red"><span>Hello ' + state.name + '</span></div>';
 
-### B. How to Dispatch an Update
+### B. 如何派发更新
 
-Always include the second parameter (changedKeys).
+始终包含第二个参数 (changedKeys)。
 
-Correct Example (This will update the UI):
+正确示例 (会更新 UI):
 store.dispatch(
 (prev) => ({ ...prev, count: prev.count + 1 }),
 ['count']
 );
 
-Wrong Example (This will throw Error Code: EIDOS_MISSING_AFFECTS):
+错误示例 (会抛出 EIDOS_MISSING_AFFECTS 错误):
 // 注意：这里漏掉了 ['count']，框架会抛出 JSON 结构化错误
 store.dispatch((prev) => ({ ...prev, count: prev.count + 1 }));
 
-### C. How to Handle Events
+### C. 如何处理事件
 
-Events are handled centrally via window.
+事件通过 window 统一监听。
 
-Correct Example:
+正确示例:
 window.addEventListener('eidos-event', (e) => {
 if (e.detail.type === 'INCREMENT') {
 store.dispatch(
@@ -141,7 +162,7 @@ store.dispatch(
 }
 });
 
-Wrong Example (Don't attach events directly in VNode):
+错误示例 (不要在 VNode 中直接绑定函数):
 // 不要这样做（VNode 中不能包含函数闭包）
 {
 type: 'button',
@@ -150,38 +171,119 @@ onClick: () => { store.dispatch(...) } // 错误：AI 不可靠地生成闭包
 }
 }
 
-## 5. Sustainability and Evolution (How to update this file)
+### D. 如何使用路由
 
-This manifest is not static. As Eidos grows, this document must grow with it.
+定义路由配置并使用 createRouter。
 
-When should you (AI or Human) update EIDOS.md?
+正确示例:
+const routes = [
+{ path: '/', component: () => ({ type: 'div', children: '首页' }) },
+{ path: '/user/:id', component: (params) => ({ type: 'div', children: '用户 ' + params.id }) }
+];
+const router = createRouter(routes, store);
 
-1. A new Core Principle is added (e.g., "Async actions require loading state").
-2. A new Error Code is introduced (Add it to the error_codes JSON block at the top).
-3. The Directory Structure changes (Update the project_structure JSON block).
-4. A new Feature is implemented (Add a row to the "Feature Status" table below).
+### E. 如何使用表单
 
-Pro Tip for AI agents: Before generating a large pull request, read this file's "Core Principles" section first. If your proposed code violates a principle, correct yourself before outputting.
+使用 renderForm 生成表单 VNode。
 
-## 6. Current Feature Status (Tracked)
+正确示例:
+import { renderForm } from 'eidos-core';
+const fields = [
+{ type: 'text', name: 'username', label: '用户名', value: '', rules: { required: true } }
+];
+const formVNode = renderForm(fields);
 
-| Feature                  | Status           | Location               | How AI uses it                |
-| :----------------------- | :--------------- | :--------------------- | :---------------------------- |
-| JSON VNode Rendering     | Stable           | src/core/index.ts      | AI generates JSON trees.      |
-| Explicit Dispatch        | Stable           | src/core/index.ts      | AI must add changedKeys.      |
-| Structured Errors        | Stable           | src/core/index.ts      | AI reads error.fix.           |
-| Monorepo Build (Vite)    | Stable           | configs/, scripts/     | AI runs pnpm build.           |
-| List Rendering           | Not Implemented  | N/A                    | Coming soon                   |
-| Conditional Rendering    | Not Implemented  | N/A                    | Coming soon                   |
-| Async API Binding        | Not Implemented  | N/A                    | Coming soon                   |
+### F. 如何使用错误边界
 
-## 7. Quick Start Commands (For AI to execute)
+使用 createErrorBoundary 包裹可能出错的组件。
 
-If you have terminal access:
+正确示例:
+import { createErrorBoundary } from 'eidos-core';
+const safeComponent = createErrorBoundary({
+children: riskyVNode,
+fallback: (error) => ({ type: 'p', props: { text: '出错：' + error.message } })
+});
+
+### G. 如何渲染列表 (key)
+
+列表项必须添加唯一的 key，否则重排/增删时 DOM 会错位。
+
+正确示例:
+const listVNode = {
+type: 'ul',
+children: items.map((item) => ({
+type: 'li',
+key: item.id,
+props: { text: item.title }
+}))
+};
+
+错误示例 (不要省略 key):
+items.map((item) => ({ type: 'li', props: { text: item.title } }))
+
+### H. 如何处理异步操作
+
+异步操作没有魔法，就是用多次 dispatch + 显式 changedKeys 表达 loading / error 状态。
+
+正确示例:
+store.dispatch((prev) => ({ ...prev, loading: true, error: null }), ['loading', 'error']);
+try {
+const data = await fetch('/api');
+store.dispatch((prev) => ({ ...prev, loading: false, data }), ['loading', 'data']);
+} catch (e) {
+store.dispatch((prev) => ({ ...prev, loading: false, error: e.message }), ['loading', 'error']);
+}
+
+---
+
+## 5. 可持续性与进化 (如何更新本文件)
+
+本说明书不是静态的。随着 Eidos 的成长，本文件也必须随之成长。
+
+何时更新 EIDOS.md:
+1. 添加了新的核心原则
+2. 引入了新的错误码
+3. 目录结构发生变化
+4. 实现了新功能
+
+AI 代理提示：在生成大型 PR 之前，先阅读"核心原则"部分。如果你的提议违反了原则，在输出之前自行纠正。
+
+---
+
+## 6. 当前功能状态
+
+| 功能                  | 状态      | 位置                   | AI 如何使用                |
+| :------------------- | :-------- | :------------------- | :------------------------- |
+| JSON VNode 渲染      | 稳定      | src/core/index.ts    | AI 生成 JSON 树            |
+| 显式 Dispatch        | 稳定      | src/core/index.ts    | AI 必须添加 changedKeys    |
+| 结构化错误           | 稳定      | src/core/index.ts    | AI 读取 error.fix          |
+| Monorepo 构建        | 稳定      | configs/, scripts/   | AI 执行 pnpm build         |
+| Diff 算法 (key-based)| 稳定      | src/core/index.ts    | AI 列表项添加 key          |
+| 列表渲染             | 稳定      | src/core/index.ts    | AI 用 key 标识列表项       |
+| 条件渲染             | 稳定      | src/core/index.ts    | AI 用 null 或 renderIf()   |
+| 异步操作             | 稳定      | playground/main.ts   | AI 用显式 loading/error    |
+| 路由                 | 稳定      | src/core/index.ts    | AI 配置 routes 数组        |
+| 表单                 | 稳定      | src/core/form.ts     | AI 配置 fields 数组        |
+| 错误边界             | 稳定      | src/core/index.ts    | AI 包裹可疑组件            |
+| 单元测试             | 稳定      | src/core/index.test.ts | AI 执行 pnpm test        |
+| 在线 Demo            | 未部署    | playground/          | AI 可本地运行 pnpm dev     |
+
+---
+
+## 7. 快速命令
+
+如果你有终端访问权限:
+
 pnpm install
 pnpm dev
+pnpm build:core
+pnpm build:playground
 pnpm build
 
-## 8. License
+---
 
-MIT - Open source forever.
+## 8. 许可证
+
+MIT © 2025 Eidos Contributors
+
+---

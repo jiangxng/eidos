@@ -10,21 +10,19 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, '../playground/index.html')
-      },
-      external: ['@eidos/core']
+      }
     }
   },
   resolve: {
     alias: {
-      '@eidos/core': resolve(__dirname, '../src/core/index.ts')
+      'eidos-core': resolve(__dirname, '../src/core/index.ts')
     }
   },
   server: {
     port: 3000,
-    open: true,
-    force: true
+    open: true
   },
   optimizeDeps: {
-    include: ['@eidos/core']
+    include: ['eidos-core']
   }
 });
