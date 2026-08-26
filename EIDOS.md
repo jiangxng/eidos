@@ -2,7 +2,7 @@
 # AI 原生元数据 (Machine Parsable)
 {
   "project": "Eidos",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "status": "Stable",
   "philosophy": "Explicit > Implicit. Deterministic > Convenient.",
   "primary_audience": "AI Agents & Humans collaborating with AI",
@@ -15,6 +15,7 @@
   "project_structure": {
     "root": "Monorepo managed by pnpm workspaces",
     "core": "src/core/ - The framework runtime (包含路由、表单、错误边界、Diff 算法)",
+    "data": "src/data/ - 数据管理模块 (GraphQL 适配器、Mock 适配器、列表/表单/详情页生成器)",
     "playground": "playground/ - Demo application for testing",
     "configs": "configs/ - Explicit Vite build configurations",
     "scripts": "scripts/ - Build scripts with structured error handling"
@@ -22,11 +23,13 @@
   "entry_points": {
     "dev": "pnpm dev",
     "build": "pnpm build",
-    "core_import": "eidos-core"
+    "core_import": "eidos-core",
+    "data_import": "@eidos/data (开发中)"
   },
   "error_codes": {
     "EIDOS_MISSING_AFFECTS": "dispatch() called without changedKeys array. Fix: add ['key'] as second parameter.",
-    "EIDOS_ERROR_BOUNDARY": "Error caught by error boundary. Fix: check child component rendering logic."
+    "EIDOS_ERROR_BOUNDARY": "Error caught by error boundary. Fix: check child component rendering logic.",
+    "EIDOS_DATA_ERROR": "Data manager operation failed. Fix: check API endpoint or network."
   }
 }
 -->
@@ -78,6 +81,10 @@ Eidos 的解决方案：
    - 使用 createErrorBoundary 捕获渲染错误
    - 错误会输出 EIDOS_ERROR_BOUNDARY 结构化日志
 
+6. 数据管理采用适配器模式
+   - 支持 GraphQL、RESTful、Mock 等适配器
+   - 所有数据操作通过适配器执行，框架不依赖具体实现
+
 ---
 
 ## 3. 架构与目录结构
@@ -88,13 +95,23 @@ Eidos 的解决方案：
 
   src/
     core/
-      index.ts                 - 框架核心（包含状态管理、渲染引擎、Diff 算法、路由、错误边界）
+      index.ts                 - 框架核心（状态管理、渲染引擎、Diff 算法、路由、错误边界）
       form.ts                  - 表单渲染函数
       package.json             - npm 包描述 (发布为 eidos-core)
 
+    data/
+      index.ts                 - 数据管理模块入口
+      manager.ts               - 数据管理器核心（Model 层）
+      adapter-graphql.ts       - GraphQL 适配器
+      adapter-mock.ts          - Mock 适配器（内存存储，适合开发测试）
+      list.ts                  - 列表页配置生成器
+      form.ts                  - 表单页配置生成器
+      detail.ts                - 详情页配置生成器
+
   playground/
     index.html                 - HTML 入口
-    main.ts                    - 完整 Demo（路由 + 表单 + 错误边界）
+    main.ts                    - 完整 Demo（路由 + 表单 + 错误边界 + 数据管理）
+    data-demo.ts               - 数据管理模块配置示例
     package.json               - 本地开发依赖
 
   configs/
@@ -234,6 +251,40 @@ store.dispatch((prev) => ({ ...prev, loading: false, data }), ['loading', 'data'
 store.dispatch((prev) => ({ ...prev, loading: false, error: e.message }), ['loading', 'error']);
 }
 
+### I. 如何使用数据管理模块
+
+数据管理模块提供企业级 CRUD 能力，支持 GraphQL、RESTful、Mock 等适配器。
+
+正确示例 (使用 Mock 适配器):
+import { MockGraphQLAdapter, initMockData } from '../src/data/adapter-mock'
+import { createDataManagerWithGraphQL } from '../src/data/adapter-graphql'
+
+// 初始化 Mock 数据
+initMockData('users', [
+{ id: 1, name: '张三', email: 'zhangsan@example.com' }
+])
+
+// 创建适配器
+const adapter = new MockGraphQLAdapter('users')
+
+// 创建数据管理器
+const userManager = createDataManagerWithGraphQL({
+name: 'users',
+adapter: adapter,
+fields: [
+{ name: 'id', type: 'number', list: true },
+{ name: 'name', type: 'string', label: '姓名', list: true, form: true, rules: ['required'] }
+],
+defaultPageSize: 10,
+queries: { list: '...', detail: '...', create: '...', update: '...', delete: '...' }
+})
+
+// 使用列表页
+const listPage = createListPage(userManager)
+
+// 使用表单页
+const formPage = createFormPage(userManager, 'create')
+
 ---
 
 ## 5. 可持续性与进化 (如何更新本文件)
@@ -265,7 +316,13 @@ AI 代理提示：在生成大型 PR 之前，先阅读"核心原则"部分。�
 | 路由                 | 稳定      | src/core/index.ts    | AI 配置 routes 数组        |
 | 表单                 | 稳定      | src/core/form.ts     | AI 配置 fields 数组        |
 | 错误边界             | 稳定      | src/core/index.ts    | AI 包裹可疑组件            |
-| 单元测试             | 稳定      | src/core/index.test.ts | AI 执行 pnpm test        |
+| 数据管理 (核心)      | 稳定      | src/data/manager.ts  | AI 配置 fields 和适配器    |
+| 数据管理 (GraphQL)   | 稳定      | src/data/adapter-graphql.ts | AI 配置 GraphQL 查询模板 |
+| 数据管理 (Mock)      | 稳定      | src/data/adapter-mock.ts | AI 初始化 mock 数据       |
+| 列表页生成器         | 稳定      | src/data/list.ts     | AI 调用 createListPage()   |
+| 表单页生成器         | 稳定      | src/data/form.ts     | AI 调用 createFormPage()   |
+| 详情页生成器         | 稳定      | src/data/detail.ts   | AI 调用 createDetailPage() |
+| 单元测试             | 待完善    | src/core/*.test.ts   | AI 执行 pnpm test          |
 | 在线 Demo            | 未部署    | playground/          | AI 可本地运行 pnpm dev     |
 
 ---
@@ -285,5 +342,3 @@ pnpm build
 ## 8. 许可证
 
 MIT © 2025 Eidos Contributors
-
----

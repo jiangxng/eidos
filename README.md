@@ -29,7 +29,7 @@ Eidos 的解决方案：
 - 纯 JSON（VNode）描述 UI，AI 生成准确率提升 40%
 - 显式 dispatch，影响范围一目了然
 
-在线 Demo：尚未部署（可本地运行 `pnpm dev` 查看效果）
+在线 Demo：尚未部署（可本地运行 pnpm dev 查看效果）
 
 ---
 
@@ -54,6 +54,10 @@ Eidos 的解决方案：
 5. 错误边界
    - 使用 createErrorBoundary 捕获渲染错误
    - 错误会输出 EIDOS_ERROR_BOUNDARY 结构化日志
+
+6. 数据管理适配器模式
+   - 支持 GraphQL、RESTful、Mock 适配器
+   - 数据操作与框架核心解耦
 
 ---
 
@@ -107,7 +111,7 @@ window.addEventListener('eidos-event', (e) => {
 
 ### 完整示例
 
-查看 playground/main.ts 获取包含路由、表单、错误边界的完整 Demo 源码。
+查看 playground/main.ts 获取包含路由、表单、错误边界、数据管理的完整 Demo 源码。
 
 ---
 
@@ -180,26 +184,73 @@ try {
   store.dispatch((prev) => ({ ...prev, loading: false, error: e.message }), ['loading', 'error']);
 }
 
+### 数据管理（企业级 CRUD）
+
+数据管理模块提供完整的企业级 CRUD 能力，支持 GraphQL、RESTful、Mock 适配器。
+
+使用 Mock 适配器示例（无需后端，适合开发测试）：
+
+import { MockGraphQLAdapter, initMockData } from '../src/data/adapter-mock'
+import { createDataManagerWithGraphQL } from '../src/data/adapter-graphql'
+import { createListPage, createFormPage } from '../src/data/index'
+
+// 1. 初始化 mock 数据
+initMockData('users', [
+  { id: 1, name: '张三', email: 'zhangsan@example.com' },
+  { id: 2, name: '李四', email: 'lisi@example.com' }
+])
+
+// 2. 创建适配器和数据管理器
+const adapter = new MockGraphQLAdapter('users')
+const userManager = createDataManagerWithGraphQL({
+  name: 'users',
+  adapter: adapter,
+  fields: [
+    { name: 'id', type: 'number', list: true, detail: true },
+    { name: 'name', type: 'string', label: '姓名', list: true, form: true, rules: ['required'] },
+    { name: 'email', type: 'string', label: '邮箱', list: true, form: true, rules: ['required'] }
+  ],
+  defaultPageSize: 10,
+  queries: { /* GraphQL 查询模板 */ }
+})
+
+// 3. 生成页面
+const listPage = createListPage(userManager)   // 列表页 VNode
+const formPage = createFormPage(userManager)   // 表单页 VNode
+
+// 4. 在路由中使用
+// 完整示例见 playground/main.ts
+
 ---
 
 ## 5. 项目结构
 
 eidos-ai-native/
-   src/core/
-      index.ts             框架核心（状态管理、渲染引擎、Diff 算法、路由、错误边界）
-      form.ts              表单渲染函数
-      package.json         npm 包描述（发布为 eidos-core）
+   src/
+      core/
+         index.ts             框架核心（状态管理、渲染引擎、Diff 算法、路由、错误边界）
+         form.ts              表单渲染函数
+         package.json         npm 包描述（发布为 eidos-core）
+      data/
+         index.ts             数据管理模块入口
+         manager.ts           数据管理器核心
+         adapter-graphql.ts   GraphQL 适配器
+         adapter-mock.ts      Mock 适配器
+         list.ts              列表页生成器
+         form.ts              表单页生成器
+         detail.ts            详情页生成器
    playground/
-      main.ts              完整 Demo（路由 + 表单 + 错误边界）
-      index.html           HTML 入口
+      main.ts                 完整 Demo（路由 + 表单 + 错误边界 + 数据管理）
+      data-demo.ts            数据管理模块配置示例
+      index.html              HTML 入口
    configs/
-      build-core.ts        核心库构建配置
-      build-playground.ts  演示应用构建配置
+      build-core.ts           核心库构建配置
+      build-playground.ts     演示应用构建配置
    scripts/
-      build.ts             构建入口脚本
-      error-handler.ts     结构化错误处理器
-   EIDOS.md                AI 项目说明书
-   README.md               本文档
+      build.ts                构建入口脚本
+      error-handler.ts        结构化错误处理器
+   EIDOS.md                   AI 项目说明书
+   README.md                  本文档
 
 ---
 
@@ -211,8 +262,9 @@ UI 描述            JSX      Template JSON (VNode)
 AI 生成准确率      中       中        高
 错误信息           堆栈     堆栈      结构化 JSON + fix
 学习曲线           陡峭     平缓      极平缓（纯 JS 对象）
-包大小 (gzip)      约40KB   约30KB   约2KB
+包大小 (gzip)      约40KB   约30KB   约2KB（核心）
 依赖               React生态 Vue生态  零依赖
+数据管理           无内置   无内置   适配器模式（GraphQL/REST/Mock）
 
 ---
 
@@ -272,8 +324,9 @@ pnpm build
 ## 9. 文档
 
 - EIDOS.md - AI 项目说明书（含核心原则、错误码、可持续进化规则）
-- playground/main.ts - 完整的 Demo 源码（含路由、表单、错误边界）
-- src/core/index.ts - 框架源码（约 340 行，含 Diff 算法）
+- playground/main.ts - 完整的 Demo 源码（含路由、表单、错误边界、数据管理）
+- src/core/index.ts - 框架核心源码（约 340 行，含 Diff 算法）
+- src/data/ - 数据管理模块源码
 
 ---
 
