@@ -381,8 +381,8 @@ export function createApp<T extends Record<string, any>>(
 
 // ---------- 条件渲染辅助函数 ----------
 // 条件为真时返回 VNode，否则返回 null（框架会自动过滤 null 子节点）
-export function renderIf(condition: unknown, vnode: VNode): VNode | null {
-  return condition ? vnode : null;
+export function renderIf(condition: boolean, vnode: VNode | null): VNode | null {
+  return condition ? vnode : null
 }
 
 // ---------- 表单模块（re-export，保持单一入口） ----------
