@@ -1,3 +1,5 @@
+// Eidos Core v0.4.1 - 修复 patchChildren 空指针
+console.log('🔥 Eidos Core v0.4.1 loaded')
 // ---------- 类型定义 ----------
 export type VNode = {
   type: string;
@@ -148,127 +150,114 @@ function patchNode(
   oldVNode: VNode | null | undefined,
   newVNode: VNode | null | undefined
 ): Node {
-  // 如果新节点为空，返回空文本节点
+  // 新节点为 null/undefined：返回空文本节点
   if (newVNode == null) {
     return document.createTextNode('');
   }
 
-  // 如果旧节点为空，或类型不同，直接创建新节点
-  if (oldVNode == null || oldVNode.type !== newVNode.type) {
+  // 如果旧 DOM 节点为 null，或旧 VNode 为 null，或类型不同：直接创建新节点
+  if (oldEl == null || oldVNode == null || oldVNode.type !== newVNode.type) {
     const newEl = createElement(newVNode);
+    // 如果有旧 DOM 节点，用新节点替换它
     if (oldEl && oldEl.parentNode) {
       oldEl.parentNode.replaceChild(newEl, oldEl);
     }
     return newEl;
   }
 
-  // 如果旧 DOM 节点为空，直接创建新节点
-  if (oldEl == null) {
-    return createElement(newVNode);
-  }
-
-  // 类型相同，复用节点
+  // 类型相同且旧 DOM 节点存在：复用并更新
   const el = oldEl as HTMLElement;
   updateProps(el, oldVNode.props || {}, newVNode.props || {});
   
-  // 确保 el 存在且是 HTMLElement 才调用 patchChildren
-  if (el && el.childNodes) {
-    patchChildren(el, oldVNode.children || [], newVNode.children || []);
+  // 只有当 el 存在且是元素节点时才处理子节点
+  if (el && el.nodeType === 1) {
+    const oldChildren = oldVNode.children || [];
+    const newChildren = newVNode.children || [];
+    // 只有有子节点时才调用 patchChildren
+    if (oldChildren.length > 0 || newChildren.length > 0) {
+      patchChildren(el, oldChildren, newChildren);
+    }
   }
   
   return el;
 }
 
 // 子节点 diff：优先按 key 匹配，无 key 时按位置 fallback（类型相同才复用）
-function patchChildren(
+function patchChildren1(
   el: HTMLElement | null,
   oldChildren: (VNode | null | undefined)[],
   newChildren: (VNode | null | undefined)[]
 ): void {
-  // 防御：如果 el 不存在或没有 childNodes，直接返回
-  if (!el || !el.childNodes) {
-    return;
+  // ----- 防御检查（关键） -----
+  if (el == null) {
+    console.warn('[patchChildren] el is null, skipping')
+    return
   }
+  if (el.nodeType !== 1) {
+    console.warn('[patchChildren] el is not an element node, skipping')
+    return
+  }
+  if (!el.childNodes) {
+    console.warn('[patchChildren] el has no childNodes, skipping')
+    return
+  }
+  // ----- 防御检查结束 -----
 
-  const oldKeyMap = new Map<string | number, number>();
+  const oldKeyMap = new Map<string | number, number>()
   oldChildren.forEach((child, i) => {
     if (child != null && child.key != null) {
-      oldKeyMap.set(child.key, i);
+      oldKeyMap.set(child.key, i)
     }
-  });
+  })
 
-  const used = new Array(oldChildren.length).fill(false);
-  const newNodes: Node[] = [];
+  const used = new Array(oldChildren.length).fill(false)
+  const newNodes: Node[] = []
 
   for (const newChild of newChildren) {
     if (newChild == null) {
-      newNodes.push(document.createTextNode(''));
-      continue;
+      newNodes.push(document.createTextNode(''))
+      continue
     }
 
-    let matchedIndex = -1;
+    let matchedIndex = -1
     if (newChild.key != null && oldKeyMap.has(newChild.key)) {
-      const idx = oldKeyMap.get(newChild.key)!;
-      if (!used[idx]) matchedIndex = idx;
+      const idx = oldKeyMap.get(newChild.key)!
+      if (!used[idx]) matchedIndex = idx
     }
 
     if (matchedIndex === -1) {
       for (let j = 0; j < oldChildren.length; j++) {
-        if (used[j]) continue;
-        const oldC = oldChildren[j];
+        if (used[j]) continue
+        const oldC = oldChildren[j]
         if (oldC != null && oldC.type === newChild.type) {
-          matchedIndex = j;
-          break;
+          matchedIndex = j
+          break
         }
       }
     }
 
     if (matchedIndex >= 0) {
-      used[matchedIndex] = true;
-      const oldC = oldChildren[matchedIndex];
-      const oldNode = (el.childNodes && el.childNodes[matchedIndex]) ? el.childNodes[matchedIndex] : null;
-      const patchedNode = patchNode(oldNode, oldC, newChild);
-      if (patchedNode && patchedNode instanceof Node) {
-        newNodes.push(patchedNode);
-      } else {
-        newNodes.push(document.createTextNode(''));
-      }
+      used[matchedIndex] = true
+      const oldC = oldChildren[matchedIndex]
+      const oldNode = el.childNodes[matchedIndex] || null
+      newNodes.push(patchNode(oldNode, oldC, newChild))
     } else {
-      const createdNode = createElement(newChild);
-      if (createdNode && createdNode instanceof Node) {
-        newNodes.push(createdNode);
-      } else {
-        newNodes.push(document.createTextNode(''));
-      }
+      newNodes.push(createElement(newChild))
     }
   }
 
-  // 删除未被复用的旧节点
   for (let i = 0; i < oldChildren.length; i++) {
     if (!used[i]) {
-      const oldNode = (el.childNodes && el.childNodes[i]) ? el.childNodes[i] : null;
-      if (oldNode && oldNode.parentNode) {
-        oldNode.parentNode.removeChild(oldNode);
-      }
+      const oldNode = el.childNodes[i]
+      if (oldNode) el.removeChild(oldNode)
     }
   }
 
-  // 按新顺序重排 DOM
-  let anchor: Node | null = null;
+  let anchor: Node | null = null
   for (let i = newNodes.length - 1; i >= 0; i--) {
-    const node = newNodes[i];
-    if (!(node instanceof Node)) {
-      continue;
-    }
-    // 如果节点已经有父节点，先移除
-    if (node.parentNode) {
-      node.parentNode.removeChild(node);
-    }
-    // 确保 el 存在且是 Node 才调用 insertBefore
-    if (el && el.insertBefore) {
-      el.insertBefore(node, anchor);
-    }
-    anchor = node;
+    const node = newNodes[i]
+    el.insertBefore(node, anchor)
+    anchor = node
   }
 }
 // 默认错误降级 UI
