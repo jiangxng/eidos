@@ -23,6 +23,8 @@ export default defineConfig({
     open: true
   },
   optimizeDeps: {
-    include: ['eidos-core']
+    include: ['eidos-core'],
+    // +++ 新增这一行 +++
+    force: true
   }
 });

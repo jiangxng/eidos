@@ -15,16 +15,20 @@
   "project_structure": {
     "root": "Monorepo managed by pnpm workspaces",
     "core": "src/core/ - The framework runtime (包含路由、表单、错误边界、Diff 算法)",
-    "data": "src/data/ - 数据管理模块 (GraphQL 适配器、Mock 适配器、列表/表单/详情页生成器)",
-    "playground": "playground/ - Demo application for testing",
-    "configs": "configs/ - Explicit Vite build configurations",
-    "scripts": "scripts/ - Build scripts with structured error handling"
+    "data": "src/data/ - 数据管理模块 (GraphQL 适配器、Mock 适配器)",
+    "auth": "src/auth/ - 权限控制模块 (RBAC、路由守卫、组件级控制)",
+    "components": "src/components/ - 业务组件库 (AdvancedTable, AdvancedForm, Dialog)",
+    "playground": "playground/ - Demo application",
+    "configs": "configs/ - Vite build configurations",
+    "scripts": "scripts/ - Build scripts"
   },
   "entry_points": {
     "dev": "pnpm dev",
     "build": "pnpm build",
     "core_import": "eidos-core",
-    "data_import": "@eidos/data (开发中)"
+    "data_import": "src/data/index",
+    "auth_import": "src/auth/index",
+    "components_import": "src/components/index"
   },
   "error_codes": {
     "EIDOS_MISSING_AFFECTS": "dispatch() called without changedKeys array. Fix: add ['key'] as second parameter.",
@@ -35,6 +39,9 @@
 -->
 
 # Eidos - AI 项目说明书
+
+版本: 0.4.0
+更新日期: 2026-08-31
 
 ---
 
@@ -82,8 +89,12 @@ Eidos 的解决方案：
    - 错误会输出 EIDOS_ERROR_BOUNDARY 结构化日志
 
 6. 数据管理采用适配器模式
-   - 支持 GraphQL、RESTful、Mock 等适配器
-   - 所有数据操作通过适配器执行，框架不依赖具体实现
+   - 支持 GraphQL、RESTful、Mock 适配器
+   - 所有数据操作通过适配器执行
+
+7. 权限控制基于 RBAC
+   - 角色 -> 权限 的映射
+   - 路由级守卫 + 组件级控制
 
 ---
 
@@ -95,45 +106,74 @@ Eidos 的解决方案：
 
   src/
     core/
-      index.ts                 - 框架核心（状态管理、渲染引擎、Diff 算法、路由、错误边界）
-      form.ts                  - 表单渲染函数
-      package.json             - npm 包描述 (发布为 eidos-core)
+      index.ts              框架核心（状态管理、渲染引擎、Diff 算法、路由、错误边界）
+      form.ts               表单渲染函数
+      package.json          npm 包描述 (发布为 eidos-core)
 
     data/
-      index.ts                 - 数据管理模块入口
-      manager.ts               - 数据管理器核心（Model 层）
-      adapter-graphql.ts       - GraphQL 适配器
-      adapter-mock.ts          - Mock 适配器（内存存储，适合开发测试）
-      list.ts                  - 列表页配置生成器
-      form.ts                  - 表单页配置生成器
-      detail.ts                - 详情页配置生成器
+      index.ts              数据管理模块入口
+      manager.ts            数据管理器核心
+      adapter-graphql.ts    GraphQL 适配器
+      adapter-mock.ts       Mock 适配器
+      list.ts               列表页生成器
+      form.ts               表单页生成器
+      detail.ts             详情页生成器
+
+    auth/
+      index.ts              权限控制模块入口
+      store.ts              权限状态管理
+      rbac.ts               RBAC 核心
+      guard.ts              路由守卫
+      components.ts         组件级权限控制 (ifAllowed)
+
+    components/
+      index.ts              业务组件库入口
+      types.ts              共享类型定义
+      AdvancedTable/
+        index.ts            高级表格（筛选、排序、分页、操作按钮）
+        style.ts            表格样式
+      AdvancedForm/
+        index.ts            高级表单（联动、校验、多列布局）
+      Dialog/
+        index.ts            弹窗/确认框
 
   playground/
-    index.html                 - HTML 入口
-    main.ts                    - 完整 Demo（路由 + 表单 + 错误边界 + 数据管理）
-    data-demo.ts               - 数据管理模块配置示例
-    package.json               - 本地开发依赖
+    index.html              HTML 入口
+    main.ts                 应用入口
+    app/
+      store.ts              全局状态
+      routes.ts             路由配置
+      events.ts             事件处理
+      view.ts               主视图
+    modules/
+      data/                 数据管理演示
+      form/                 表单演示
+      list/                 列表演示
+      async/                异步演示
+      error/                错误边界演示
+      auth/                 权限控制演示
+    components/
+      NavBar.ts             导航栏组件
 
   configs/
-    build-core.ts              - 核心库构建配置 (ESM + UMD + 类型声明)
-    build-playground.ts        - 演示应用构建配置
-    tsconfig.base.json         - 共享 TypeScript 规则
+    build-core.ts           核心库构建配置
+    build-playground.ts     演示应用构建配置
+    tsconfig.base.json      共享 TypeScript 规则
 
   scripts/
-    build.ts                   - 构建入口脚本
-    error-handler.ts           - 结构化错误处理器
+    build.ts                构建入口脚本
+    error-handler.ts        结构化错误处理器
 
-  package.json                 - 根 workspace 管理
-  pnpm-workspace.yaml          - workspace 声明
-  tsconfig.json                - 根 TypeScript 配置
-  EIDOS.md                     - 本文件 (AI 项目说明书)
-  README.md                    - 面向开发者的文档
+  docs/
+    Layout-System.md        布局系统设计说明书
+
+  EIDOS.md                  本文件 (AI 项目说明书)
+  README.md                 面向开发者的文档
+  ROADMAP.md                项目路线图
 
 ---
 
-## 4. AI 编码规范
-
-欢迎，AI 代理。以下是你正确编写 Eidos 代码的方式：
+## 4. AI 编码规范 (核心部分)
 
 ### A. 如何编写视图 (UI)
 
@@ -141,11 +181,11 @@ Eidos 的解决方案：
 
 正确示例:
 const view = (state) => ({
-type: 'div',
-props: { style: { color: 'red' } },
-children: [
-{ type: 'span', props: { text: 'Hello ' + state.name } }
-]
+  type: 'div',
+  props: { style: { color: 'red' } },
+  children: [
+    { type: 'span', props: { text: 'Hello ' + state.name } }
+  ]
 });
 
 错误示例 (永远不要这样做):
@@ -155,181 +195,65 @@ const view = (state) => '<div style="color:red"><span>Hello ' + state.name + '</
 
 始终包含第二个参数 (changedKeys)。
 
-正确示例 (会更新 UI):
-store.dispatch(
-(prev) => ({ ...prev, count: prev.count + 1 }),
-['count']
-);
+正确示例:
+store.dispatch((prev) => ({ ...prev, count: prev.count + 1 }), ['count'])
 
-错误示例 (会抛出 EIDOS_MISSING_AFFECTS 错误):
-// 注意：这里漏掉了 ['count']，框架会抛出 JSON 结构化错误
-store.dispatch((prev) => ({ ...prev, count: prev.count + 1 }));
+错误示例:
+store.dispatch((prev) => ({ ...prev, count: prev.count + 1 }))
 
-### C. 如何处理事件
+### C. 如何使用数据管理
 
-事件通过 window 统一监听。
+使用 createDataManagerWithGraphQL 或 Mock 适配器。
 
 正确示例:
-window.addEventListener('eidos-event', (e) => {
-if (e.detail.type === 'INCREMENT') {
-store.dispatch(
-(prev) => ({ ...prev, count: prev.count + 1 }),
-['count']
-);
-}
-});
-
-错误示例 (不要在 VNode 中直接绑定函数):
-// 不要这样做（VNode 中不能包含函数闭包）
-{
-type: 'button',
-props: {
-onClick: () => { store.dispatch(...) } // 错误：AI 不可靠地生成闭包
-}
-}
-
-### D. 如何使用路由
-
-定义路由配置并使用 createRouter。
-
-正确示例:
-const routes = [
-{ path: '/', component: () => ({ type: 'div', children: '首页' }) },
-{ path: '/user/:id', component: (params) => ({ type: 'div', children: '用户 ' + params.id }) }
-];
-const router = createRouter(routes, store);
-
-### E. 如何使用表单
-
-使用 renderForm 生成表单 VNode。
-
-正确示例:
-import { renderForm } from 'eidos-core';
-const fields = [
-{ type: 'text', name: 'username', label: '用户名', value: '', rules: { required: true } }
-];
-const formVNode = renderForm(fields);
-
-### F. 如何使用错误边界
-
-使用 createErrorBoundary 包裹可能出错的组件。
-
-正确示例:
-import { createErrorBoundary } from 'eidos-core';
-const safeComponent = createErrorBoundary({
-children: riskyVNode,
-fallback: (error) => ({ type: 'p', props: { text: '出错：' + error.message } })
-});
-
-### G. 如何渲染列表 (key)
-
-列表项必须添加唯一的 key，否则重排/增删时 DOM 会错位。
-
-正确示例:
-const listVNode = {
-type: 'ul',
-children: items.map((item) => ({
-type: 'li',
-key: item.id,
-props: { text: item.title }
-}))
-};
-
-错误示例 (不要省略 key):
-items.map((item) => ({ type: 'li', props: { text: item.title } }))
-
-### H. 如何处理异步操作
-
-异步操作没有魔法，就是用多次 dispatch + 显式 changedKeys 表达 loading / error 状态。
-
-正确示例:
-store.dispatch((prev) => ({ ...prev, loading: true, error: null }), ['loading', 'error']);
-try {
-const data = await fetch('/api');
-store.dispatch((prev) => ({ ...prev, loading: false, data }), ['loading', 'data']);
-} catch (e) {
-store.dispatch((prev) => ({ ...prev, loading: false, error: e.message }), ['loading', 'error']);
-}
-
-### I. 如何使用数据管理模块
-
-数据管理模块提供企业级 CRUD 能力，支持 GraphQL、RESTful、Mock 等适配器。
-
-正确示例 (使用 Mock 适配器):
 import { MockGraphQLAdapter, initMockData } from '../src/data/adapter-mock'
 import { createDataManagerWithGraphQL } from '../src/data/adapter-graphql'
 
-// 初始化 Mock 数据
-initMockData('users', [
-{ id: 1, name: '张三', email: 'zhangsan@example.com' }
-])
-
-// 创建适配器
+initMockData('users', [{ id: 1, name: '张三' }])
 const adapter = new MockGraphQLAdapter('users')
-
-// 创建数据管理器
 const userManager = createDataManagerWithGraphQL({
-name: 'users',
-adapter: adapter,
-fields: [
-{ name: 'id', type: 'number', list: true },
-{ name: 'name', type: 'string', label: '姓名', list: true, form: true, rules: ['required'] }
-],
-defaultPageSize: 10,
-queries: { list: '...', detail: '...', create: '...', update: '...', delete: '...' }
+  name: 'users',
+  adapter,
+  fields: [...],
+  queries: { list, detail, create, update, delete }
 })
 
-// 使用列表页
-const listPage = createListPage(userManager)
+### D. 如何使用权限控制
 
-// 使用表单页
-const formPage = createFormPage(userManager, 'create')
+使用 createAuthStore 和 ifAllowed。
 
----
+正确示例:
+const authStore = createAuthStore()
+authStore.login('user-001', '张三', 'admin')
 
-## 5. 可持续性与进化 (如何更新本文件)
-
-本说明书不是静态的。随着 Eidos 的成长，本文件也必须随之成长。
-
-何时更新 EIDOS.md:
-1. 添加了新的核心原则
-2. 引入了新的错误码
-3. 目录结构发生变化
-4. 实现了新功能
-
-AI 代理提示：在生成大型 PR 之前，先阅读"核心原则"部分。如果你的提议违反了原则，在输出之前自行纠正。
+ifAllowed(authStore, {
+  permissions: ['user:manage'],
+  children: { type: 'div', children: '管理员面板' }
+})
 
 ---
 
-## 6. 当前功能状态
+## 5. 当前功能状态
 
 | 功能                  | 状态      | 位置                   | AI 如何使用                |
 | :------------------- | :-------- | :------------------- | :------------------------- |
 | JSON VNode 渲染      | 稳定      | src/core/index.ts    | AI 生成 JSON 树            |
 | 显式 Dispatch        | 稳定      | src/core/index.ts    | AI 必须添加 changedKeys    |
 | 结构化错误           | 稳定      | src/core/index.ts    | AI 读取 error.fix          |
-| Monorepo 构建        | 稳定      | configs/, scripts/   | AI 执行 pnpm build         |
 | Diff 算法 (key-based)| 稳定      | src/core/index.ts    | AI 列表项添加 key          |
-| 列表渲染             | 稳定      | src/core/index.ts    | AI 用 key 标识列表项       |
-| 条件渲染             | 稳定      | src/core/index.ts    | AI 用 null 或 renderIf()   |
-| 异步操作             | 稳定      | playground/main.ts   | AI 用显式 loading/error    |
 | 路由                 | 稳定      | src/core/index.ts    | AI 配置 routes 数组        |
-| 表单                 | 稳定      | src/core/form.ts     | AI 配置 fields 数组        |
+| 表单 (基础)          | 稳定      | src/core/form.ts     | AI 配置 fields 数组        |
 | 错误边界             | 稳定      | src/core/index.ts    | AI 包裹可疑组件            |
-| 数据管理 (核心)      | 稳定      | src/data/manager.ts  | AI 配置 fields 和适配器    |
-| 数据管理 (GraphQL)   | 稳定      | src/data/adapter-graphql.ts | AI 配置 GraphQL 查询模板 |
-| 数据管理 (Mock)      | 稳定      | src/data/adapter-mock.ts | AI 初始化 mock 数据       |
-| 列表页生成器         | 稳定      | src/data/list.ts     | AI 调用 createListPage()   |
-| 表单页生成器         | 稳定      | src/data/form.ts     | AI 调用 createFormPage()   |
-| 详情页生成器         | 稳定      | src/data/detail.ts   | AI 调用 createDetailPage() |
-| 单元测试             | 待完善    | src/core/*.test.ts   | AI 执行 pnpm test          |
-| 在线 Demo            | 未部署    | playground/          | AI 可本地运行 pnpm dev     |
+| 数据管理             | 稳定      | src/data/             | AI 配置 fields 和适配器    |
+| 权限控制             | 稳定      | src/auth/             | AI 配置角色和权限          |
+| 高级表格             | 稳定      | src/components/AdvancedTable/ | AI 配置 columns 和 actions |
+| 高级表单             | 开发中    | src/components/AdvancedForm/  | 联动、校验、布局           |
+| 布局系统             | 设计完成  | docs/Layout-System.md | AI 生成布局配置             |
+| 在线 Demo            | 可运行    | playground/           | AI 可本地运行 pnpm dev     |
 
 ---
 
-## 7. 快速命令
-
-如果你有终端访问权限:
+## 6. 快速命令
 
 pnpm install
 pnpm dev
@@ -339,6 +263,6 @@ pnpm build
 
 ---
 
-## 8. 许可证
+## 7. 许可证
 
 MIT © 2025 Eidos Contributors

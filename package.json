@@ -5,7 +5,7 @@
   "description": "AI-Native Framework - Everything Explicit",
   "type": "module",
   "scripts": {
-    "dev": "vite playground --port 3000 --open --config configs/build-playground.ts",
+    "dev": "vite playground --port 3000 --open --config configs/build-playground.ts --force --host",
     "build": "tsx scripts/build.ts",
     "build:core": "vite build --config configs/build-core.ts",
     "build:playground": "vite build --config configs/build-playground.ts",

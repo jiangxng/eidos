@@ -1,5 +1,4 @@
-// Eidos Core v0.4.1 - 修复 patchChildren 空指针
-console.log('🔥 Eidos Core v0.4.1 loaded')
+// >>> EIDOS CORE BUILD: 2026-08-31 15:30:00 <<<
 // ---------- 类型定义 ----------
 export type VNode = {
   type: string;
@@ -77,7 +76,19 @@ function createElement(vnode: VNode | null | undefined): Node {
 function setProps(el: HTMLElement, props: Record<string, any>) {
   for (const [key, val] of Object.entries(props)) {
     if (key === 'style' && typeof val === 'object') {
-      Object.assign(el.style, val);
+      for (const [styleKey, styleVal] of Object.entries(val)) {
+        // 【关键修复】跳过无效的 styleKey
+        if (styleKey === undefined || styleKey === null || styleKey === '') {
+          continue;
+        }
+        if (styleVal !== undefined && styleVal !== null) {
+          try {
+            el.style[styleKey as any] = String(styleVal);
+          } catch (e) {
+            // 忽略无效的样式属性
+          }
+        }
+      }
     } else if (key === 'text') {
       el.textContent = val;
     } else if (key === 'onClick') {
@@ -107,31 +118,39 @@ function updateProps(el: HTMLElement, oldProps: Record<string, any>, newProps: R
     const newVal = newProps?.[key];
     if (oldVal === newVal) continue;
 
-    // 处理特殊键
     if (key === 'style') {
       const oldStyle = oldVal || {};
       const newStyle = newVal || {};
-      // 获取所有样式键（合并新旧）
+      // 获取所有样式键
       const styleKeys = new Set([
         ...Object.keys(oldStyle),
         ...Object.keys(newStyle)
       ]);
       for (const styleKey of styleKeys) {
-        // 跳过 undefined 或 null 的键名
-        if (styleKey === undefined || styleKey === null) continue;
+        // 【关键修复】跳过无效的 styleKey
+        if (styleKey === undefined || styleKey === null || styleKey === '') {
+          continue;
+        }
         const newStyleValue = newStyle[styleKey];
+        // 如果 newStyleValue 有效则设置，否则清空
         if (newStyleValue !== undefined && newStyleValue !== null) {
-          el.style[styleKey as any] = String(newStyleValue);
+          try {
+            el.style[styleKey as any] = String(newStyleValue);
+          } catch (e) {
+            // 忽略无效的样式属性
+          }
         } else {
-          el.style[styleKey as any] = '';
+          try {
+            el.style[styleKey as any] = '';
+          } catch (e) {
+            // 忽略无效的样式属性
+          }
         }
       }
     } else if (key === 'text') {
       el.textContent = newVal ?? '';
-    } else if (key === 'onClick') {
+    } else if (key === 'onClick' || key === 'onInput') {
       // 事件通过全局 eidos-event 处理，不需要重新绑定
-    } else if (key === 'onInput') {
-      // 同 onClick
     } else {
       if (newVal != null && newVal !== false) {
         el.setAttribute(key, String(newVal));
@@ -150,47 +169,51 @@ function patchNode(
   oldVNode: VNode | null | undefined,
   newVNode: VNode | null | undefined
 ): Node {
-  // 新节点为 null/undefined：返回空文本节点
   if (newVNode == null) {
-    return document.createTextNode('');
+    return document.createTextNode('')
   }
 
-  // 如果旧 DOM 节点为 null，或旧 VNode 为 null，或类型不同：直接创建新节点
-  if (oldEl == null || oldVNode == null || oldVNode.type !== newVNode.type) {
-    const newEl = createElement(newVNode);
-    // 如果有旧 DOM 节点，用新节点替换它
+  if (oldVNode == null || oldVNode.type !== newVNode.type) {
+    const newEl = createElement(newVNode)
     if (oldEl && oldEl.parentNode) {
-      oldEl.parentNode.replaceChild(newEl, oldEl);
+      oldEl.parentNode.replaceChild(newEl, oldEl)
     }
-    return newEl;
+    return newEl
   }
 
-  // 类型相同且旧 DOM 节点存在：复用并更新
-  const el = oldEl as HTMLElement;
-  updateProps(el, oldVNode.props || {}, newVNode.props || {});
-  
-  // 只有当 el 存在且是元素节点时才处理子节点
-  if (el && el.nodeType === 1) {
-    const oldChildren = oldVNode.children || [];
-    const newChildren = newVNode.children || [];
+  // 【关键】如果 oldEl 为 null，直接创建新节点，不再调用 patchChildren
+  if (oldEl == null) {
+    return createElement(newVNode)
+  }
+
+  const el = oldEl as HTMLElement
+  updateProps(el, oldVNode.props || {}, newVNode.props || {})
+
+  // 【关键】只有 el 存在且是元素节点时才处理子节点
+  if (el && el.nodeType === 1 && el.childNodes) {
+    const oldChildren = oldVNode.children || []
+    const newChildren = newVNode.children || []
     // 只有有子节点时才调用 patchChildren
     if (oldChildren.length > 0 || newChildren.length > 0) {
-      patchChildren(el, oldChildren, newChildren);
+      patchChildren(el, oldChildren, newChildren)
     }
   }
-  
-  return el;
-}
 
+  return el
+}
 // 子节点 diff：优先按 key 匹配，无 key 时按位置 fallback（类型相同才复用）
-function patchChildren1(
+function patchChildren(
   el: HTMLElement | null,
   oldChildren: (VNode | null | undefined)[],
   newChildren: (VNode | null | undefined)[]
 ): void {
-  // ----- 防御检查（关键） -----
+  // ----- 防御检查 -----
   if (el == null) {
     console.warn('[patchChildren] el is null, skipping')
+    return
+  }
+  if (typeof el !== 'object') {
+    console.warn('[patchChildren] el is not an object, skipping')
     return
   }
   if (el.nodeType !== 1) {
@@ -199,6 +222,9 @@ function patchChildren1(
   }
   if (!el.childNodes) {
     console.warn('[patchChildren] el has no childNodes, skipping')
+    return
+  }
+  if (oldChildren.length === 0 && newChildren.length === 0) {
     return
   }
   // ----- 防御检查结束 -----
@@ -236,28 +262,63 @@ function patchChildren1(
       }
     }
 
+    let resultNode: Node
     if (matchedIndex >= 0) {
       used[matchedIndex] = true
       const oldC = oldChildren[matchedIndex]
       const oldNode = el.childNodes[matchedIndex] || null
-      newNodes.push(patchNode(oldNode, oldC, newChild))
+      const patched = patchNode(oldNode, oldC, newChild)
+      resultNode = patched instanceof Node ? patched : document.createTextNode('')
     } else {
-      newNodes.push(createElement(newChild))
+      const created = createElement(newChild)
+      resultNode = created instanceof Node ? created : document.createTextNode('')
     }
+
+    if (!(resultNode instanceof Node)) {
+      resultNode = document.createTextNode('')
+    }
+    newNodes.push(resultNode)
   }
 
-  for (let i = 0; i < oldChildren.length; i++) {
+  // 删除未被复用的旧节点
+  for (let i = oldChildren.length - 1; i >= 0; i--) {
     if (!used[i]) {
-      const oldNode = el.childNodes[i]
-      if (oldNode) el.removeChild(oldNode)
+      const oldNode = el.childNodes[i] || null
+      if (oldNode && oldNode.parentNode) {
+        oldNode.parentNode.removeChild(oldNode)
+      }
     }
   }
 
+  // 按新顺序重排 DOM
   let anchor: Node | null = null
   for (let i = newNodes.length - 1; i >= 0; i--) {
     const node = newNodes[i]
-    el.insertBefore(node, anchor)
+    if (!(node instanceof Node)) {
+      continue
+    }
+    if (node.parentNode && node.parentNode !== el) {
+      node.parentNode.removeChild(node)
+    }
+    if (node.parentNode === el) {
+      const currentIndex = Array.from(el.childNodes).indexOf(node)
+      if (currentIndex !== i) {
+        el.insertBefore(node, anchor)
+      }
+    } else {
+      el.insertBefore(node, anchor)
+    }
     anchor = node
+  }
+
+  // 清理多余的尾部节点
+  while (el.childNodes.length > newNodes.length) {
+    const last = el.lastChild
+    if (last) {
+      el.removeChild(last)
+    } else {
+      break
+    }
   }
 }
 // 默认错误降级 UI
