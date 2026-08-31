@@ -148,12 +148,10 @@ function patchNode(
   oldVNode: VNode | null | undefined,
   newVNode: VNode | null | undefined
 ): Node {
-  // 新节点为 null/undefined：由调用方移除，这里返回占位节点
   if (newVNode == null) {
     return document.createTextNode('');
   }
 
-  // 旧节点为 null，或类型不同（无法复用）：创建全新节点并替换
   if (oldVNode == null || oldVNode.type !== newVNode.type) {
     const newEl = createElement(newVNode);
     if (oldEl && oldEl.parentNode) {
@@ -162,7 +160,11 @@ function patchNode(
     return newEl;
   }
 
-  // 类型相同：复用旧 DOM，只更新 props 和 children
+  // 如果 oldEl 为空，直接创建新节点
+  if (oldEl == null) {
+    return createElement(newVNode);
+  }
+
   const el = oldEl as HTMLElement;
   updateProps(el, oldVNode.props || {}, newVNode.props || {});
   patchChildren(el, oldVNode.children || [], newVNode.children || []);
@@ -175,7 +177,9 @@ function patchChildren(
   oldChildren: (VNode | null | undefined)[],
   newChildren: (VNode | null | undefined)[]
 ): void {
-  // 建立旧子节点 key -> index 的映射（仅对带 key 的节点）
+  // 如果 el 为空，直接返回
+  if (!el) return
+
   const oldKeyMap = new Map<string | number, number>();
   oldChildren.forEach((child, i) => {
     if (child != null && child.key != null) {
@@ -187,20 +191,17 @@ function patchChildren(
   const newNodes: Node[] = [];
 
   for (const newChild of newChildren) {
-    // null/undefined 子节点 -> 空文本占位（与 createElement 行为一致）
     if (newChild == null) {
       newNodes.push(document.createTextNode(''));
       continue;
     }
 
-    // 1) 优先按 key 匹配
     let matchedIndex = -1;
     if (newChild.key != null && oldKeyMap.has(newChild.key)) {
       const idx = oldKeyMap.get(newChild.key)!;
       if (!used[idx]) matchedIndex = idx;
     }
 
-    // 2) 无 key 或 key 未命中 -> 扫描式 fallback（找「未使用 + 非空 + 类型相同」的旧节点）
     if (matchedIndex === -1) {
       for (let j = 0; j < oldChildren.length; j++) {
         if (used[j]) continue;
@@ -215,31 +216,47 @@ function patchChildren(
     if (matchedIndex >= 0) {
       used[matchedIndex] = true;
       const oldC = oldChildren[matchedIndex];
-      const oldNode = el.childNodes[matchedIndex] || null;
-      newNodes.push(patchNode(oldNode, oldC, newChild));
+      const oldNode = el.childNodes && el.childNodes[matchedIndex] ? el.childNodes[matchedIndex] : null;
+      const patchedNode = patchNode(oldNode, oldC, newChild);
+      if (patchedNode && patchedNode instanceof Node) {
+        newNodes.push(patchedNode);
+      } else {
+        newNodes.push(document.createTextNode(''));
+      }
     } else {
-      // 无旧节点可复用 -> 新建
-      newNodes.push(createElement(newChild));
+      const createdNode = createElement(newChild);
+      if (createdNode && createdNode instanceof Node) {
+        newNodes.push(createdNode);
+      } else {
+        newNodes.push(document.createTextNode(''));
+      }
     }
   }
 
   // 删除未被复用的旧节点
   for (let i = 0; i < oldChildren.length; i++) {
     if (!used[i]) {
-      const oldNode = el.childNodes[i];
-      if (oldNode) el.removeChild(oldNode);
+      const oldNode = el.childNodes && el.childNodes[i] ? el.childNodes[i] : null;
+      if (oldNode && oldNode.parentNode) {
+        oldNode.parentNode.removeChild(oldNode);
+      }
     }
   }
 
-  // 按新顺序重排 DOM：从后往前 insertBefore，保证最终顺序正确
+  // 按新顺序重排 DOM
   let anchor: Node | null = null;
   for (let i = newNodes.length - 1; i >= 0; i--) {
     const node = newNodes[i];
+    if (!(node instanceof Node)) {
+      continue;
+    }
+    if (node.parentNode) {
+      node.parentNode.removeChild(node);
+    }
     el.insertBefore(node, anchor);
     anchor = node;
   }
 }
-
 // 默认错误降级 UI
 function defaultFallback(error: Error): VNode {
   return {

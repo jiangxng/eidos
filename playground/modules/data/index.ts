@@ -6,6 +6,10 @@ import { MockGraphQLAdapter, initMockData } from '../../../src/data/adapter-mock
 import { createDataManagerWithGraphQL } from '../../../src/data/adapter-graphql'
 import { store } from '../../app/store'
 
+// 使用高级表格替代原来的列表渲染
+import { renderAdvancedTable, showConfirm } from '../../../src/components/index'
+import type { Column, TableAction } from '../../../src/components/types'
+
 // 初始化 Mock 数据
 initMockData('users', [
   { id: 1, name: '张三', email: 'zhangsan@example.com', phone: '13800001001' },
@@ -66,15 +70,101 @@ export const renderDataModule = () => {
   const page = store.get().dataPage
   const listState = userManager.listStore.get()
 
-  // 自动加载数据
   if (listState.items.length === 0 && !listState.loading) {
     setTimeout(() => userManager.fetchList(), 0)
   }
 
   if (page === 'list') {
+    const columns: Column[] = userManager.fields.map(f => ({
+      key: f.name,
+      title: f.label || f.name,
+      sortable: true,
+      filterable: true
+    }))
+
+    const actions: TableAction[] = [
+      {
+        key: 'edit',
+        label: '编辑',
+        onClick: (record) => {
+          // 触发编辑
+          window.dispatchEvent(new CustomEvent('eidos-event', {
+            detail: { type: `FORM_OPEN_users_${record.id}` }
+          }))
+        }
+      },
+      {
+        key: 'delete',
+        label: '删除',
+        onClick: (record) => {
+          showConfirm({
+            title: '确认删除',
+            content: `确定要删除用户 ${record.name} 吗？`,
+            type: 'warning',
+            onConfirm: () => {
+              userManager.remove(record.id)
+            }
+          })
+        }
+      }
+    ]
+
     return {
       type: 'div',
-      children: [createListPage(userManager)]
+      children: [
+        {
+          type: 'div',
+          props: {
+            style: {
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '16px'
+            }
+          },
+          children: [
+            { type: 'h2', props: { text: '📋 用户管理（高级表格）' } },
+            {
+              type: 'button',
+              props: {
+                text: '➕ 新增',
+                onClick: 'FORM_OPEN_users',
+                style: {
+                  padding: '8px 16px',
+                  background: '#1890ff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }
+              }
+            }
+          ]
+        },
+        renderAdvancedTable({
+          columns,
+          data: listState.items,
+          pagination: {
+            page: listState.page,
+            pageSize: listState.pageSize,
+            total: listState.total
+          },
+          sort: listState.sort,
+          actions,
+          loading: listState.loading,
+          rowSelection: true,
+          onSort: (field, order) => {
+            userManager.setSort(field, order)
+          },
+          onPageChange: (page) => {
+            userManager.goToPage(page)
+          },
+          onFilter: (field, value) => {
+            const currentFilters = userManager.listStore.get().filters
+            userManager.setFilters({ ...currentFilters, [field]: value })
+          }
+        })
+      ]
     }
   }
 

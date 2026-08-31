@@ -1,57 +1,90 @@
-// -------- 表单模块 --------
-// 职责：表单示例
+// -------- 高级表单演示 --------
 
-import { renderForm } from 'eidos-core'
-import type { FormField } from 'eidos-core'
+import { renderAdvancedForm } from '../../../src/components/index'
 import { store } from '../../app/store'
 
 export const renderFormModule = () => {
-  const fields: FormField[] = [
-    {
-      type: 'text',
-      name: 'username',
-      label: '用户名',
-      value: store.get().formValues.username || '',
-      rules: { required: true, minLength: 3, message: '用户名至少 3 个字符' }
-    },
-    {
-      type: 'email',
-      name: 'email',
-      label: '邮箱',
-      value: store.get().formValues.email || '',
-      rules: { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: '请输入有效的邮箱地址' }
-    },
-    {
-      type: 'textarea',
-      name: 'bio',
-      label: '个人简介',
-      value: store.get().formValues.bio || '',
-      rules: { maxLength: 200, message: '最多 200 个字符' }
-    }
-  ]
+  const values = store.get().formValues
 
   return {
     type: 'div',
     children: [
-      { type: 'h2', props: { text: '📝 注册表单', style: { margin: '0 0 16px 0' } } },
-      renderForm(fields),
-      {
-        type: 'button',
-        props: {
-          text: '提交',
-          onClick: 'FORM_SUBMIT',
-          style: {
-            padding: '8px 16px',
-            background: '#1890ff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            marginTop: '12px'
+      { type: 'h2', props: { text: '📝 高级表单（联动 + 校验）', style: { margin: '0 0 16px 0' } } },
+      renderAdvancedForm({
+        fields: [
+          {
+            name: 'username',
+            label: '用户名',
+            type: 'text',
+            placeholder: '请输入用户名',
+            required: true,
+            rules: [
+              (v) => {
+                if (v && v.length < 3) return '用户名至少 3 个字符'
+                return null
+              }
+            ]
+          },
+          {
+            name: 'email',
+            label: '邮箱',
+            type: 'email',
+            placeholder: '请输入邮箱',
+            required: true,
+            rules: [
+              (v) => {
+                if (v && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) {
+                  return '请输入有效的邮箱地址'
+                }
+                return null
+              }
+            ]
+          },
+          {
+            name: 'role',
+            label: '角色',
+            type: 'select',
+            options: [
+              { label: '管理员', value: 'admin' },
+              { label: '经理', value: 'manager' },
+              { label: '普通用户', value: 'user' }
+            ],
+            defaultValue: 'user'
+          },
+          {
+            name: 'bio',
+            label: '个人简介',
+            type: 'textarea',
+            placeholder: '请输入个人简介',
+            // 联动：当 role 为 admin 时显示
+            visible: (vals) => vals.role === 'admin'
           }
-        }
-      }
+        ],
+        values: values,
+        layout: 'vertical',
+        columns: 2,
+        submitText: '提交',
+        cancelText: '取消',
+        onCancel: () => {
+          console.log('取消')
+        },
+        onSubmit: (data) => {
+          console.log('📤 提交数据:', data)
+          // 更新 store 中的表单数据
+          store.dispatch(
+            (prev: any) => ({
+              ...prev,
+              formValues: data
+            }),
+            ['formValues']
+          )
+          alert('表单已提交，请查看控制台输出。')
+        },
+        onChange: (name, value, allValues) => {
+          console.log('字段变化:', name, value, allValues)
+        },
+        touched: {}
+      })
     ]
   }
 }

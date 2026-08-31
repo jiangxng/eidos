@@ -8,7 +8,63 @@ import { renderListModule } from '../modules/list'
 import { renderAsyncModule } from '../modules/async'
 import { renderDataModule } from '../modules/data'
 import { renderErrorBoundary } from '../modules/error'
-import { renderAuthDemo } from '../modules/auth'
+import { renderAuthDemo, authStore } from '../modules/auth'
+
+// 无权限时的 403 页面
+function render403() {
+  return {
+    type: 'div',
+    props: {
+      style: {
+        padding: '40px',
+        textAlign: 'center',
+        color: '#999'
+      }
+    },
+    children: [
+      { type: 'h2', props: { text: '🚫 403 无权限访问', style: { color: '#ff4d4f' } } },
+      { type: 'p', props: { text: '您没有权限访问此页面' } },
+      {
+        type: 'a',
+        props: {
+          href: '#/',
+          text: '返回首页',
+          style: { color: '#1890ff', textDecoration: 'none' }
+        }
+      }
+    ]
+  }
+}
+
+// 权限检查包装器
+function withAuth(
+  component: () => any,
+  requiredPermissions: string[] = [],
+  requiredRoles: string[] = []
+): () => any {
+  return () => {
+    const state = authStore.store.get()
+    const userPermissions = state.user.permissions
+    const userRole = state.user.role || ''
+
+    // 角色检查
+    if (requiredRoles.length > 0) {
+      const hasRole = requiredRoles.includes(userRole)
+      if (!hasRole) return render403()
+    }
+
+    // 权限检查
+    if (requiredPermissions.length > 0) {
+      // 如果有通配符 * 则通过
+      if (!userPermissions.includes('*')) {
+        const hasPermission = requiredPermissions.some(p => userPermissions.includes(p))
+        if (!hasPermission) return render403()
+      }
+    }
+
+    return component()
+  }
+}
 
 export const routes = [
   {
@@ -47,7 +103,8 @@ export const routes = [
   },
   {
     path: '/list',
-    component: renderListModule
+    // 需要 user:view 权限才能访问
+    component: withAuth(renderListModule, ['user:view'])
   },
   {
     path: '/async',
@@ -59,7 +116,8 @@ export const routes = [
   },
   {
     path: '/users',
-    component: renderDataModule
+    // 需要 admin 角色才能访问
+    component: withAuth(renderDataModule, [], ['admin'])
   },
   {
     path: '/auth',

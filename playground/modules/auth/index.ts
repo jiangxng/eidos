@@ -14,18 +14,16 @@ export function initAuth() {
   const savedRole = localStorage.getItem(STORAGE_KEY) || 'manager'
   const role = savedRole as 'admin' | 'manager' | 'user'
   authStore.login('user-001', `用户 (${role})`, role)
+  ;(window as any).__EIDOS_ROLE__ = role
   console.log('[Auth] 已登录，角色:', role)
 }
 
 // 切换角色（用于演示）
 export function switchRole(role: 'admin' | 'manager' | 'user') {
-  // 保存角色到 localStorage
   localStorage.setItem(STORAGE_KEY, role)
   authStore.login('user-001', `用户 (${role})`, role)
-  // 不刷新页面，而是触发重新渲染
-  // 直接调用 authStore 的订阅者，让视图更新
-  // 由于 authStore 内部使用 createStore，dispatch 会自动触发订阅
-  // 但我们需要让 app 重新渲染，最简单的方式是触发一个无操作的 dispatch
+  // 同步到全局变量，方便调试
+  ;(window as any).__EIDOS_ROLE__ = role
   const app = (window as any).__EIDOS_APP__
   if (app) {
     app.refresh()
