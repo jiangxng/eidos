@@ -148,10 +148,12 @@ function patchNode(
   oldVNode: VNode | null | undefined,
   newVNode: VNode | null | undefined
 ): Node {
+  // 如果新节点为空，返回空文本节点
   if (newVNode == null) {
     return document.createTextNode('');
   }
 
+  // 如果旧节点为空，或类型不同，直接创建新节点
   if (oldVNode == null || oldVNode.type !== newVNode.type) {
     const newEl = createElement(newVNode);
     if (oldEl && oldEl.parentNode) {
@@ -160,25 +162,33 @@ function patchNode(
     return newEl;
   }
 
-  // 如果 oldEl 为空，直接创建新节点
+  // 如果旧 DOM 节点为空，直接创建新节点
   if (oldEl == null) {
     return createElement(newVNode);
   }
 
+  // 类型相同，复用节点
   const el = oldEl as HTMLElement;
   updateProps(el, oldVNode.props || {}, newVNode.props || {});
-  patchChildren(el, oldVNode.children || [], newVNode.children || []);
+  
+  // 确保 el 存在且是 HTMLElement 才调用 patchChildren
+  if (el && el.childNodes) {
+    patchChildren(el, oldVNode.children || [], newVNode.children || []);
+  }
+  
   return el;
 }
 
 // 子节点 diff：优先按 key 匹配，无 key 时按位置 fallback（类型相同才复用）
 function patchChildren(
-  el: HTMLElement,
+  el: HTMLElement | null,
   oldChildren: (VNode | null | undefined)[],
   newChildren: (VNode | null | undefined)[]
 ): void {
-  // 如果 el 为空，直接返回
-  if (!el) return
+  // 防御：如果 el 不存在或没有 childNodes，直接返回
+  if (!el || !el.childNodes) {
+    return;
+  }
 
   const oldKeyMap = new Map<string | number, number>();
   oldChildren.forEach((child, i) => {
@@ -216,7 +226,7 @@ function patchChildren(
     if (matchedIndex >= 0) {
       used[matchedIndex] = true;
       const oldC = oldChildren[matchedIndex];
-      const oldNode = el.childNodes && el.childNodes[matchedIndex] ? el.childNodes[matchedIndex] : null;
+      const oldNode = (el.childNodes && el.childNodes[matchedIndex]) ? el.childNodes[matchedIndex] : null;
       const patchedNode = patchNode(oldNode, oldC, newChild);
       if (patchedNode && patchedNode instanceof Node) {
         newNodes.push(patchedNode);
@@ -236,7 +246,7 @@ function patchChildren(
   // 删除未被复用的旧节点
   for (let i = 0; i < oldChildren.length; i++) {
     if (!used[i]) {
-      const oldNode = el.childNodes && el.childNodes[i] ? el.childNodes[i] : null;
+      const oldNode = (el.childNodes && el.childNodes[i]) ? el.childNodes[i] : null;
       if (oldNode && oldNode.parentNode) {
         oldNode.parentNode.removeChild(oldNode);
       }
@@ -250,10 +260,14 @@ function patchChildren(
     if (!(node instanceof Node)) {
       continue;
     }
+    // 如果节点已经有父节点，先移除
     if (node.parentNode) {
       node.parentNode.removeChild(node);
     }
-    el.insertBefore(node, anchor);
+    // 确保 el 存在且是 Node 才调用 insertBefore
+    if (el && el.insertBefore) {
+      el.insertBefore(node, anchor);
+    }
     anchor = node;
   }
 }
