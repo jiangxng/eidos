@@ -8,6 +8,7 @@ import { renderListModule } from '../modules/list'
 import { renderAsyncModule } from '../modules/async'
 import { renderDataModule } from '../modules/data'
 import { renderErrorBoundary } from '../modules/error'
+import { renderAuthDemo } from '../modules/auth'
 
 export const routes = [
   {
@@ -59,6 +60,10 @@ export const routes = [
   {
     path: '/users',
     component: renderDataModule
+  },
+  {
+    path: '/auth',
+    component: () => renderAuthDemo()
   }
 ]
 

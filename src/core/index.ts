@@ -109,22 +109,25 @@ function updateProps(el: HTMLElement, oldProps: Record<string, any>, newProps: R
     if (key === 'style') {
       const oldStyle = oldVal || {};
       const newStyle = newVal || {};
-      for (const styleKey of Object.keys({ ...oldStyle, ...newStyle })) {
-        if (oldStyle[styleKey] !== newStyle[styleKey]) {
-          if (newStyle[styleKey] != null) {
-            el.style[styleKey as any] = newStyle[styleKey];
-          } else {
-            el.style[styleKey as any] = '';
-          }
+      // 获取所有样式键（合并新旧）
+      const styleKeys = new Set([
+        ...Object.keys(oldStyle),
+        ...Object.keys(newStyle)
+      ]);
+      for (const styleKey of styleKeys) {
+        // 跳过 undefined 或 null 的键名
+        if (styleKey === undefined || styleKey === null) continue;
+        const newStyleValue = newStyle[styleKey];
+        if (newStyleValue !== undefined && newStyleValue !== null) {
+          el.style[styleKey as any] = String(newStyleValue);
+        } else {
+          el.style[styleKey as any] = '';
         }
       }
     } else if (key === 'text') {
       el.textContent = newVal ?? '';
     } else if (key === 'onClick') {
-      // 简单处理：移除旧监听器，添加新监听器（实际应该使用事件委托优化，但简化）
-      // 这里我们仅模拟：因为事件是通过全局监听，所以不需要重新绑定，但为了 demo 我们保留
-      // 实际项目中，为了避免内存泄漏，我们应该在删除节点时清理监听器，但这里保持简单。
-      // 我们假设事件绑定是一次性的，通过全局 eidos-event 处理，所以不需要改变。
+      // 事件通过全局 eidos-event 处理，不需要重新绑定
     } else if (key === 'onInput') {
       // 同 onClick
     } else {

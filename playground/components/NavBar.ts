@@ -10,7 +10,8 @@ export const NavBar = (state: any) => {
     { href: '#/list', label: '列表' },
     { href: '#/async', label: '异步' },
     { href: '#/error', label: '错误边界' },
-    { href: '#/users', label: '用户管理' }
+    { href: '#/users', label: '用户管理' },
+    { href: '#/auth', label: '权限' }
   ]
 
   return {

@@ -108,6 +108,15 @@ export function setupEventListeners() {
       return
     }
 
+    // -------- 权限切换事件 --------
+    if (type && type.startsWith('AUTH_SWITCH_')) {
+      const role = type.replace('AUTH_SWITCH_', '') as 'admin' | 'manager' | 'user'
+      import('../modules/auth').then(({ switchRole }) => {
+        switchRole(role)
+      })
+      return
+    }
+
     // -------- 数据管理模块事件 --------
     handleDataModuleEvents(type, value, e)
   })
