@@ -19,7 +19,7 @@ export type FormConfig = {
   loading?: boolean
 }
 
-// 校验函数
+// 校验单个字段
 function validateField(
   field: FormField,
   value: any,
@@ -76,7 +76,7 @@ export function renderAdvancedForm(config: FormConfig): VNode {
     loading = false
   } = config
 
-  // 校验所有字段（显示所有错误）
+  // 校验所有字段
   const allErrors = validateForm(fields, values)
 
   // 布局样式
@@ -223,25 +223,32 @@ function renderField(
   onChange?: (name: string, value: any, values: Record<string, any>) => void,
   values?: Record<string, any>
 ): VNode {
-  const baseProps = {
-    style: {
-      padding: '8px 12px',
-      border: '1px solid #d9d9d9',
-      borderRadius: '4px',
-      fontSize: '14px',
-      width: '100%',
-      minHeight: field.type === 'textarea' ? '80px' : 'auto',
-      background: disabled ? '#f5f5f5' : 'white',
-      cursor: disabled ? 'not-allowed' : 'default',
-      boxSizing: 'border-box' as const,
-      transition: 'border-color 0.15s'
-    },
-    onInput: onChange ? `FORM_INPUT_${field.name}` : undefined,
-    value: value ?? '',
-    disabled: disabled
+  // 基础样式
+  const baseStyle = {
+    padding: '8px 12px',
+    border: '1px solid #d9d9d9',
+    borderRadius: '4px',
+    fontSize: '14px',
+    width: '100%',
+    minHeight: field.type === 'textarea' ? '80px' : 'auto',
+    background: disabled ? '#f5f5f5' : 'white',
+    cursor: disabled ? 'not-allowed' : 'default',
+    boxSizing: 'border-box' as const,
+    transition: 'border-color 0.15s'
   }
 
-  // 如果字段有自定义渲染
+  // 基础属性：不包含 disabled
+  const baseProps: Record<string, any> = {
+    style: baseStyle,
+    onInput: onChange ? `FORM_INPUT_${field.name}` : undefined,
+    value: value ?? ''
+  }
+
+  // 【关键修复】只有当 disabled 为 true 时才添加 disabled 属性
+  if (disabled === true) {
+    baseProps.disabled = true
+  }
+
   if (field.render) {
     return field.render({ value, disabled, onChange, values })
   }
@@ -287,7 +294,6 @@ function renderField(
       }
   }
 }
-
 // 表单事件处理辅助
 export function handleFormEvents(
   type: string,
@@ -313,7 +319,6 @@ export function handleFormEvents(
     const hasError = Object.keys(errors).length > 0
 
     if (hasError) {
-      // 触发错误事件，显示第一条错误
       const firstError = Object.values(errors)[0]
       window.dispatchEvent(new CustomEvent('eidos-event', {
         detail: { type: 'FORM_ERROR', message: firstError }

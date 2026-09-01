@@ -52,12 +52,29 @@ export const renderFormModule = () => {
             defaultValue: 'user'
           },
           {
+            name: 'department',
+            label: '部门',
+            type: 'text',
+            placeholder: '请输入部门',
+            // 联动禁用：当 role 为 user 时禁用
+            disabled: (vals) => vals.role === 'user'
+          },
+          {
             name: 'bio',
             label: '个人简介',
             type: 'textarea',
             placeholder: '请输入个人简介',
-            // 联动：当 role 为 admin 时显示
+            // 联动显示：当 role 为 admin 时显示
             visible: (vals) => vals.role === 'admin'
+          },
+          {
+            name: 'salary',
+            label: '薪资',
+            type: 'number',
+            placeholder: '请输入薪资',
+            // 联动显示 + 禁用：仅 admin 可见且可编辑
+            visible: (vals) => vals.role === 'admin',
+            disabled: (vals) => vals.role !== 'admin'
           }
         ],
         values: values,
@@ -70,7 +87,6 @@ export const renderFormModule = () => {
         },
         onSubmit: (data) => {
           console.log('📤 提交数据:', data)
-          // 更新 store 中的表单数据
           store.dispatch(
             (prev: any) => ({
               ...prev,

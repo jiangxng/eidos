@@ -24,7 +24,7 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['eidos-core'],
-    // +++ 新增这一行 +++
+    // 新增：强制重新预构建
     force: true
   }
 });
