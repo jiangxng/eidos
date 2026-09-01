@@ -1,7 +1,7 @@
 // ---------- 内容块渲染器 ----------
 // 根据内容块类型渲染对应的 VNode
 
-import type { VNode } from '../../core/index'
+import type { VNode } from '../core/index'
 import type { ContentBlock, MenuItem } from './types'
 import { createMenu } from './menu'
 
@@ -264,8 +264,8 @@ function renderQuickLinks(state: any): VNode {
             color: '#333',
             textDecoration: 'none',
             borderRadius: '4px'
-          },
-          onMouseEnter: 'HOVER_LINK'
+          }
+          // 移除 onMouseEnter: 'HOVER_LINK'
         }
       }))
     ]

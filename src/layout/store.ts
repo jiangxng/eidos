@@ -1,7 +1,7 @@
 // ---------- 布局状态管理 ----------
 // 使用 Eidos 的 createStore 管理布局状态
 
-import { createStore } from '../../core/index'
+import { createStore } from '../core/index'
 import type { LayoutConfig, LayoutRegion } from './types'
 
 export type LayoutState = {

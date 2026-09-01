@@ -1,6 +1,4 @@
 // -------- 全局事件处理 --------
-// 职责：处理所有 eidos-event 事件
-
 import { store } from './store'
 import { userManager } from '../modules/data'
 
@@ -8,10 +6,51 @@ export function setupEventListeners() {
   window.addEventListener('eidos-event', async (e: any) => {
     const { type, value } = e.detail
 
-    // 路由导航事件（由导航栏触发）
+    // 导航事件
     if (type && type.startsWith('NAVIGATE_')) {
       const path = type.replace('NAVIGATE_', '')
       window.location.hash = path
+      return
+    }
+
+    // 布局折叠切换
+    if (type && type.startsWith('LAYOUT_TOGGLE_')) {
+      const regionId = type.replace('LAYOUT_TOGGLE_', '')
+      const state = store.get()
+      const current = state.collapsedRegions[regionId] || false
+      store.dispatch(
+        (prev: any) => ({
+          ...prev,
+          collapsedRegions: { ...prev.collapsedRegions, [regionId]: !current }
+        }),
+        ['collapsedRegions']
+      )
+      return
+    }
+
+    // 全局搜索
+    if (type === 'GLOBAL_SEARCH') {
+      console.log('[搜索]', value)
+      return
+    }
+
+    // 通知打开
+    if (type === 'OPEN_NOTIFICATIONS') {
+      console.log('[通知] 打开通知面板')
+      return
+    }
+
+    // 关闭 AI 推荐
+    if (type && type.startsWith('DISMISS_RECOMMEND_')) {
+      const id = type.replace('DISMISS_RECOMMEND_', '')
+      const state = store.get()
+      store.dispatch(
+        (prev: any) => ({
+          ...prev,
+          recommendations: prev.recommendations.filter((r: any) => r.id !== id)
+        }),
+        ['recommendations']
+      )
       return
     }
 
@@ -108,34 +147,20 @@ export function setupEventListeners() {
       return
     }
 
-    // -------- 权限切换事件 --------
-    if (type && type.startsWith('AUTH_SWITCH_')) {
-      const role = type.replace('AUTH_SWITCH_', '') as 'admin' | 'manager' | 'user'
-      import('../modules/auth').then(({ switchRole }) => {
-        switchRole(role)
-      })
-      return
-    }
-
     // -------- 数据管理模块事件 --------
-    handleDataModuleEvents(type, value, e)
+    await handleDataModuleEvents(type, value, e)
   })
 }
 
-// 数据管理模块事件处理（独立函数）
 async function handleDataModuleEvents(type: string, value: any, e: any) {
   const name = 'users'
 
-  // 分页
   if (type && type.startsWith(`PAGE_${name}_`)) {
     const page = parseInt(type.replace(`PAGE_${name}_`, ''), 10)
-    if (page > 0) {
-      userManager.goToPage(page)
-    }
+    if (page > 0) userManager.goToPage(page)
     return
   }
 
-  // 过滤
   if (type && type.startsWith(`FILTER_${name}_`)) {
     const fieldName = type.replace(`FILTER_${name}_`, '')
     const val = e.detail.value || ''
@@ -144,14 +169,12 @@ async function handleDataModuleEvents(type: string, value: any, e: any) {
     return
   }
 
-  // 删除
   if (type && type.startsWith(`DELETE_${name}_`)) {
     const id = parseInt(type.replace(`DELETE_${name}_`, ''), 10)
     await userManager.remove(id)
     return
   }
 
-  // 打开新增表单
   if (type === `FORM_OPEN_${name}`) {
     userManager.resetForm()
     store.dispatch(
@@ -166,7 +189,6 @@ async function handleDataModuleEvents(type: string, value: any, e: any) {
     return
   }
 
-  // 打开编辑表单
   if (type && type.startsWith(`FORM_OPEN_${name}_`)) {
     const id = parseInt(type.replace(`FORM_OPEN_${name}_`, ''), 10)
     const item = userManager.listStore.get().items.find((i: any) => i.id === id)
@@ -185,14 +207,12 @@ async function handleDataModuleEvents(type: string, value: any, e: any) {
     return
   }
 
-  // 表单字段输入
   if (type && type.startsWith(`FORM_FIELD_${name}_`)) {
     const fieldName = type.replace(`FORM_FIELD_${name}_`, '')
     userManager.setField(fieldName, e.detail.value)
     return
   }
 
-  // 表单提交
   if (type === `FORM_SUBMIT_${name}`) {
     const data = userManager.formStore.get().data
     const mode = store.get().dataFormMode
@@ -213,13 +233,11 @@ async function handleDataModuleEvents(type: string, value: any, e: any) {
     return
   }
 
-  // 表单取消
   if (type === `FORM_CANCEL_${name}`) {
     store.dispatch((prev: any) => ({ ...prev, dataPage: 'list' }), ['dataPage'])
     return
   }
 
-  // 返回列表
   if (type === 'LIST_BACK') {
     store.dispatch((prev: any) => ({ ...prev, dataPage: 'list' }), ['dataPage'])
     return

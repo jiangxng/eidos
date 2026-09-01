@@ -5,18 +5,15 @@ import type { VNode } from '../../core/index'
 import type { LayoutConfig, LayoutRegion } from './types'
 import { renderRegion } from './regions'
 
-// 主布局渲染函数
 export function renderLayout(config: LayoutConfig, state: any): VNode {
   const { regions, menu, theme } = config
   const { collapsedRegions, hiddenRegions } = state
 
-  // 过滤出可见的区域
   const visibleRegions = regions.filter((region) => {
     if (hiddenRegions[region.id]) return false
     return isRegionVisible(region, state)
   })
 
-  // 按位置分组
   const regionsByPosition: Record<string, LayoutRegion[]> = {
     top: [],
     left: [],
@@ -31,7 +28,6 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
     }
   }
 
-  // 构建布局容器
   const children: VNode[] = []
 
   // 顶部区域
@@ -43,18 +39,17 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          height: '56px',
+          height: theme?.compact ? '44px' : '56px',
           padding: '0 16px',
           borderBottom: '1px solid #e8e8e8',
           backgroundColor: '#ffffff',
-          ...theme?.compact ? { height: '44px' } : {}
+          flexShrink: 0
         }
       },
       children: regionsByPosition.top.map((r) => renderRegion(r, state, menu))
     })
   }
 
-  // 主体区域（左侧边栏 + 内容 + 右侧边栏）
   const mainChildren: VNode[] = []
 
   // 左侧边栏
@@ -94,18 +89,21 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
 
   // 内容区
   if (regionsByPosition.center.length > 0) {
+    const contentVNode = state._content || { type: 'p', props: { text: '内容加载中...' } }
+    
     mainChildren.push({
       type: 'div',
       props: {
         style: {
           flex: 1,
+          minWidth: 0,
           padding: '16px',
           overflowY: 'auto',
           height: 'calc(100vh - 56px)',
           backgroundColor: '#f5f5f5'
         }
       },
-      children: regionsByPosition.center.map((r) => renderRegion(r, state, menu))
+      children: [contentVNode]
     })
   }
 
@@ -134,7 +132,8 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
       style: {
         display: 'flex',
         flexDirection: 'row',
-        height: 'calc(100vh - 56px)'
+        height: 'calc(100vh - 56px)',
+        width: '100%'
       }
     },
     children: mainChildren
@@ -153,7 +152,8 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
           display: 'flex',
           alignItems: 'center',
           fontSize: '12px',
-          color: '#999'
+          color: '#999',
+          flexShrink: 0
         }
       },
       children: regionsByPosition.bottom.map((r) => renderRegion(r, state, menu))
@@ -168,31 +168,28 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
         flexDirection: 'column',
         height: '100vh',
         overflow: 'hidden',
-        fontFamily: '-apple-system, sans-serif'
+        fontFamily: '-apple-system, sans-serif',
+        width: '100%'
       }
     },
     children
   }
 }
 
-// 判断区域是否可见
 function isRegionVisible(region: LayoutRegion, state: any): boolean {
   const vis = region.visibility
   if (!vis) return true
 
-  // 角色检查
   if (vis.roles && vis.roles.length > 0) {
     const userRole = state.userProfile?.role || 'guest'
     if (!vis.roles.includes(userRole)) return false
   }
 
-  // 设备检查
   if (vis.devices && vis.devices.length > 0) {
     const device = getCurrentDevice()
     if (!vis.devices.includes(device)) return false
   }
 
-  // 条件表达式检查
   if (vis.condition) {
     try {
       const fn = new Function('state', `return ${vis.condition}`)
@@ -205,7 +202,6 @@ function isRegionVisible(region: LayoutRegion, state: any): boolean {
   return true
 }
 
-// 获取当前设备类型
 function getCurrentDevice(): 'desktop' | 'tablet' | 'mobile' {
   const w = window.innerWidth
   if (w >= 1024) return 'desktop'
