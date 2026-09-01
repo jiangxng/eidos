@@ -2,7 +2,7 @@
 import { store } from './store'
 import { userManager } from '../modules/data'
 
-export function setupEventListeners() {
+export async function setupEventListeners() {
   window.addEventListener('eidos-event', async (e: any) => {
     const { type, value } = e.detail
 
@@ -10,6 +10,15 @@ export function setupEventListeners() {
     if (type && type.startsWith('NAVIGATE_')) {
       const path = type.replace('NAVIGATE_', '')
       window.location.hash = path
+      return
+    }
+
+    // -------- 权限切换事件 --------
+    if (type && type.startsWith('AUTH_SWITCH_')) {
+      const role = type.replace('AUTH_SWITCH_', '') as 'admin' | 'manager' | 'user'
+      // 动态导入权限模块
+      const { switchRole } = await import('../modules/auth')
+      switchRole(role)
       return
     }
 
