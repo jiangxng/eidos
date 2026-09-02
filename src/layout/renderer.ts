@@ -1,7 +1,7 @@
 // ---------- 布局渲染器 ----------
 // 将布局配置渲染为 VNode 树
 
-import type { VNode } from '../../core/index'
+import type { VNode } from '../core/index'
 import type { LayoutConfig, LayoutRegion } from './types'
 import { renderRegion } from './regions'
 

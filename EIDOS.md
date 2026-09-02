@@ -14,21 +14,20 @@
   ],
   "project_structure": {
     "root": "Monorepo managed by pnpm workspaces",
-    "core": "src/core/ - The framework runtime (包含路由、表单、错误边界、Diff 算法)",
-    "data": "src/data/ - 数据管理模块 (GraphQL 适配器、Mock 适配器)",
-    "auth": "src/auth/ - 权限控制模块 (RBAC、路由守卫、组件级控制)",
-    "components": "src/components/ - 业务组件库 (AdvancedTable, AdvancedForm, Dialog)",
+    "core": "src/core/ - The framework runtime",
+    "data": "src/data/ - 数据管理模块",
+    "auth": "src/auth/ - 权限控制模块",
+    "components": "src/components/ - 业务组件库",
+    "layout": "src/layout/ - 布局系统",
     "playground": "playground/ - Demo application",
     "configs": "configs/ - Vite build configurations",
-    "scripts": "scripts/ - Build scripts"
+    "scripts": "scripts/ - Build scripts",
+    "docs": "docs/ - 设计文档"
   },
   "entry_points": {
     "dev": "pnpm dev",
     "build": "pnpm build",
-    "core_import": "eidos-core",
-    "data_import": "src/data/index",
-    "auth_import": "src/auth/index",
-    "components_import": "src/components/index"
+    "core_import": "eidos-core"
   },
   "error_codes": {
     "EIDOS_MISSING_AFFECTS": "dispatch() called without changedKeys array. Fix: add ['key'] as second parameter.",
@@ -41,18 +40,18 @@
 # Eidos - AI 项目说明书
 
 版本: 0.4.0
-更新日期: 2026-08-31
+更新日期: 2026-09-02
 
 ---
 
-## 1. 项目意图 (Why this exists)
+## 1. 项目意图
 
 Eidos 是一个为 AI 原生时代设计的前端框架。
 
 与 React、Vue、Svelte 等为人类开发者体验优化的框架不同，Eidos 为 AI 代码生成的准确性和确定性调试而优化。
 
 核心问题：
-- AI 生成 React/Vue 代码时经常忘记依赖数组、误用 Hooks、产生难以调试的 bug
+- AI 生成代码时忘记依赖数组、误用 Hooks、产生难以调试的 bug
 - 错误信息是堆栈，AI 无法自动修复
 - JSX/模板语法容易拼错，AI 生成准确率低
 
@@ -64,7 +63,7 @@ Eidos 的解决方案：
 
 ---
 
-## 2. 核心原则 (The Unbreakable Rules)
+## 2. 核心原则
 
 如果你是 AI 代理，编辑此代码库时必须遵守以下规则：
 
@@ -93,7 +92,7 @@ Eidos 的解决方案：
    - 所有数据操作通过适配器执行
 
 7. 权限控制基于 RBAC
-   - 角色 -> 权限 的映射
+   - 角色 → 权限 的映射
    - 路由级守卫 + 组件级控制
 
 ---
@@ -106,9 +105,9 @@ Eidos 的解决方案：
 
   src/
     core/
-      index.ts              框架核心（状态管理、渲染引擎、Diff 算法、路由、错误边界）
+      index.ts              框架核心
       form.ts               表单渲染函数
-      package.json          npm 包描述 (发布为 eidos-core)
+      package.json          npm 包描述
 
     data/
       index.ts              数据管理模块入口
@@ -124,36 +123,30 @@ Eidos 的解决方案：
       store.ts              权限状态管理
       rbac.ts               RBAC 核心
       guard.ts              路由守卫
-      components.ts         组件级权限控制 (ifAllowed)
+      components.ts         组件级权限控制
 
     components/
       index.ts              业务组件库入口
       types.ts              共享类型定义
-      AdvancedTable/
-        index.ts            高级表格（筛选、排序、分页、操作按钮）
-        style.ts            表格样式
-      AdvancedForm/
-        index.ts            高级表单（联动、校验、多列布局）
-      Dialog/
-        index.ts            弹窗/确认框
+      AdvancedTable/        高级表格
+      AdvancedForm/         高级表单
+      Dialog/               弹窗/确认框
+
+    layout/
+      index.ts              布局系统入口
+      types.ts              类型定义
+      store.ts              布局状态管理
+      renderer.ts           布局渲染器
+      regions.ts            区域渲染器
+      blocks.ts             内容块渲染器
+      menu.ts               菜单系统
 
   playground/
     index.html              HTML 入口
     main.ts                 应用入口
-    app/
-      store.ts              全局状态
-      routes.ts             路由配置
-      events.ts             事件处理
-      view.ts               主视图
-    modules/
-      data/                 数据管理演示
-      form/                 表单演示
-      list/                 列表演示
-      async/                异步演示
-      error/                错误边界演示
-      auth/                 权限控制演示
-    components/
-      NavBar.ts             导航栏组件
+    app/                    应用核心（状态、路由、事件、视图）
+    modules/                功能模块
+    components/             UI 组件
 
   configs/
     build-core.ts           核心库构建配置
@@ -170,10 +163,11 @@ Eidos 的解决方案：
   EIDOS.md                  本文件 (AI 项目说明书)
   README.md                 面向开发者的文档
   ROADMAP.md                项目路线图
+  CHANGELOG.md              版本变更日志
 
 ---
 
-## 4. AI 编码规范 (核心部分)
+## 4. AI 编码规范
 
 ### A. 如何编写视图 (UI)
 
@@ -201,7 +195,28 @@ store.dispatch((prev) => ({ ...prev, count: prev.count + 1 }), ['count'])
 错误示例:
 store.dispatch((prev) => ({ ...prev, count: prev.count + 1 }))
 
-### C. 如何使用数据管理
+### C. 如何处理事件
+
+事件通过 window 统一监听。
+
+正确示例:
+window.addEventListener('eidos-event', (e) => {
+  if (e.detail.type === 'INCREMENT') {
+    store.dispatch((prev) => ({ ...prev, count: prev.count + 1 }), ['count'])
+  }
+});
+
+错误示例 (不要在 VNode 中直接绑定函数):
+{
+  type: 'button',
+  props: {
+    onClick: () => { store.dispatch(...) }
+  }
+}
+
+---
+
+## 5. 数据管理模块使用规范
 
 使用 createDataManagerWithGraphQL 或 Mock 适配器。
 
@@ -218,7 +233,9 @@ const userManager = createDataManagerWithGraphQL({
   queries: { list, detail, create, update, delete }
 })
 
-### D. 如何使用权限控制
+---
+
+## 6. 权限控制使用规范
 
 使用 createAuthStore 和 ifAllowed。
 
@@ -233,27 +250,27 @@ ifAllowed(authStore, {
 
 ---
 
-## 5. 当前功能状态
+## 7. 当前功能状态
 
-| 功能                  | 状态      | 位置                   | AI 如何使用                |
-| :------------------- | :-------- | :------------------- | :------------------------- |
-| JSON VNode 渲染      | 稳定      | src/core/index.ts    | AI 生成 JSON 树            |
-| 显式 Dispatch        | 稳定      | src/core/index.ts    | AI 必须添加 changedKeys    |
-| 结构化错误           | 稳定      | src/core/index.ts    | AI 读取 error.fix          |
-| Diff 算法 (key-based)| 稳定      | src/core/index.ts    | AI 列表项添加 key          |
-| 路由                 | 稳定      | src/core/index.ts    | AI 配置 routes 数组        |
-| 表单 (基础)          | 稳定      | src/core/form.ts     | AI 配置 fields 数组        |
-| 错误边界             | 稳定      | src/core/index.ts    | AI 包裹可疑组件            |
-| 数据管理             | 稳定      | src/data/             | AI 配置 fields 和适配器    |
-| 权限控制             | 稳定      | src/auth/             | AI 配置角色和权限          |
-| 高级表格             | 稳定      | src/components/AdvancedTable/ | AI 配置 columns 和 actions |
-| 高级表单             | 开发中    | src/components/AdvancedForm/  | 联动、校验、布局           |
-| 布局系统             | 设计完成  | docs/Layout-System.md | AI 生成布局配置             |
-| 在线 Demo            | 可运行    | playground/           | AI 可本地运行 pnpm dev     |
+| 功能                  | 状态      | 位置                   |
+| :------------------- | :-------- | :------------------- |
+| JSON VNode 渲染      | 稳定      | src/core/index.ts    |
+| 显式 Dispatch        | 稳定      | src/core/index.ts    |
+| 结构化错误           | 稳定      | src/core/index.ts    |
+| Diff 算法 (key-based)| 稳定      | src/core/index.ts    |
+| 路由                 | 稳定      | src/core/index.ts    |
+| 表单 (基础)          | 稳定      | src/core/form.ts     |
+| 错误边界             | 稳定      | src/core/index.ts    |
+| 数据管理             | 稳定      | src/data/            |
+| 权限控制             | 稳定      | src/auth/            |
+| 高级表格             | 稳定      | src/components/AdvancedTable/ |
+| 高级表单             | 稳定      | src/components/AdvancedForm/  |
+| 布局系统             | 稳定      | src/layout/          |
+| 在线 Demo            | 可运行    | playground/          |
 
 ---
 
-## 6. 快速命令
+## 8. 快速命令
 
 pnpm install
 pnpm dev
@@ -263,6 +280,96 @@ pnpm build
 
 ---
 
-## 7. 许可证
+## 9. 协作规范 (AI 多对话协作协议)
+
+### 9.1 背景
+
+Eidos 项目涉及多个模块和大量代码。为了应对复杂协作场景，支持将不同子任务拆分到多个对话中执行，同时保持信息一致性，特制定本协作规范。
+
+### 9.2 核心原则
+
+1. 每个对话只负责一个子任务
+2. 所有对话共享同一套项目元数据（EIDOS.md、README.md、ROADMAP.md、CHANGELOG.md）
+3. 子任务完成后，变更内容汇总到主对话进行同步
+
+### 9.3 项目元数据文件（标准协议）
+
+| 文件 | 作用 |
+| :--- | :--- |
+| EIDOS.md | 项目意图、核心原则、AI 编码规范 |
+| README.md | 项目概述、快速上手 |
+| ROADMAP.md | 当前进度、里程碑 |
+| CHANGELOG.md | 版本历史、决策记录 |
+
+任何新对话在开始工作前，必须先阅读这些文件。
+
+### 9.4 新对话标准启动模板
+
+开启新子对话时，请将以下内容作为第一条消息发送：
+
+---
+【Eidos 项目 - 子任务启动】
+
+请先阅读以下项目元数据（已提供），然后执行指定子任务：
+
+1. 项目概况:
+- 项目名: Eidos
+- 描述: AI 原生前端框架
+- 核心原则: 显式状态变更、JSON 驱动 UI、结构化错误
+- 当前版本: v0.4.0
+
+2. 核心文档（关键信息摘要）:
+- EIDOS.md: 定义核心原则、AI 编码规范
+- ROADMAP.md: 当前里程碑，未完成模块
+- CHANGELOG.md: 最近版本变更
+
+3. 当前要解决的子任务:
+[在此描述具体任务]
+
+4. 已知约束:
+- 不要修改 src/core/index.ts 中的 createStore 签名
+- 布局配置使用 JSON 驱动
+- 权限控制已集成到布局系统
+
+5. 相关文件:
+[列出需要修改的文件]
+
+请确认已理解项目核心原则，然后开始执行子任务。
+---
+
+### 9.5 子任务完成后的同步流程
+
+1. 在子对话中完成开发、验证
+2. 将变更内容整理为以下格式：
+   - 新增文件: [路径列表]
+   - 修改文件: [路径列表 + 变更摘要]
+   - 关键代码片段: [如有必要]
+3. 将变更内容贴回主对话
+4. 主对话确认后更新 CHANGELOG.md 和 ROADMAP.md
+
+### 9.6 对话拆分建议
+
+| 任务类型 | 建议 |
+| :--- | :--- |
+| 新功能开发 | 独立子对话 |
+| Bug 修复 | 独立子对话（简单修复可在主对话完成） |
+| 架构决策 | 主对话 |
+| 代码审查 | 主对话 |
+| 性能优化 | 独立子对话 |
+| 文档完善 | 独立子对话或主对话 |
+
+### 9.7 版本同步检查清单
+
+子任务完成后，确认以下内容已同步:
+
+- [ ] 代码变更已合并到主分支
+- [ ] CHANGELOG.md 已更新
+- [ ] ROADMAP.md 进度已更新
+- [ ] 如有必要，EIDOS.md 已更新
+- [ ] pnpm dev 验证通过
+
+---
+
+## 10. 许可证
 
 MIT © 2025 Eidos Contributors
