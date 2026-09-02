@@ -7,6 +7,9 @@ import { store } from './store'
 import { routes } from './routes'
 import { generateForRoute } from './generated'
 
+// 记录上次生成的路由，用于判断是否需要重新生成
+let lastGeneratedRoute: string | null = null
+
 export const view = (state: any) => {
   const route = state.route || '/'
   const isGeneratedRoute = route.startsWith('/generated/')
@@ -15,19 +18,15 @@ export const view = (state: any) => {
   let layoutConfigToUse = layoutConfig
 
   if (isGeneratedRoute) {
-    // 检查 store 中是否已有生成内容
-    const generatedContent = state._generatedContent
-    const generatedLayout = state._generatedLayout
+    // 检查是否是新的生成路由，或者 store 中没有生成内容
+    const shouldRegenerate = lastGeneratedRoute !== route || !state._generatedContent
 
-    if (generatedContent) {
-      contentVNode = generatedContent
-      if (generatedLayout) {
-        layoutConfigToUse = generatedLayout
-      }
-    } else {
-      // 没有生成内容，显示加载状态，并触发生成
+    if (shouldRegenerate) {
+      // 需要重新生成：显示加载状态
       contentVNode = { type: 'p', props: { text: '⏳ 生成中...', style: { textAlign: 'center', padding: '40px' } } }
-      // 异步触发生成（在下一帧执行，避免阻塞渲染）
+      lastGeneratedRoute = route
+      
+      // 异步触发生成
       setTimeout(() => {
         generateForRoute(route).then((result) => {
           if (result) {
@@ -42,6 +41,12 @@ export const view = (state: any) => {
           }
         })
       }, 0)
+    } else {
+      // 使用已生成的内容
+      contentVNode = state._generatedContent || { type: 'p', props: { text: '⏳ 生成中...' } }
+      if (state._generatedLayout) {
+        layoutConfigToUse = state._generatedLayout
+      }
     }
   } else {
     // 普通路由，使用已有路由配置
@@ -49,6 +54,9 @@ export const view = (state: any) => {
     contentVNode = match
       ? match.component(state.params)
       : { type: 'p', props: { text: '404 页面未找到' } }
+    
+    // 非生成路由，重置生成记录
+    lastGeneratedRoute = null
   }
 
   // 构建布局状态

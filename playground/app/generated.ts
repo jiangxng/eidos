@@ -7,13 +7,14 @@ import { store } from './store'
 import { getDataManager, hasDataManager } from './data-managers'
 
 // 数据模型注册表（用于生成器）
+// 数据模型注册表
 const dataModels = {
   todo: {
     name: 'todo',
     label: '待办',
     fields: [
       { name: 'id', type: 'number', label: 'ID' },
-      { name: 'text', type: 'string', label: '内容' },
+      { name: 'text', type: 'string', label: '内容', required: true },
       { name: 'done', type: 'boolean', label: '已完成' },
       { name: 'createdAt', type: 'date', label: '创建时间' }
     ]
@@ -23,8 +24,8 @@ const dataModels = {
     label: '用户',
     fields: [
       { name: 'id', type: 'number', label: 'ID' },
-      { name: 'name', type: 'string', label: '姓名' },
-      { name: 'email', type: 'string', label: '邮箱' },
+      { name: 'name', type: 'string', label: '姓名', required: true },
+      { name: 'email', type: 'string', label: '邮箱', required: true },
       { name: 'role', type: 'string', label: '角色' }
     ]
   },
@@ -33,8 +34,8 @@ const dataModels = {
     label: '订单',
     fields: [
       { name: 'id', type: 'number', label: '订单号' },
-      { name: 'amount', type: 'number', label: '金额' },
-      { name: 'status', type: 'string', label: '状态' },
+      { name: 'amount', type: 'number', label: '金额', required: true },
+      { name: 'status', type: 'string', label: '状态', required: true },
       { name: 'createdAt', type: 'date', label: '创建时间' }
     ]
   }
