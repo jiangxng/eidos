@@ -1,5 +1,6 @@
 // -------- 全局状态 --------
 import { createStore } from 'eidos-core'
+import { treeSelectInitialState } from '../modules/tree-select'
 
 function getCurrentRoute(): string {
   const hash = window.location.hash.slice(1) || '/'
@@ -108,7 +109,12 @@ export const store = createStore({
   // 生成器创建的布局配置
   _generatedLayout: null as any,
   // 生成器表单的临时数据（用于提交）
-  _generatorFormData: {} as Record<string, any>
+  _generatorFormData: {} as Record<string, any>,
+
+  // ============================================================
+  // +++ TreeSelect 模块状态（新增） +++
+  // ============================================================
+  ...treeSelectInitialState
 })
 
 // 监听 hash 变化，更新路由状态

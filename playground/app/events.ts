@@ -77,7 +77,7 @@ export async function setupEventListeners() {
       const action = parts[1]
       const name = parts[2]
       const key = parts.slice(3).join('_')
-
+      console.log('[TreeSelect] 事件:', action, 'name:', name, 'key:', key, 'value:', value);
       switch (action) {
         case 'TOGGLE_DROPDOWN':
           store.dispatch(
@@ -86,6 +86,32 @@ export async function setupEventListeners() {
               [name]: {
                 ...prev[name],
                 dropdownOpen: !prev[name]?.dropdownOpen
+              }
+            }),
+            [name]
+          )
+          break
+
+        case 'HOVER':
+          store.dispatch(
+            (prev: any) => ({
+              ...prev,
+              [name]: {
+                ...prev[name],
+                isHover: true
+              }
+            }),
+            [name]
+          )
+          break
+
+        case 'LEAVE':
+          store.dispatch(
+            (prev: any) => ({
+              ...prev,
+              [name]: {
+                ...prev[name],
+                isHover: false
               }
             }),
             [name]
@@ -109,9 +135,59 @@ export async function setupEventListeners() {
           break
 
         case 'SELECT':
-          // 单选/多选逻辑由组件内部处理，这里只做状态同步
-          // 实际项目中根据需求扩展
-          console.log('[TreeSelect] 选择:', name, key, value)
+          store.dispatch(
+            (prev: any) => {
+              const fieldState = prev[name] || {}
+              const multiple = fieldState.multiple || false
+              if (multiple) {
+                return prev
+              }
+              const currentSelected = fieldState.selected
+              const newSelected = currentSelected === key ? null : key
+              return {
+                ...prev,
+                [name]: {
+                  ...prev[name],
+                  selected: newSelected,
+                  dropdownOpen: false
+                }
+              }
+            },
+            [name]
+          )
+          break
+
+        case 'CHECK':
+          store.dispatch(
+            (prev: any) => {
+              const fieldState = prev[name] || {}
+              const multiple = fieldState.multiple || false
+              if (!multiple) {
+                const currentSelected = fieldState.selected
+                const newSelected = currentSelected === key ? null : key
+                return {
+                  ...prev,
+                  [name]: {
+                    ...prev[name],
+                    selected: newSelected,
+                    dropdownOpen: false
+                  }
+                }
+              }
+              const currentSelected = Array.isArray(fieldState.selected) ? fieldState.selected : []
+              const newSelected = currentSelected.includes(key)
+                ? currentSelected.filter((k: string) => k !== key)
+                : [...currentSelected, key]
+              return {
+                ...prev,
+                [name]: {
+                  ...prev[name],
+                  selected: newSelected
+                }
+              }
+            },
+            [name]
+          )
           break
 
         case 'SEARCH':
@@ -126,6 +202,36 @@ export async function setupEventListeners() {
             }),
             [name]
           )
+          break
+
+        case 'FOCUS':
+          store.dispatch(
+            (prev: any) => ({
+              ...prev,
+              [name]: {
+                ...prev[name],
+                searchFocus: true
+              }
+            }),
+            [name]
+          )
+          break
+
+        case 'BLUR':
+          store.dispatch(
+            (prev: any) => ({
+              ...prev,
+              [name]: {
+                ...prev[name],
+                searchFocus: false
+              }
+            }),
+            [name]
+          )
+          break
+
+        default:
+          console.warn('[TreeSelect] 未处理的事件:', type)
           break
       }
       return

@@ -1,12 +1,13 @@
-// ---------- TreeSelect 树形选择器组件 ----------
+// TreeSelect 树形选择器组件
 // 完整实现：展开/折叠、搜索过滤、单选/多选、样式独立、onChange 回调
+// 回调通过 store.subscribe 实现，不依赖全局注册表
+// 使用简洁的事件命名：TREESELECT_{ACTION}_{name}_{key}
 
 import type { VNode } from '../../core/index'
 import type { TreeItem, TreeSelectConfig } from '../types'
 import { treeSelectStyles, getIndent } from './style'
 
 export function createTreeSelect(config: TreeSelectConfig) {
-  // 解构配置，设置默认值
   const {
     name,
     data: rawData,
@@ -19,7 +20,7 @@ export function createTreeSelect(config: TreeSelectConfig) {
     onChange,
   } = config
 
-  // ---------- 工具函数：根据 key 查找节点 ----------
+  // 工具函数：根据 key 查找节点
   const findNodeByKey = (items: TreeItem[], key: string): TreeItem | null => {
     for (const item of items) {
       if (String(item[valueKey]) === key) return item
@@ -31,29 +32,23 @@ export function createTreeSelect(config: TreeSelectConfig) {
     return null
   }
 
-  // ---------- 工具函数：获取选中节点的显示标签 ----------
+  // 获取选中节点的显示文本
   const getSelectedLabels = (items: TreeItem[], selected: any): string[] => {
     const selectedKeys = multiple
       ? Array.isArray(selected) ? selected : []
       : selected !== null && selected !== undefined ? [selected] : []
 
     const labels: string[] = []
-    const traverse = (list: TreeItem[]) => {
-      for (const item of list) {
-        const key = String(item[valueKey])
-        if (selectedKeys.includes(key)) {
-          labels.push(String(item[labelKey]))
-        }
-        if (item[childrenKey]) {
-          traverse(item[childrenKey])
-        }
+    for (const key of selectedKeys) {
+      const node = findNodeByKey(items, String(key))
+      if (node) {
+        labels.push(String(node[labelKey]))
       }
     }
-    traverse(items)
     return labels
   }
 
-  // ---------- 工具函数：搜索过滤（保留匹配节点及其父路径） ----------
+  // 搜索过滤
   const filterTree = (items: TreeItem[], keyword: string): TreeItem[] => {
     const lowerKeyword = keyword.toLowerCase()
     const result: TreeItem[] = []
@@ -77,29 +72,49 @@ export function createTreeSelect(config: TreeSelectConfig) {
     return result
   }
 
-  // ---------- 渲染函数 ----------
-  return function renderTreeSelect(state: any): VNode {
-    // 从 store 读取当前字段状态
+  // 注册 store 订阅，监听状态变化触发 onChange
+  let storeInstance: any = null
+
+  const component = function renderTreeSelect(state: any): VNode {
+    // 首次渲染时注册 store 订阅
+    if (!storeInstance && state._store) {
+      storeInstance = state._store
+      // 监听当前组件状态变化
+      storeInstance.subscribe(() => {
+        const newState = storeInstance.get()
+        const fieldState = newState[name]
+        if (fieldState) {
+          const currentValue = fieldState.selected
+          const prevValue = fieldState._prevSelected
+          if (JSON.stringify(currentValue) !== JSON.stringify(prevValue) && onChange) {
+            onChange(currentValue, name)
+            // 更新记录的上次值
+            storeInstance.dispatch(
+              (prev: any) => ({
+                ...prev,
+                [name]: { ...prev[name], _prevSelected: currentValue }
+              }),
+              [name]
+            )
+          }
+        }
+      })
+    }
+
     const fieldState = state[name] || {}
     const selected = fieldState.selected ?? (multiple ? [] : null)
     const expanded = fieldState.expanded || {}
     const dropdownOpen = !!fieldState.dropdownOpen
     const searchKeyword = fieldState.searchKeyword || ''
 
-    // 数据过滤
     let displayData = rawData
     if (searchKeyword.trim()) {
       displayData = filterTree(rawData, searchKeyword.trim())
     }
 
-    // 获取选中标签显示
     const selectedLabels = getSelectedLabels(rawData, selected)
-    const displayText =
-      selectedLabels.length > 0
-        ? selectedLabels.join(', ')
-        : placeholder
+    const displayText = selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder
 
-    // ---------- 递归渲染树节点 ----------
     const renderTree = (items: TreeItem[], level: number = 0): VNode[] => {
       const nodes: VNode[] = []
 
@@ -112,10 +127,8 @@ export function createTreeSelect(config: TreeSelectConfig) {
           : selected === key
         const isDisabled = !!item.disabled
 
-        // 缩进
         const indent = getIndent(level)
 
-        // 行样式组合
         const rowStyle = {
           ...treeSelectStyles.nodeRow,
           paddingLeft: (8 + indent) + 'px',
@@ -125,14 +138,13 @@ export function createTreeSelect(config: TreeSelectConfig) {
 
         const rowChildren: VNode[] = []
 
-        // 1. 展开/折叠按钮
         if (hasChildren) {
           rowChildren.push({
             type: 'span',
             props: {
               text: isExpanded ? '▼' : '▶',
               style: treeSelectStyles.toggleIcon,
-              onClick: `TREESELECT_TOGGLE_${name}_${key}`,
+              onClick: 'TREESELECT_TOGGLE_' + name + '_' + key,
             },
           })
         } else {
@@ -145,7 +157,6 @@ export function createTreeSelect(config: TreeSelectConfig) {
           })
         }
 
-        // 2. 复选框（可选）
         if (checkable) {
           rowChildren.push({
             type: 'input',
@@ -154,12 +165,11 @@ export function createTreeSelect(config: TreeSelectConfig) {
               checked: isSelected,
               disabled: isDisabled,
               style: treeSelectStyles.checkbox,
-              onChange: `TREESELECT_CHECK_${name}_${key}`,
+              onChange: 'TREESELECT_CHECK_' + name + '_' + key,
             },
           })
         }
 
-        // 3. 图标
         if (item.icon) {
           rowChildren.push({
             type: 'span',
@@ -170,7 +180,6 @@ export function createTreeSelect(config: TreeSelectConfig) {
           })
         }
 
-        // 4. 标签文本
         rowChildren.push({
           type: 'span',
           props: {
@@ -179,25 +188,21 @@ export function createTreeSelect(config: TreeSelectConfig) {
               ...treeSelectStyles.nodeLabel,
               color: isDisabled ? '#ccc' : '#333',
             },
-            onClick: isDisabled
-              ? undefined
-              : `TREESELECT_SELECT_${name}_${key}`,
+            onClick: isDisabled ? undefined : 'TREESELECT_SELECT_' + name + '_' + key,
           },
         })
 
-        // 构建节点行
         const nodeChildren: VNode[] = [
           {
             type: 'div',
             props: {
               style: rowStyle,
-              onMouseEnter: `TREESELECT_HOVER_${name}_${key}`,
+              onMouseEnter: 'TREESELECT_HOVER_' + name + '_' + key,
             },
             children: rowChildren,
           },
         ]
 
-        // 递归子节点
         if (hasChildren && isExpanded) {
           const childNodes = renderTree(item[childrenKey] || [], level + 1)
           nodeChildren.push({
@@ -225,14 +230,12 @@ export function createTreeSelect(config: TreeSelectConfig) {
       return nodes
     }
 
-    // ---------- 主 VNode ----------
     return {
       type: 'div',
       props: {
         style: treeSelectStyles.container,
       },
       children: [
-        // ---- 触发器（输入框） ----
         {
           type: 'div',
           props: {
@@ -240,12 +243,11 @@ export function createTreeSelect(config: TreeSelectConfig) {
               ...treeSelectStyles.trigger,
               ...(fieldState.isHover ? treeSelectStyles.triggerHover : {}),
             },
-            onClick: `TREESELECT_TOGGLE_DROPDOWN_${name}`,
-            onMouseEnter: `TREESELECT_TRIGGER_HOVER_${name}`,
-            onMouseLeave: `TREESELECT_TRIGGER_LEAVE_${name}`,
+            onClick: 'TREESELECT_TOGGLE_DROPDOWN_' + name,
+            onMouseEnter: 'TREESELECT_TRIGGER_HOVER_' + name,
+            onMouseLeave: 'TREESELECT_TRIGGER_LEAVE_' + name,
           },
           children: [
-            // 显示文本
             {
               type: 'span',
               props: {
@@ -256,7 +258,6 @@ export function createTreeSelect(config: TreeSelectConfig) {
                 },
               },
             },
-            // 下拉箭头
             {
               type: 'span',
               props: {
@@ -270,58 +271,55 @@ export function createTreeSelect(config: TreeSelectConfig) {
           ],
         },
 
-        // ---- 下拉面板（条件渲染） ----
-        dropdownOpen
-          ? {
+        dropdownOpen ? {
+          type: 'div',
+          props: {
+            style: treeSelectStyles.dropdown,
+          },
+          children: [
+            {
               type: 'div',
               props: {
-                style: treeSelectStyles.dropdown,
+                style: {
+                  padding: '4px 8px',
+                  borderBottom: '1px solid #f0f0f0',
+                },
               },
               children: [
-                // 搜索框
                 {
-                  type: 'div',
+                  type: 'input',
                   props: {
+                    placeholder: '搜索...',
+                    value: searchKeyword,
                     style: {
-                      padding: '4px 8px',
-                      borderBottom: '1px solid #f0f0f0',
+                      ...treeSelectStyles.searchInput,
+                      ...(fieldState.searchFocus ? treeSelectStyles.searchInputFocus : {}),
                     },
+                    onInput: 'TREESELECT_SEARCH_' + name,
+                    onFocus: 'TREESELECT_SEARCH_FOCUS_' + name,
+                    onBlur: 'TREESELECT_SEARCH_BLUR_' + name,
                   },
-                  children: [
-                    {
-                      type: 'input',
-                      props: {
-                        placeholder: '搜索...',
-                        value: searchKeyword,
-                        style: {
-                          ...treeSelectStyles.searchInput,
-                          ...(fieldState.searchFocus ? treeSelectStyles.searchInputFocus : {}),
-                        },
-                        onInput: `TREESELECT_SEARCH_${name}`,
-                        onFocus: `TREESELECT_SEARCH_FOCUS_${name}`,
-                        onBlur: `TREESELECT_SEARCH_BLUR_${name}`,
-                      },
-                    },
-                  ],
                 },
-                // 树内容
-                ...(displayData.length > 0
-                  ? renderTree(displayData)
-                  : [
-                      {
-                        type: 'div',
-                        props: {
-                          style: treeSelectStyles.empty,
-                        },
-                        children: [
-                          { type: 'span', props: { text: '🔍 无匹配结果' } },
-                        ],
-                      },
-                    ]),
               ],
-            }
-          : null,
+            },
+          ].concat(displayData.length > 0 ? renderTree(displayData) : [
+            {
+              type: 'div',
+              props: {
+                style: treeSelectStyles.empty,
+              },
+              children: [
+                { type: 'span', props: { text: '无匹配结果' } },
+              ],
+            },
+          ]),
+        } : null,
       ].filter(Boolean) as VNode[],
     }
   }
+
+  // 暴露 store 引用，供订阅使用
+  ;(component as any)._storeRef = null
+
+  return component
 }

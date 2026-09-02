@@ -4,12 +4,13 @@
 import type { VNode } from '../../../src/core/index'
 import { createTreeSelect } from '../../../src/components/index'
 import type { TreeItem } from '../../../src/components/types'
+import { store } from '../../app/store'
 
 // ---- 模拟树形数据 ----
 const treeData: TreeItem[] = [
   {
     id: '1',
-    label: '📁 总公司',
+    label: '总公司',
     icon: '🏢',
     children: [
       {
@@ -44,7 +45,7 @@ const treeData: TreeItem[] = [
   },
   {
     id: '2',
-    label: '📁 分公司',
+    label: '分公司',
     icon: '🏢',
     children: [
       { id: '2-1', label: '上海分公司' },
@@ -53,6 +54,40 @@ const treeData: TreeItem[] = [
   },
 ]
 
+// ---- 订阅管理（延迟初始化） ----
+let previousSingleSelected: any = undefined
+let previousMultiSelected: any = undefined
+let unsubscribeSingle: (() => void) | null = null
+let unsubscribeMultiple: (() => void) | null = null
+let isSubscribed = false
+
+function ensureSubscriptions() {
+  if (isSubscribed) return
+  if (!store || typeof store.subscribe !== 'function') return
+
+  // 单选订阅
+  unsubscribeSingle = store.subscribe(() => {
+    const state = store.get()
+    const currentSelected = state.treeSelectSingle?.selected
+    if (previousSingleSelected !== currentSelected) {
+      previousSingleSelected = currentSelected
+      console.log('[treeSelectSingle] 选中:', currentSelected)
+    }
+  })
+
+  // 多选订阅
+  unsubscribeMultiple = store.subscribe(() => {
+    const state = store.get()
+    const currentSelected = state.treeSelectMultiple?.selected
+    if (previousMultiSelected !== currentSelected) {
+      previousMultiSelected = currentSelected
+      console.log('[treeSelectMultiple] 多选:', currentSelected)
+    }
+  })
+
+  isSubscribed = true
+}
+
 // ---- 创建组件实例（单选） ----
 const treeSelectSingle = createTreeSelect({
   name: 'treeSelectSingle',
@@ -60,9 +95,6 @@ const treeSelectSingle = createTreeSelect({
   placeholder: '请选择部门（单选）',
   multiple: false,
   checkable: true,
-  onChange: (selected, name) => {
-    console.log(`[${name}] 选中:`, selected)
-  },
 })
 
 // ---- 创建组件实例（多选） ----
@@ -72,14 +104,13 @@ const treeSelectMultiple = createTreeSelect({
   placeholder: '请选择部门（多选）',
   multiple: true,
   checkable: true,
-  onChange: (selected, name) => {
-    console.log(`[${name}] 多选:`, selected)
-  },
 })
 
-// ---- 视图渲染（与现有模块保持一致的导出方式） ----
+// ---- 视图渲染 ----
 export function renderTreeSelectDemo(state: any): VNode {
-  // 从 store 读取当前选中值（用于展示）
+  // 首次渲染时建立订阅
+  ensureSubscriptions()
+
   const singleVal = state.treeSelectSingle?.selected || null
   const multiVal = state.treeSelectMultiple?.selected || []
 
@@ -94,15 +125,13 @@ export function renderTreeSelectDemo(state: any): VNode {
       },
     },
     children: [
-      // 标题
       {
         type: 'h1',
         props: {
           style: { fontSize: '24px', fontWeight: 'bold', marginBottom: '16px' },
         },
-        children: [{ type: 'span', props: { text: '🌳 TreeSelect 树形选择器演示' } }],
+        children: [{ type: 'span', props: { text: 'TreeSelect 树形选择器演示' } }],
       },
-      // 说明
       {
         type: 'p',
         props: {
@@ -117,8 +146,6 @@ export function renderTreeSelectDemo(state: any): VNode {
           },
         ],
       },
-
-      // ---- 单选示例 ----
       {
         type: 'div',
         props: {
@@ -149,15 +176,13 @@ export function renderTreeSelectDemo(state: any): VNode {
               {
                 type: 'span',
                 props: {
-                  text: `当前选中: ${singleVal ? singleVal : '（未选择）'}`,
+                  text: '当前选中: ' + (singleVal ? singleVal : '（未选择）'),
                 },
               },
             ],
           },
         ],
       },
-
-      // ---- 多选示例 ----
       {
         type: 'div',
         props: {
@@ -188,15 +213,13 @@ export function renderTreeSelectDemo(state: any): VNode {
               {
                 type: 'span',
                 props: {
-                  text: `已选: ${multiVal.length > 0 ? multiVal.join('、') : '（未选择）'}`,
+                  text: '已选: ' + (multiVal.length > 0 ? multiVal.join('、') : '（未选择）'),
                 },
               },
             ],
           },
         ],
       },
-
-      // 使用提示
       {
         type: 'div',
         props: {
@@ -213,7 +236,7 @@ export function renderTreeSelectDemo(state: any): VNode {
           {
             type: 'span',
             props: {
-              text: '💡 提示：点击节点标签选择，点击箭头展开/折叠子节点，支持搜索过滤。',
+              text: '提示：点击节点标签选择，点击箭头展开/折叠子节点，支持搜索过滤。',
             },
           },
         ],
@@ -222,18 +245,35 @@ export function renderTreeSelectDemo(state: any): VNode {
   }
 }
 
-// ---- 导出初始状态（供 store 初始化使用） ----
+// ---- 导出初始状态 ----
 export const treeSelectInitialState = {
   treeSelectSingle: {
     selected: null,
     expanded: {},
     dropdownOpen: false,
     searchKeyword: '',
+    isHover: false,
+    searchFocus: false,
   },
   treeSelectMultiple: {
     selected: [],
     expanded: {},
     dropdownOpen: false,
     searchKeyword: '',
+    isHover: false,
+    searchFocus: false,
   },
+}
+
+// ---- 清理函数 ----
+export function cleanup() {
+  if (unsubscribeSingle) {
+    unsubscribeSingle()
+    unsubscribeSingle = null
+  }
+  if (unsubscribeMultiple) {
+    unsubscribeMultiple()
+    unsubscribeMultiple = null
+  }
+  isSubscribed = false
 }

@@ -55,8 +55,10 @@ export type FormField = {
 // 表单布局
 export type FormLayout = 'vertical' | 'horizontal' | 'inline'
 
-// ---------- TreeSelect 类型 ----------
-export interface TreeItem {
+// ---------- 组件库共享类型 ----------
+
+// TreeSelect 相关类型
+export type TreeItem = {
   id: string | number
   label: string
   icon?: string
@@ -64,15 +66,15 @@ export interface TreeItem {
   children?: TreeItem[]
 }
 
-export interface TreeSelectConfig {
-  name: string                // 字段名，用于状态路径
-  items: TreeItem[]           // 树数据
-  valueKey?: string           // 选中值字段，默认 'id'
-  labelKey?: string           // 显示字段，默认 'label'
-  childrenKey?: string        // 子节点字段，默认 'children'
+export type TreeSelectConfig = {
+  name: string
+  data: TreeItem[]
+  valueKey?: string
+  labelKey?: string
+  childrenKey?: string
   placeholder?: string
   multiple?: boolean
-  checkable?: boolean         // 是否显示复选框
+  checkable?: boolean
 }
 
 // ---------- Upload 类型 ----------
