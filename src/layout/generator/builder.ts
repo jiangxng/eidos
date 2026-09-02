@@ -152,6 +152,7 @@ const defaultHandler: SceneHandler = async (intent, context, config) => {
 
 /**
  * 构建列表页
+ * 修改 buildListPage 函数，从 context 中读取真实数据
  */
 async function buildListPage(
   target: string,
@@ -165,10 +166,15 @@ async function buildListPage(
   const label = dataModel.label || target
   const fields = dataModel.fields || []
 
+  // 从 context 中获取数据
+  const listData = (context as any).data?.list || []
+  const hasData = listData.length > 0
+
   // 构建列表页内容
   const contentVNode = {
     type: 'div',
     children: [
+      // 标题和新建按钮（保持不变）
       {
         type: 'div',
         props: {
@@ -198,6 +204,7 @@ async function buildListPage(
           }
         ]
       },
+      // 表格（使用真实数据）
       {
         type: 'div',
         props: {
@@ -209,7 +216,7 @@ async function buildListPage(
           }
         },
         children: [
-          // 表头
+          // 表头（保持不变）
           {
             type: 'div',
             props: {
@@ -221,31 +228,62 @@ async function buildListPage(
                 fontWeight: 'bold'
               }
             },
-            children: fields.map((f: any) => ({
+            children: fields
+              .filter((f: any) => f.name !== 'id' || true) // 显示所有字段
+              .map((f: any) => ({
+                type: 'div',
+                props: {
+                  style: {
+                    flex: 1,
+                    minWidth: '80px',
+                    fontSize: '13px',
+                    color: '#666'
+                  },
+                  text: f.label
+                }
+              }))
+          },
+          // 数据行（真实数据）
+          ...(hasData
+            ? listData.map((item: any) => ({
               type: 'div',
               props: {
                 style: {
-                  flex: 1,
-                  minWidth: '80px',
-                  fontSize: '13px',
-                  color: '#666'
-                },
-                text: f.label
-              }
+                  display: 'flex',
+                  borderBottom: '1px solid #f0f0f0',
+                  padding: '8px 12px',
+                  background: 'white'
+                }
+              },
+              children: fields
+                .filter((f: any) => f.name !== 'id' || true)
+                .map((f: any) => ({
+                  type: 'div',
+                  props: {
+                    style: {
+                      flex: 1,
+                      minWidth: '80px',
+                      fontSize: '13px',
+                      color: '#333'
+                    },
+                    text: String(item[f.name] ?? '-')
+                  }
+                }))
             }))
-          },
-          // 空状态
-          {
-            type: 'div',
-            props: {
-              style: {
-                padding: '40px',
-                textAlign: 'center',
-                color: '#bbb'
+            : [
+              // 空状态
+              {
+                type: 'div',
+                props: {
+                  style: {
+                    padding: '40px',
+                    textAlign: 'center',
+                    color: '#bbb'
+                  }
+                },
+                children: [{ type: 'span', props: { text: '📭 暂无数据，点击"新建"添加' } }]
               }
-            },
-            children: [{ type: 'span', props: { text: '📭 暂无数据，点击"新建"添加' } }]
-          }
+            ])
         ]
       }
     ]
@@ -335,8 +373,12 @@ async function buildCreatePage(
                 {
                   type: 'label',
                   props: {
-                    text: f.label,
-                    style: { fontWeight: '500', fontSize: '14px' }
+                    text: f.label + (f.required ? ' *' : ''),
+                    style: {
+                      fontWeight: '500',
+                      fontSize: '14px',
+                      color: f.required ? '#333' : '#666'
+                    }
                   }
                 },
                 {

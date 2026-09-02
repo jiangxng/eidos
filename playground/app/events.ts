@@ -404,4 +404,87 @@ async function handleDataModuleEvents(type: string, value: any, e: any) {
     window.location.hash = `/generated/${target}`
     return
   }
+
+// -------- 生成器提交事件（对接数据管理模块） --------
+if (type && type.startsWith('GENERATOR_SUBMIT_')) {
+  const target = type.replace('GENERATOR_SUBMIT_', '')
+  
+  // 获取对应的数据管理器
+  const { getDataManager } = await import('./data-managers')
+  const dataManager = getDataManager(target)
+  
+  if (dataManager && dataManager.create) {
+    // 从临时状态获取表单数据
+    const formData = store.get()._generatorFormData || {}
+    
+    // 检查是否有必填字段
+    const dataModel = getDataModelForTarget(target)
+    const requiredFields = dataModel?.fields?.filter((f: any) => f.required) || []
+    const missingFields = requiredFields.filter((f: any) => !formData[f.name])
+    
+    if (missingFields.length > 0) {
+      const fieldNames = missingFields.map((f: any) => f.label).join('、')
+      alert(`⚠️ 请填写必填字段: ${fieldNames}`)
+      return
+    }
+    
+    try {
+      const result = await dataManager.create(formData)
+      if (result) {
+        // 清空表单数据
+        store.dispatch(
+          (prev: any) => ({ ...prev, _generatorFormData: {} }),
+          ['_generatorFormData']
+        )
+        // 刷新列表（通过重新生成页面）
+        const currentRoute = store.get().route
+        const { generateForRoute } = await import('./generated')
+        const newResult = await generateForRoute(currentRoute)
+        if (newResult) {
+          store.dispatch(
+            (prev: any) => ({
+              ...prev,
+              _generatedContent: newResult.contentVNode,
+              _generatedLayout: newResult.layoutConfig
+            }),
+            ['_generatedContent', '_generatedLayout']
+          )
+        }
+        // 跳转回列表
+        window.location.hash = `/generated/${target}`
+        console.log('[Generator] ✅ 创建成功:', result)
+      }
+    } catch (error) {
+      console.error('[Generator] ❌ 创建失败:', error)
+      alert('创建失败: ' + (error instanceof Error ? error.message : '未知错误'))
+    }
+  } else {
+    alert(`⚠️ 目标 "${target}" 暂不支持创建功能`)
+  }
+  return
+}
+
+  // -------- 生成器取消事件 --------
+  if (type && type.startsWith('GENERATOR_CANCEL_')) {
+    const target = type.replace('GENERATOR_CANCEL_', '')
+    window.location.hash = `/generated/${target}`
+    return
+  }
+
+  // -------- 生成器字段输入事件（存储临时数据） --------
+  if (type && type.startsWith('GENERATOR_INPUT_')) {
+    const parts = type.replace('GENERATOR_INPUT_', '').split('_')
+    const target = parts[0]
+    const field = parts.slice(1).join('_') // 支持字段名包含下划线
+    // 存储到临时状态
+    const currentFormData = store.get()._generatorFormData || {}
+    store.dispatch(
+      (prev: any) => ({
+        ...prev,
+        _generatorFormData: { ...currentFormData, [field]: value }
+      }),
+      ['_generatorFormData']
+    )
+    return
+  }
 }

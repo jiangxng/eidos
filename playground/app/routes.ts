@@ -127,29 +127,6 @@ export const routes = [
   {
     path: '/tree-select',
     component: renderTreeSelectDemo
-  },
-  {
-    path: '/generated/:target/:action?',
-    component: async (params: Record<string, string>) => {
-      const target = params.target || 'todo'
-      const action = params.action || 'list'
-      const route = `/generated/${target}/${action}`
-      const result = await handleGeneratedRoute(route, params)
-      if (result) {
-        generatedConfig = result
-        // 更新 store 中的 _generatedContent
-        store.dispatch(
-          (prev: any) => ({
-            ...prev,
-            _generatedContent: result.contentVNode,
-            _generatedLayout: result.layoutConfig
-          }),
-          ['_generatedContent', '_generatedLayout']
-        )
-        return result.contentVNode
-      }
-      return { type: 'p', props: { text: '生成失败' } }
-    }
   }
 ]
 
