@@ -54,7 +54,7 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
 
   // 左侧边栏
   if (regionsByPosition.left.length > 0) {
-    const isCollapsed = collapsedRegions[regionsByPosition.left[0]?.id] || false
+    const isCollapsed = regionsByPosition.left.some(r => collapsedRegions[r.id]) || false
     const width = isCollapsed ? 56 : (regionsByPosition.left[0]?.width || 240)
     mainChildren.push({
       type: 'div',
@@ -97,9 +97,9 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
         style: {
           flex: 1,
           minWidth: 0,
+          width: '100%',
           padding: '16px',
           overflowY: 'auto',
-          height: 'calc(100vh - 56px)',
           backgroundColor: '#f5f5f5'
         }
       },
@@ -132,7 +132,8 @@ export function renderLayout(config: LayoutConfig, state: any): VNode {
       style: {
         display: 'flex',
         flexDirection: 'row',
-        height: 'calc(100vh - 56px)',
+        flex: 1,
+        minHeight: 0,
         width: '100%'
       }
     },

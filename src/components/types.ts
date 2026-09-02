@@ -54,3 +54,47 @@ export type FormField = {
 
 // 表单布局
 export type FormLayout = 'vertical' | 'horizontal' | 'inline'
+
+// ---------- TreeSelect 类型 ----------
+export interface TreeItem {
+  id: string | number
+  label: string
+  icon?: string
+  disabled?: boolean
+  children?: TreeItem[]
+}
+
+export interface TreeSelectConfig {
+  name: string                // 字段名，用于状态路径
+  items: TreeItem[]           // 树数据
+  valueKey?: string           // 选中值字段，默认 'id'
+  labelKey?: string           // 显示字段，默认 'label'
+  childrenKey?: string        // 子节点字段，默认 'children'
+  placeholder?: string
+  multiple?: boolean
+  checkable?: boolean         // 是否显示复选框
+}
+
+// ---------- Upload 类型 ----------
+export interface UploadConfig {
+  name: string
+  accept?: string             // 如 'image/*' 或 '.pdf,.doc'
+  multiple?: boolean
+  maxSize?: number            // 字节，默认 10MB
+  autoUpload?: boolean        // 是否选择后自动上传
+  action?: string             // 上传地址（由事件监听器处理）
+  dragDrop?: boolean          // 是否支持拖拽
+  maxCount?: number           // 最大文件数
+}
+
+// ---------- DatePicker 类型 ----------
+export interface DatePickerConfig {
+  name: string
+  value?: string              // 初始值 'YYYY-MM-DD'
+  format?: string             // 显示格式，默认 'YYYY-MM-DD'
+  placeholder?: string
+  disabled?: boolean
+  minDate?: string
+  maxDate?: string
+  clearable?: boolean
+}

@@ -8,6 +8,57 @@ export async function setupEventListeners() {
   window.addEventListener('eidos-event', async (e: any) => {
     const { type, value } = e.detail
 
+    // ---- TreeSelect 事件处理 ----
+    if (type.startsWith('TREESELECT_')) {
+      const parts = type.split('_')
+      const action = parts[1] // TOGGLE, SELECT, SEARCH, etc.
+      const name = parts[2]
+      const key = parts.slice(3).join('_')
+
+      const fieldState = store.getState()[name] || {}
+
+      switch (action) {
+        case 'TOGGLE_DROPDOWN':
+          store.dispatch((prev) => ({
+            ...prev,
+            [name]: {
+              ...prev[name],
+              dropdownOpen: !prev[name]?.dropdownOpen,
+            },
+          }), [name])
+          break
+
+        case 'TOGGLE':
+          store.dispatch((prev) => {
+            const expanded = prev[name]?.expanded || {}
+            return {
+              ...prev,
+              [name]: {
+                ...prev[name],
+                expanded: { ...expanded, [key]: !expanded[key] },
+              },
+            }
+          }, [name])
+          break
+
+        case 'SELECT':
+          // 单选/多选逻辑（根据 fieldState.multiple 判断）
+          // 省略详细实现...
+          break
+
+        case 'SEARCH':
+          store.dispatch((prev) => ({
+            ...prev,
+            [name]: {
+              ...prev[name],
+              searchKeyword: detail.value || '',
+              dropdownOpen: true, // 搜索时自动展开
+            },
+          }), [name])
+          break
+      }
+    }
+
     // ============================================================
     // 1. 系统级事件（导航、布局、权限）
     // ============================================================
@@ -306,6 +357,51 @@ async function handleDataModuleEvents(type: string, value: any, e: any) {
   // 格式: LIST_BACK
   if (type === 'LIST_BACK') {
     store.dispatch((prev: any) => ({ ...prev, dataPage: 'list' }), ['dataPage'])
+    return
+  }
+
+  // -------- 生成器事件 --------
+  // 处理生成器创建、列表切换、提交等
+
+  // 生成器列表切换
+  if (type && type.startsWith('GENERATOR_LIST_')) {
+    const target = type.replace('GENERATOR_LIST_', '')
+    window.location.hash = `/generated/${target}`
+    return
+  }
+
+  // 生成器创建
+  if (type && type.startsWith('GENERATOR_CREATE_')) {
+    const target = type.replace('GENERATOR_CREATE_', '')
+    window.location.hash = `/generated/${target}/create`
+    return
+  }
+
+  // 生成器字段输入
+  if (type && type.startsWith('GENERATOR_INPUT_')) {
+    const parts = type.replace('GENERATOR_INPUT_', '').split('_')
+    const target = parts[0]
+    const field = parts[1]
+    // 存储到临时状态（后续可用于提交）
+    console.log('[Generator] 字段输入:', target, field, value)
+    return
+  }
+
+  // 生成器提交
+  if (type && type.startsWith('GENERATOR_SUBMIT_')) {
+    const target = type.replace('GENERATOR_SUBMIT_', '')
+    console.log('[Generator] 提交:', target)
+    // 这里可以调用数据管理模块的创建方法
+    alert('提交成功！（演示模式）')
+    // 跳转回列表
+    window.location.hash = `/generated/${target}`
+    return
+  }
+
+  // 生成器取消
+  if (type && type.startsWith('GENERATOR_CANCEL_')) {
+    const target = type.replace('GENERATOR_CANCEL_', '')
+    window.location.hash = `/generated/${target}`
     return
   }
 }
