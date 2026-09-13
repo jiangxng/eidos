@@ -1,0 +1,21 @@
+{
+  "catalogVersion": "1.0.0",
+  "tools": [
+    {
+      "name": "eidos.discoverCapabilities",
+      "deterministic": true,
+      "purpose": "Search bounded Eidos semantic capabilities before proposing an experience."
+    },
+    {
+      "name": "eidos.validateExperienceProposal",
+      "deterministic": true,
+      "purpose": "Fail-closed validation of an explicit Experience Proposal."
+    },
+    {
+      "name": "eidos.realizeExperienceProposal",
+      "deterministic": true,
+      "purpose": "Resolve a validated proposal into Eidos realization records."
+    }
+  ],
+  "producerRule": "LLM/EC may propose. Deterministic Eidos validates and realizes."
+}

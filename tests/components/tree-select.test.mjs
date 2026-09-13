@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import { createTreeSelectState, filterTreeData, parseTreeSelectEvent, reduceTreeSelectState, treeSelectEventType } from '../../dist/components/TreeSelect/index.js';
+const config={name:'department_tree_v1',data:[{id:'hq',label:'Headquarters',children:[{id:'sales_ops',label:'Sales Ops'},{id:2,label:'Finance'}]},{id:'disabled',label:'Disabled',disabled:true}],multiple:true,checkable:true,cascade:'none'};
+let state=createTreeSelectState(config);
+let event=parseTreeSelectEvent(treeSelectEventType(config.name,'toggle-open'));
+assert(event); state=reduceTreeSelectState(config,state,event).state; assert.equal(state.open,true);
+event=parseTreeSelectEvent(treeSelectEventType(config.name,'check','sales_ops'),true); assert(event); let t=reduceTreeSelectState(config,state,event); assert.deepEqual(t.value,['sales_ops']); assert.equal(t.valueChanged,true);
+event=parseTreeSelectEvent(treeSelectEventType(config.name,'check',2),true); assert(event); t=reduceTreeSelectState(config,t.state,event); assert.deepEqual(t.value,['sales_ops',2]);
+event=parseTreeSelectEvent(treeSelectEventType(config.name,'check','disabled'),true); assert(event); t=reduceTreeSelectState(config,t.state,event); assert.deepEqual(t.value,['sales_ops',2]);
+const filtered=filterTreeData(config.data,config,'finance'); assert.equal(filtered.length,1); assert.equal(filtered[0].children.length,1); assert.equal(filtered[0].children[0].id,2);
+const encoded=treeSelectEventType('name_with_underscore','select','key_with_underscore'); const parsed=parseTreeSelectEvent(encoded); assert.equal(parsed.name,'name_with_underscore'); assert.equal(parsed.key,'key_with_underscore');
+const cascade={...config,cascade:'descendants'}; state=createTreeSelectState(cascade); event=parseTreeSelectEvent(treeSelectEventType(cascade.name,'check','hq')); assert(event); t=reduceTreeSelectState(cascade,state,event); assert.deepEqual(t.value,['hq','sales_ops',2]);
+console.log('EIDOS TreeSelect state machine PASS');

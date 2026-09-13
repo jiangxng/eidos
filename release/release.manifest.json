@@ -1,0 +1,195 @@
+{
+  "version": "1.0.0-rc.1",
+  "files": [
+    {
+      "path": "capabilities.json",
+      "bytes": 44728,
+      "sha256": "b5f424f4369178ac37273d22524bdbf7432084192b0aea92492446582b00d48a"
+    },
+    {
+      "path": "contracts/action-request/v0.1.0/schema.json",
+      "bytes": 864,
+      "sha256": "929671b746f0b54cd4277e3f0e9cc81d5f58ff5d0dfe8058444384b6ddb44d23"
+    },
+    {
+      "path": "contracts/ec-experience-proposal/v0.1.0/schema.json",
+      "bytes": 699,
+      "sha256": "428b57ac1bb7da90debdb13e394396d8043bc563f6264a6362aa262bab27cb8c"
+    },
+    {
+      "path": "contracts/experience-composition/v0.1.0/schema.json",
+      "bytes": 1175,
+      "sha256": "1aeca7ec255edd5311105b67cb8e95a46ca5a879c458f2790cf9c1aef069c5c6"
+    },
+    {
+      "path": "contracts/experience-context/v0.1.0/schema.json",
+      "bytes": 1391,
+      "sha256": "c38f273036f080492c4ba6f7670d4ed6719eaa9f1a6ea10e6fc438cf995ac82e"
+    },
+    {
+      "path": "contracts/llm-tools/v1.0.0/tool-catalog.json",
+      "bytes": 655,
+      "sha256": "954ef3cfa28bd1eaf4783aff7915008c56436de82bd2ac0e3fe4e382c0d97e9c"
+    },
+    {
+      "path": "contracts/uidl/v0.1.1/schema.json",
+      "bytes": 2293,
+      "sha256": "7c7ea73654a2368e9448ca39646e0d0ad839f1149b1994b33ebfce34064992a7"
+    },
+    {
+      "path": "demo/README.md",
+      "bytes": 178,
+      "sha256": "3a8d91a5225fc3230d204f0f3ae4975e67d77c9b66eca76573c10fe6202ae6b8"
+    },
+    {
+      "path": "demo/app.js",
+      "bytes": 5592,
+      "sha256": "470c771f9a4d2d361b79857eafcb71ccc01f68f49efc3aaef2e4e3a557c23438"
+    },
+    {
+      "path": "demo/index.html",
+      "bytes": 2911,
+      "sha256": "95a7940338d785247da68c7056123021c8c58d25c93cc37cd674826a74ef5f4f"
+    },
+    {
+      "path": "demo/styles.css",
+      "bytes": 1988,
+      "sha256": "966498256dfb5af4f42f185edda2f9d4f6131182f3b9a6ae46c47041a82216e5"
+    },
+    {
+      "path": "feedback/EXPERIMENT-PROTOCOL.md",
+      "bytes": 924,
+      "sha256": "da377c95cc2bd634fde6fc280225f6daff91a079ff583305134899dc6e67f72c"
+    },
+    {
+      "path": "feedback/HUMAN-FEEDBACK-TEMPLATE.md",
+      "bytes": 1166,
+      "sha256": "daa65c289e8a17b6869f3bcea6a83968f9c8043f52251c3106dc8e97a6afe56f"
+    },
+    {
+      "path": "feedback/ISSUE-TAXONOMY.md",
+      "bytes": 1368,
+      "sha256": "77b6a00d196cd20c5e243d2f34b9f33e547895bc42c55badee4daf08284b4bfc"
+    },
+    {
+      "path": "feedback/LLM-FEEDBACK-TEMPLATE.md",
+      "bytes": 1628,
+      "sha256": "d80fcb7030dd1c438f36b6613412f307346e44af79e7b254722f80273007db49"
+    },
+    {
+      "path": "feedback/METRICS.md",
+      "bytes": 1111,
+      "sha256": "6f140d551c90d4ca4aa48405ae16c13c6cf22095719349f85e0f41fb956c84a6"
+    },
+    {
+      "path": "feedback/README.md",
+      "bytes": 613,
+      "sha256": "7002d6e9530c256782d08b0c02dedf4b60ecd34c169eeae0b72d369ca142ad24"
+    },
+    {
+      "path": "index.html",
+      "bytes": 473,
+      "sha256": "64e5e0d0c0870e95d860e891ebdcfefe0bd3ffea9d28a82122bf49ae4b3d0622"
+    },
+    {
+      "path": "llm/ANSWER-KEY.md",
+      "bytes": 1171,
+      "sha256": "f544680a3cb9f03bed0963eee7703171b29b64c01ee318e4fd1008b9a9ef5521"
+    },
+    {
+      "path": "llm/EVALUATION.md",
+      "bytes": 1837,
+      "sha256": "aab4bad5a4d670c3d2cf04180af5acc0a99ada1da3991ff642d2c7108bf6e007"
+    },
+    {
+      "path": "llm/QUICK-CONTEXT.md",
+      "bytes": 1218,
+      "sha256": "186be783d8ca271a9642173754728d6edffe910273010dea9e154cfbc5ad2904"
+    },
+    {
+      "path": "llm/TASK-PROTOCOL.md",
+      "bytes": 307,
+      "sha256": "e7562f1c1f7440b28e0f56a4a91492659034f5cbbda2617c7ab5b639d090ea0e"
+    },
+    {
+      "path": "llm/TEACH-ME-EIDOS.md",
+      "bytes": 3554,
+      "sha256": "239b5061af1f54c5c55879f7af0be8ca09789addb46bd6becafe8fe1170e8f8f"
+    },
+    {
+      "path": "llm/TOOL-USAGE.md",
+      "bytes": 555,
+      "sha256": "03a17c701c0ccf3359db24bfa12cf503d0cd1ffbc1a01ebad49441206381de16"
+    },
+    {
+      "path": "llm/repository-map.json",
+      "bytes": 748,
+      "sha256": "98f4bb9db1e915c62b692d02306b8f2ab55850e9fa01af6f157fb3e21ae0a7cb"
+    },
+    {
+      "path": "product/DEMO-STORYBOARD.md",
+      "bytes": 1558,
+      "sha256": "4a8ed40de958524c2d5100c64d4133a575289177ddd051e731861f00f49900fc"
+    },
+    {
+      "path": "product/EXTERNAL-REVIEW-KIT.md",
+      "bytes": 1133,
+      "sha256": "4dd86d7dd13ab90ad00594c3e71643c1e1600b9bb878738f2bb53f5ffb5bd71a"
+    },
+    {
+      "path": "product/FAQ.md",
+      "bytes": 1225,
+      "sha256": "40622741f4728be4d62c5c16ea5387d78597467aa0ab98f890ba72ffdd6be617"
+    },
+    {
+      "path": "product/GO-TO-MARKET.md",
+      "bytes": 2749,
+      "sha256": "52132696b1d7779e5787932eb5816c650356c1c0e4d51030a1ec978c630ac6c2"
+    },
+    {
+      "path": "product/LLM-INTEGRATION-DEMO.md",
+      "bytes": 722,
+      "sha256": "230871b5afe442657fe7b34df6c2b019962ef3b7ce66caa5fbcb326fb5d17203"
+    },
+    {
+      "path": "product/MULTILINGUAL-DEMO.md",
+      "bytes": 526,
+      "sha256": "6a85fa8407eaa4e2f3a61a0deb6f6f1eed33eeb20826cdd96ff5531bd8ba3a9c"
+    },
+    {
+      "path": "product/PROMOTION-PLAN.md",
+      "bytes": 5736,
+      "sha256": "96425911b1ae0b54ed5a7c589abc378e57fe2bd44e210ff55ad9d30100ea537b"
+    },
+    {
+      "path": "showcase/README.md",
+      "bytes": 834,
+      "sha256": "96cbefba0f282ea536ad4add3b549c6f0041887dd6359f6c8fb7b5252ceb4017"
+    },
+    {
+      "path": "showcase/SALES-SCRIPT.md",
+      "bytes": 1488,
+      "sha256": "dc0a0e0e251102a5bcf1d71e06033bc1903f0927e2a5f9585f6d456cff60cd06"
+    },
+    {
+      "path": "showcase/i18n.js",
+      "bytes": 8085,
+      "sha256": "6913c6ef17b39eabd865bfa51857df25fb4a15a4859822ed0bd0d79489c04a55"
+    },
+    {
+      "path": "showcase/index.html",
+      "bytes": 11034,
+      "sha256": "c74584f5ca30ebb011497632d51e25991ce1ad0e5002946847903c52a764a337"
+    },
+    {
+      "path": "showcase/showcase.css",
+      "bytes": 9112,
+      "sha256": "0898d4296891e42d45baee6d8c1288c55c7d73c661ce599f4c80a1cff4486424"
+    },
+    {
+      "path": "showcase/showcase.js",
+      "bytes": 7269,
+      "sha256": "7d252c9e34bc701d745836b3613059d9a668a2bc489005742053c4d32ed64b27"
+    }
+  ]
+}

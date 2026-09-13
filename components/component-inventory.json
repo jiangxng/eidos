@@ -1,0 +1,82 @@
+{
+  "version": "0.1.0",
+  "families": {
+    "forms": [
+      "TextInput",
+      "NumberInput",
+      "CurrencyInput",
+      "DateInput",
+      "DateRange",
+      "Select",
+      "MultiSelect",
+      "TreeSelect",
+      "Cascader",
+      "Autocomplete",
+      "FileUpload",
+      "RichText",
+      "CodeEditor",
+      "FormulaEditor"
+    ],
+    "data": [
+      "Table",
+      "VirtualTable",
+      "TreeTable",
+      "PivotTable",
+      "Kanban",
+      "Calendar",
+      "Gantt",
+      "Timeline",
+      "MasterDetail"
+    ],
+    "feedback": [
+      "Dialog",
+      "Drawer",
+      "Toast",
+      "Banner",
+      "InlineNotice",
+      "Progress",
+      "Skeleton",
+      "EmptyState"
+    ],
+    "layout": [
+      "Grid",
+      "Stack",
+      "SplitPane",
+      "DockingLayout",
+      "ResizablePanel",
+      "Sidebar",
+      "Workspace"
+    ],
+    "decision": [
+      "DecisionPanel",
+      "EvidenceStack",
+      "ImpactPreview",
+      "DiffView",
+      "AlternativeCompare",
+      "ApprovalPanel",
+      "ExceptionQueue"
+    ],
+    "visualization": [
+      "ChartHost",
+      "KpiCard",
+      "Legend",
+      "CrossFilterBar",
+      "MetricSelector"
+    ],
+    "diagram": [
+      "DiagramHost",
+      "Node",
+      "Edge",
+      "MiniMap",
+      "Toolbar",
+      "Inspector"
+    ],
+    "spatial": [
+      "SceneHost",
+      "ModelViewer",
+      "SpatialAnnotation",
+      "MeasurementTool",
+      "LayerPanel"
+    ]
+  }
+}

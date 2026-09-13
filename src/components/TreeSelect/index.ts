@@ -1,325 +1,152 @@
-// TreeSelect 树形选择器组件
-// 完整实现：展开/折叠、搜索过滤、单选/多选、样式独立、onChange 回调
-// 回调通过 store.subscribe 实现，不依赖全局注册表
-// 使用简洁的事件命名：TREESELECT_{ACTION}_{name}_{key}
+import type { VNode } from '../../core/index.js';
+import type { TreeItem, TreeKey, TreeSelectConfig, TreeSelectEvent, TreeSelectState, TreeSelectValue } from '../types.js';
+import { getIndent, treeSelectStyles } from './style.js';
 
-import type { VNode } from '../../core/index'
-import type { TreeItem, TreeSelectConfig } from '../types'
-import { treeSelectStyles, getIndent } from './style'
+const PREFIX = 'TREESELECT';
+const SEP = '::';
 
+function keyToken(key: TreeKey): string { return encodeURIComponent(JSON.stringify(key)); }
+function decodeKey(token: string): TreeKey | undefined {
+  try { const value = JSON.parse(decodeURIComponent(token)); return typeof value === 'string' || typeof value === 'number' ? value : undefined; }
+  catch { return undefined; }
+}
+
+export function treeSelectEventType(name: string, action: TreeSelectEvent['action'], key?: TreeKey): string {
+  return [PREFIX, encodeURIComponent(name), action, key === undefined ? '' : keyToken(key)].join(SEP);
+}
+
+export function parseTreeSelectEvent(type: string, value?: unknown): TreeSelectEvent | null {
+  const parts = type.split(SEP);
+  if (parts.length !== 4 || parts[0] !== PREFIX) return null;
+  let name: string;
+  try { name = decodeURIComponent(parts[1]); } catch { return null; }
+  const action = parts[2] as TreeSelectEvent['action'];
+  const allowed: TreeSelectEvent['action'][] = ['toggle-open','toggle-expand','select','check','search','focus','blur','hover','leave','clear'];
+  if (!allowed.includes(action)) return null;
+  const key = parts[3] ? decodeKey(parts[3]) : undefined;
+  if (parts[3] && key === undefined) return null;
+  return { name, action, key, value };
+}
+
+function nodeKey(item: TreeItem, config: TreeSelectConfig): TreeKey {
+  const key = item[config.valueKey ?? 'id'];
+  if (typeof key !== 'string' && typeof key !== 'number') throw new Error(`TreeSelect node key must be string or number: ${String(key)}`);
+  return key;
+}
+function labelOf(item: TreeItem, config: TreeSelectConfig): string { return String(item[config.labelKey ?? 'label'] ?? ''); }
+function childrenOf(item: TreeItem, config: TreeSelectConfig): TreeItem[] { const value = item[config.childrenKey ?? 'children']; return Array.isArray(value) ? value : []; }
+function sameKey(a: TreeKey, b: TreeKey): boolean { return typeof a === typeof b && a === b; }
+
+export function findTreeNode(data: TreeItem[], config: TreeSelectConfig, key: TreeKey): TreeItem | null {
+  for (const item of data) { if (sameKey(nodeKey(item, config), key)) return item; const found = findTreeNode(childrenOf(item, config), config, key); if (found) return found; }
+  return null;
+}
+function descendants(item: TreeItem, config: TreeSelectConfig): TreeKey[] {
+  const result: TreeKey[] = [];
+  for (const child of childrenOf(item, config)) { result.push(nodeKey(child, config), ...descendants(child, config)); }
+  return result;
+}
+function includesKey(values: TreeKey[], key: TreeKey): boolean { return values.some(value => sameKey(value, key)); }
+function removeKey(values: TreeKey[], key: TreeKey): TreeKey[] { return values.filter(value => !sameKey(value, key)); }
+function uniqueKeys(values: TreeKey[]): TreeKey[] { const result: TreeKey[] = []; for (const key of values) if (!includesKey(result, key)) result.push(key); return result; }
+
+export function createTreeSelectState(config: TreeSelectConfig, value?: TreeSelectValue): TreeSelectState {
+  return { value: value ?? (config.multiple ? [] : null), expandedKeys: [], open: false, search: '', focused: false, hovered: false };
+}
+
+export interface TreeSelectTransition { state: TreeSelectState; valueChanged: boolean; value: TreeSelectValue }
+export function reduceTreeSelectState(config: TreeSelectConfig, state: TreeSelectState, event: TreeSelectEvent): TreeSelectTransition {
+  if (event.name !== config.name || config.disabled) return { state, valueChanged: false, value: state.value };
+  let next = state; let valueChanged = false;
+  switch (event.action) {
+    case 'toggle-open': next = { ...state, open: !state.open }; break;
+    case 'focus': next = { ...state, focused: true }; break;
+    case 'blur': next = { ...state, focused: false }; break;
+    case 'hover': next = { ...state, hovered: true }; break;
+    case 'leave': next = { ...state, hovered: false }; break;
+    case 'search': next = { ...state, search: typeof event.value === 'string' ? event.value : '', open: true }; break;
+    case 'clear': next = { ...state, value: config.multiple ? [] : null }; valueChanged = true; break;
+    case 'toggle-expand': {
+      if (event.key === undefined) break;
+      const expanded = includesKey(state.expandedKeys, event.key) ? removeKey(state.expandedKeys, event.key) : [...state.expandedKeys, event.key];
+      next = { ...state, expandedKeys: expanded }; break;
+    }
+    case 'select':
+    case 'check': {
+      if (event.key === undefined) break;
+      const item = findTreeNode(config.data, config, event.key); if (!item || item.disabled) break;
+      if (config.multiple) {
+        const current = Array.isArray(state.value) ? state.value : [];
+        const affected = config.cascade === 'descendants' ? [event.key, ...descendants(item, config)] : [event.key];
+        const shouldRemove = includesKey(current, event.key);
+        let value = [...current];
+        for (const key of affected) value = shouldRemove ? removeKey(value, key) : uniqueKeys([...value, key]);
+        next = { ...state, value }; valueChanged = true;
+      } else {
+        next = { ...state, value: event.key, open: false }; valueChanged = !sameKey(state.value as TreeKey, event.key);
+      }
+      break;
+    }
+  }
+  return { state: next, valueChanged, value: next.value };
+}
+
+export function filterTreeData(data: TreeItem[], config: TreeSelectConfig, search: string): TreeItem[] {
+  const term = search.trim().toLocaleLowerCase(); if (!term) return data;
+  const result: TreeItem[] = [];
+  const childrenKey = config.childrenKey ?? 'children';
+  for (const item of data) {
+    const filteredChildren = filterTreeData(childrenOf(item, config), config, term);
+    if (labelOf(item, config).toLocaleLowerCase().includes(term) || filteredChildren.length) result.push({ ...item, [childrenKey]: filteredChildren });
+  }
+  return result;
+}
+
+export function getSelectedTreeItems(config: TreeSelectConfig, value: TreeSelectValue): TreeItem[] {
+  const keys = Array.isArray(value) ? value : value === null ? [] : [value];
+  return keys.map(key => findTreeNode(config.data, config, key)).filter((item): item is TreeItem => item !== null);
+}
+
+function normalizedLegacyState(config: TreeSelectConfig, source: any): TreeSelectState {
+  const expanded = source?.expanded ?? {};
+  return {
+    value: source?.value ?? source?.selected ?? (config.multiple ? [] : null),
+    expandedKeys: Array.isArray(source?.expandedKeys) ? source.expandedKeys : Object.keys(expanded).filter(key => expanded[key]),
+    open: Boolean(source?.open ?? source?.dropdownOpen), search: String(source?.search ?? source?.searchKeyword ?? ''),
+    focused: Boolean(source?.focused ?? source?.searchFocus), hovered: Boolean(source?.hovered ?? source?.isHover),
+  };
+}
+
+export function renderTreeSelect(config: TreeSelectConfig, state: TreeSelectState): VNode {
+  const selected = getSelectedTreeItems(config, state.value); const displayData = config.searchable === false ? config.data : filterTreeData(config.data, config, state.search);
+  const multipleValues = Array.isArray(state.value) ? state.value : [];
+  const renderNodes = (items: TreeItem[], level = 0): VNode[] => items.map(item => {
+    const key = nodeKey(item, config), children = childrenOf(item, config), hasChildren = children.length > 0;
+    const selectedNow = config.multiple ? includesKey(multipleValues, key) : state.value !== null && !Array.isArray(state.value) && sameKey(state.value, key);
+    const expanded = includesKey(state.expandedKeys, key), disabled = config.disabled || Boolean(item.disabled);
+    const rowChildren: VNode[] = [
+      hasChildren ? { type:'span', props:{ text: expanded ? '▼' : '▶', style:treeSelectStyles.toggleIcon, onClick: treeSelectEventType(config.name,'toggle-expand',key) } } : { type:'span', props:{text:'',style:{width:'16px',display:'inline-block'}} },
+    ];
+    if (config.checkable !== false) rowChildren.push({ type:'input', props:{ type:'checkbox', checked:selectedNow, disabled, style:treeSelectStyles.checkbox, onChange:treeSelectEventType(config.name,'check',key), 'aria-label':`选择 ${labelOf(item, config)}` } });
+    if (item.icon) rowChildren.push({ type:'span', props:{text:String(item.icon)+' ',style:{fontSize:'14px'}} });
+    rowChildren.push({ type:'span', props:{ text:labelOf(item,config), style:{...treeSelectStyles.nodeLabel,color:disabled?'#ccc':'#333'}, onClick:disabled?undefined:treeSelectEventType(config.name,'select',key) } });
+    const nodeChildren: VNode[] = [{ type:'div', key:`row:${String(key)}`, props:{ style:{...treeSelectStyles.nodeRow,paddingLeft:(8+getIndent(level))+'px',...(selectedNow?treeSelectStyles.nodeRowSelected:{}),...(disabled?treeSelectStyles.nodeRowDisabled:{})}, role:'treeitem','aria-selected':selectedNow,'aria-expanded':hasChildren?expanded:undefined }, children:rowChildren }];
+    if (hasChildren && expanded) nodeChildren.push({ type:'div', key:`children:${String(key)}`, props:{role:'group'}, children:renderNodes(children,level+1) });
+    return { type:'div', key, children:nodeChildren };
+  });
+
+  const valueDisplay: VNode = config.multiple && selected.length ? { type:'div', props:{style:treeSelectStyles.tags}, children:selected.map(item=>({ type:'span', key:nodeKey(item,config), props:{text:labelOf(item,config),style:treeSelectStyles.tag} })) } : { type:'span', props:{ text:selected.length ? selected.map(item=>labelOf(item,config)).join(', ') : (config.placeholder ?? '请选择'), style:{...treeSelectStyles.valueText,...(!selected.length?treeSelectStyles.placeholderText:{})} } };
+
+  return { type:'div', props:{style:treeSelectStyles.container,'data-eidos-control':'tree-select','data-name':config.name}, children:[
+    { type:'div', props:{ style:{...treeSelectStyles.trigger,...(state.hovered?treeSelectStyles.triggerHover:{}),...(config.disabled?treeSelectStyles.triggerDisabled:{})}, role:'combobox','aria-expanded':state.open,'aria-disabled':Boolean(config.disabled),tabIndex:config.disabled?-1:0,onClick:config.disabled?undefined:treeSelectEventType(config.name,'toggle-open'),onMouseEnter:treeSelectEventType(config.name,'hover'),onMouseLeave:treeSelectEventType(config.name,'leave') }, children:[valueDisplay,{type:'span',props:{text:'▼',style:{...treeSelectStyles.arrow,...(state.open?treeSelectStyles.arrowOpen:{})}}}] },
+    state.open ? { type:'div', props:{style:treeSelectStyles.dropdown,role:'tree'}, children:[
+      config.searchable === false ? null : { type:'input', props:{ placeholder:config.searchPlaceholder ?? '搜索...',value:state.search,style:{...treeSelectStyles.searchInput,...(state.focused?treeSelectStyles.searchInputFocus:{})},onInput:treeSelectEventType(config.name,'search'),onFocus:treeSelectEventType(config.name,'focus'),onBlur:treeSelectEventType(config.name,'blur'),'aria-label':'搜索树节点'} },
+      ...(displayData.length ? renderNodes(displayData) : [{type:'div',props:{style:treeSelectStyles.empty,text:'无匹配结果'}}])
+    ].filter(Boolean) as VNode[] } : null
+  ].filter(Boolean) as VNode[] };
+}
+
+/** Legacy adapter: preserves createTreeSelect(config)(rootState) while removing hidden store subscriptions. */
 export function createTreeSelect(config: TreeSelectConfig) {
-  const {
-    name,
-    data: rawData,
-    valueKey = 'id',
-    labelKey = 'label',
-    childrenKey = 'children',
-    placeholder = '请选择',
-    multiple = false,
-    checkable = true,
-    onChange,
-  } = config
-
-  // 工具函数：根据 key 查找节点
-  const findNodeByKey = (items: TreeItem[], key: string): TreeItem | null => {
-    for (const item of items) {
-      if (String(item[valueKey]) === key) return item
-      if (item[childrenKey]) {
-        const found = findNodeByKey(item[childrenKey], key)
-        if (found) return found
-      }
-    }
-    return null
-  }
-
-  // 获取选中节点的显示文本
-  const getSelectedLabels = (items: TreeItem[], selected: any): string[] => {
-    const selectedKeys = multiple
-      ? Array.isArray(selected) ? selected : []
-      : selected !== null && selected !== undefined ? [selected] : []
-
-    const labels: string[] = []
-    for (const key of selectedKeys) {
-      const node = findNodeByKey(items, String(key))
-      if (node) {
-        labels.push(String(node[labelKey]))
-      }
-    }
-    return labels
-  }
-
-  // 搜索过滤
-  const filterTree = (items: TreeItem[], keyword: string): TreeItem[] => {
-    const lowerKeyword = keyword.toLowerCase()
-    const result: TreeItem[] = []
-
-    for (const item of items) {
-      const label = String(item[labelKey]).toLowerCase()
-      const matchSelf = label.includes(lowerKeyword)
-
-      let filteredChildren: TreeItem[] = []
-      if (item[childrenKey]) {
-        filteredChildren = filterTree(item[childrenKey], keyword)
-      }
-
-      if (matchSelf || filteredChildren.length > 0) {
-        result.push({
-          ...item,
-          children: filteredChildren.length > 0 ? filteredChildren : item[childrenKey],
-        })
-      }
-    }
-    return result
-  }
-
-  // 注册 store 订阅，监听状态变化触发 onChange
-  let storeInstance: any = null
-
-  const component = function renderTreeSelect(state: any): VNode {
-    // 首次渲染时注册 store 订阅
-    if (!storeInstance && state._store) {
-      storeInstance = state._store
-      // 监听当前组件状态变化
-      storeInstance.subscribe(() => {
-        const newState = storeInstance.get()
-        const fieldState = newState[name]
-        if (fieldState) {
-          const currentValue = fieldState.selected
-          const prevValue = fieldState._prevSelected
-          if (JSON.stringify(currentValue) !== JSON.stringify(prevValue) && onChange) {
-            onChange(currentValue, name)
-            // 更新记录的上次值
-            storeInstance.dispatch(
-              (prev: any) => ({
-                ...prev,
-                [name]: { ...prev[name], _prevSelected: currentValue }
-              }),
-              [name]
-            )
-          }
-        }
-      })
-    }
-
-    const fieldState = state[name] || {}
-    const selected = fieldState.selected ?? (multiple ? [] : null)
-    const expanded = fieldState.expanded || {}
-    const dropdownOpen = !!fieldState.dropdownOpen
-    const searchKeyword = fieldState.searchKeyword || ''
-
-    let displayData = rawData
-    if (searchKeyword.trim()) {
-      displayData = filterTree(rawData, searchKeyword.trim())
-    }
-
-    const selectedLabels = getSelectedLabels(rawData, selected)
-    const displayText = selectedLabels.length > 0 ? selectedLabels.join(', ') : placeholder
-
-    const renderTree = (items: TreeItem[], level: number = 0): VNode[] => {
-      const nodes: VNode[] = []
-
-      for (const item of items) {
-        const key = String(item[valueKey])
-        const hasChildren = !!(item[childrenKey] && item[childrenKey].length > 0)
-        const isExpanded = !!expanded[key]
-        const isSelected = multiple
-          ? Array.isArray(selected) && selected.includes(key)
-          : selected === key
-        const isDisabled = !!item.disabled
-
-        const indent = getIndent(level)
-
-        const rowStyle = {
-          ...treeSelectStyles.nodeRow,
-          paddingLeft: (8 + indent) + 'px',
-          ...(isSelected ? treeSelectStyles.nodeRowSelected : {}),
-          ...(isDisabled ? treeSelectStyles.nodeRowDisabled : {}),
-        }
-
-        const rowChildren: VNode[] = []
-
-        if (hasChildren) {
-          rowChildren.push({
-            type: 'span',
-            props: {
-              text: isExpanded ? '▼' : '▶',
-              style: treeSelectStyles.toggleIcon,
-              onClick: 'TREESELECT_TOGGLE_' + name + '_' + key,
-            },
-          })
-        } else {
-          rowChildren.push({
-            type: 'span',
-            props: {
-              text: '',
-              style: { width: '16px', display: 'inline-block' },
-            },
-          })
-        }
-
-        if (checkable) {
-          rowChildren.push({
-            type: 'input',
-            props: {
-              type: 'checkbox',
-              checked: isSelected,
-              disabled: isDisabled,
-              style: treeSelectStyles.checkbox,
-              onChange: 'TREESELECT_CHECK_' + name + '_' + key,
-            },
-          })
-        }
-
-        if (item.icon) {
-          rowChildren.push({
-            type: 'span',
-            props: {
-              text: item.icon + ' ',
-              style: { fontSize: '14px' },
-            },
-          })
-        }
-
-        rowChildren.push({
-          type: 'span',
-          props: {
-            text: String(item[labelKey]),
-            style: {
-              ...treeSelectStyles.nodeLabel,
-              color: isDisabled ? '#ccc' : '#333',
-            },
-            onClick: isDisabled ? undefined : 'TREESELECT_SELECT_' + name + '_' + key,
-          },
-        })
-
-        const nodeChildren: VNode[] = [
-          {
-            type: 'div',
-            props: {
-              style: rowStyle,
-              onMouseEnter: 'TREESELECT_HOVER_' + name + '_' + key,
-            },
-            children: rowChildren,
-          },
-        ]
-
-        if (hasChildren && isExpanded) {
-          const childNodes = renderTree(item[childrenKey] || [], level + 1)
-          nodeChildren.push({
-            type: 'div',
-            props: {
-              style: {
-                paddingLeft: '0px',
-              },
-            },
-            children: childNodes,
-          })
-        }
-
-        nodes.push({
-          type: 'div',
-          props: {
-            style: {
-              borderBottom: '1px solid #f5f5f5',
-            },
-          },
-          children: nodeChildren,
-        })
-      }
-
-      return nodes
-    }
-
-    return {
-      type: 'div',
-      props: {
-        style: treeSelectStyles.container,
-      },
-      children: [
-        {
-          type: 'div',
-          props: {
-            style: {
-              ...treeSelectStyles.trigger,
-              ...(fieldState.isHover ? treeSelectStyles.triggerHover : {}),
-            },
-            onClick: 'TREESELECT_TOGGLE_DROPDOWN_' + name,
-            onMouseEnter: 'TREESELECT_TRIGGER_HOVER_' + name,
-            onMouseLeave: 'TREESELECT_TRIGGER_LEAVE_' + name,
-          },
-          children: [
-            {
-              type: 'span',
-              props: {
-                text: displayText,
-                style: {
-                  ...treeSelectStyles.valueText,
-                  ...(selectedLabels.length === 0 ? treeSelectStyles.placeholderText : {}),
-                },
-              },
-            },
-            {
-              type: 'span',
-              props: {
-                text: '▼',
-                style: {
-                  ...treeSelectStyles.arrow,
-                  ...(dropdownOpen ? treeSelectStyles.arrowOpen : {}),
-                },
-              },
-            },
-          ],
-        },
-
-        dropdownOpen ? {
-          type: 'div',
-          props: {
-            style: treeSelectStyles.dropdown,
-          },
-          children: [
-            {
-              type: 'div',
-              props: {
-                style: {
-                  padding: '4px 8px',
-                  borderBottom: '1px solid #f0f0f0',
-                },
-              },
-              children: [
-                {
-                  type: 'input',
-                  props: {
-                    placeholder: '搜索...',
-                    value: searchKeyword,
-                    style: {
-                      ...treeSelectStyles.searchInput,
-                      ...(fieldState.searchFocus ? treeSelectStyles.searchInputFocus : {}),
-                    },
-                    onInput: 'TREESELECT_SEARCH_' + name,
-                    onFocus: 'TREESELECT_SEARCH_FOCUS_' + name,
-                    onBlur: 'TREESELECT_SEARCH_BLUR_' + name,
-                  },
-                },
-              ],
-            },
-          ].concat(displayData.length > 0 ? renderTree(displayData) : [
-            {
-              type: 'div',
-              props: {
-                style: treeSelectStyles.empty,
-              },
-              children: [
-                { type: 'span', props: { text: '无匹配结果' } },
-              ],
-            },
-          ]),
-        } : null,
-      ].filter(Boolean) as VNode[],
-    }
-  }
-
-  // 暴露 store 引用，供订阅使用
-  ;(component as any)._storeRef = null
-
-  return component
+  return (rootState: any): VNode => renderTreeSelect(config, normalizedLegacyState(config, rootState?.[config.name] ?? {}));
 }

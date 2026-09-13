@@ -1,0 +1,1834 @@
+{
+  "catalogVersion": "0.2.0",
+  "principle": "capability-first, component-rich",
+  "capabilityCount": 203,
+  "capabilities": [
+    {
+      "id": "text-input",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "number-input",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "currency-input",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "date-input",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "date-range",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "time-input",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "select",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "multi-select",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "hierarchical-selection",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "cascader",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "autocomplete",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "tag-input",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "rating",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "slider",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "switch",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "checkbox",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "radio",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "file-upload",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "image-upload",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "signature",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "rich-text-editor",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "code-editor",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "formula-editor",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "color-picker",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "location-picker",
+      "version": "0.1.0",
+      "family": "input",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "table",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "virtual-table",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "tree-table",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "pivot-table",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "matrix",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "record-list",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "master-detail",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "kanban",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "calendar",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "gantt",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "timeline",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "detail-view",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "infinite-list",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "data-filter",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "saved-view",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "bulk-selection",
+      "version": "0.1.0",
+      "family": "data",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "decision-panel",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "evidence-stack",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "alternative-compare",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "diff-view",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "impact-preview",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "recommendation",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "confidence-display",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "approval",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "confirmation",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "escalation",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "decision-timeline",
+      "version": "0.1.0",
+      "family": "decision",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "exception-queue",
+      "version": "0.1.0",
+      "family": "exception",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "anomaly-review",
+      "version": "0.1.0",
+      "family": "exception",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "alert-triage",
+      "version": "0.1.0",
+      "family": "exception",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "root-cause-view",
+      "version": "0.1.0",
+      "family": "exception",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "threshold-breach",
+      "version": "0.1.0",
+      "family": "exception",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "conflict-view",
+      "version": "0.1.0",
+      "family": "exception",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "line-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "bar-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "area-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "pie-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "donut-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "scatter-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "bubble-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "heatmap",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "treemap",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "sunburst",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "sankey",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "funnel",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "gauge",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "radar-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "waterfall",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "boxplot",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "histogram",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "geo-map",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "network-graph",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "kpi-card",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "small-multiples",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "sparkline",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "variance-chart",
+      "version": "0.1.0",
+      "family": "visualization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "metric",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "dimension",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "measure",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "aggregation",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "filter",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "slice",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "drill-down",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "drill-through",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "cross-filter",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "pivot-analysis",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "formula",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "time-intelligence",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "forecast-presentation",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "variance-analysis",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "contribution-analysis",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "ranking",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "segmentation",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "threshold-alert",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "narrative-explanation",
+      "version": "0.1.0",
+      "family": "bi",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "flowchart",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "process-map",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "bpmn-like",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "org-chart",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "dependency-graph",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "state-machine",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "er-diagram",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "topology",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "mind-map",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "whiteboard",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "node-editor",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "swimlane",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "decision-tree",
+      "version": "0.1.0",
+      "family": "diagram",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "report-builder",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "report-section",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "cross-table",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "group",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "subtotal",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "formula-block",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "header-footer",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "pagination",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "print-layout",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "export",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "drillable-report",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "parameter-panel",
+      "version": "0.1.0",
+      "family": "reporting",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "dashboard-grid",
+      "version": "0.1.0",
+      "family": "dashboard",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "responsive-dashboard",
+      "version": "0.1.0",
+      "family": "dashboard",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "filter-bar",
+      "version": "0.1.0",
+      "family": "dashboard",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "global-time-range",
+      "version": "0.1.0",
+      "family": "dashboard",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "cross-filter-dashboard",
+      "version": "0.1.0",
+      "family": "dashboard",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "drill-through-dashboard",
+      "version": "0.1.0",
+      "family": "dashboard",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "dashboard-saved-view",
+      "version": "0.1.0",
+      "family": "dashboard",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "dashboard-story",
+      "version": "0.1.0",
+      "family": "dashboard",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "image-viewer",
+      "version": "0.1.0",
+      "family": "media",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "video-player",
+      "version": "0.1.0",
+      "family": "media",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "audio-player",
+      "version": "0.1.0",
+      "family": "media",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "pdf-viewer",
+      "version": "0.1.0",
+      "family": "media",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "document-viewer",
+      "version": "0.1.0",
+      "family": "media",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "annotation-viewer",
+      "version": "0.1.0",
+      "family": "media",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "compare-viewer",
+      "version": "0.1.0",
+      "family": "media",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "scene",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "mesh",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "model-viewer",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "camera",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "lighting",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "material",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "animation-timeline",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "object-picking",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "spatial-annotation",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "measurement",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "layer",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "digital-twin-view",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "path-visualization",
+      "version": "0.1.0",
+      "family": "spatial",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "menu",
+      "version": "0.1.0",
+      "family": "navigation",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "tabs",
+      "version": "0.1.0",
+      "family": "navigation",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "breadcrumb",
+      "version": "0.1.0",
+      "family": "navigation",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "command-palette",
+      "version": "0.1.0",
+      "family": "navigation",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "launcher",
+      "version": "0.1.0",
+      "family": "navigation",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "context-menu",
+      "version": "0.1.0",
+      "family": "navigation",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "step-navigation",
+      "version": "0.1.0",
+      "family": "navigation",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "workspace-switcher",
+      "version": "0.1.0",
+      "family": "navigation",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "presence",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "shared-cursor",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "shared-focus",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "shared-selection",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "annotation",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "comment",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "presenter-mode",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "follow-mode",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "review-session",
+      "version": "0.1.0",
+      "family": "collaboration",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "badge",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "inline-notice",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "callout",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "toast",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "banner",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "modal",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "spotlight",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "progressive-reveal",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "focus-ring",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "priority-lane",
+      "version": "0.1.0",
+      "family": "attention",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": false,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "grid",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "stack",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "split-pane",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "docking",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "resizable-panel",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "drawer",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "sidebar",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "floating-panel",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "workspace",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "responsive-regions",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "adaptive-layout",
+      "version": "0.1.0",
+      "family": "layout",
+      "maturity": "candidate",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "drag",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "drop",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "reorder",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "resize",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "pin",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "hide-show",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "collapse-expand",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "save-view",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "reset-view",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "lock-layout",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "duplicate-widget",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    },
+    {
+      "id": "personal-workspace",
+      "version": "0.1.0",
+      "family": "customization",
+      "maturity": "planned",
+      "llmFacing": true,
+      "directManipulation": true,
+      "runtimeExecutableCode": false
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+import test from "node:test";import assert from "node:assert/strict";import {validateCustomizations} from "../../dist/customization/index.js";
+test("invariant regions cannot be personalized",()=>{const r=validateCustomizations([{regionId:"truth",hidden:true}],[{regionId:"truth",stability:"invariant",hideable:false,reorderable:false,resizable:false}]);assert.equal(r.accepted.length,0);assert.equal(r.rejected.length,1);});

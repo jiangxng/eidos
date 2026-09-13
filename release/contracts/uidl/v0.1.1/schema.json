@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.eidos.local/uidl/0.1.1/schema.json",
+  "title": "Eidos UIDL 0.1.1 Interaction Document",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion","kind","id","title","purpose","command","fields","actions"],
+  "properties": {
+    "contractVersion": {"const": "0.1.1"},
+    "kind": {"const": "form"},
+    "id": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "purpose": {"const": "execute-command"},
+    "command": {
+      "type": "object", "additionalProperties": false,
+      "required": ["code","inputVersion"],
+      "properties": {"code":{"type":"string","minLength":1},"inputVersion":{"type":"string","minLength":1}}
+    },
+    "fields": {"type":"array","items":{"$ref":"#/$defs/field"}},
+    "actions": {"type":"array","minItems":1,"items":{"$ref":"#/$defs/action"}},
+    "metadata": {"type":"object"}
+  },
+  "$defs": {
+    "jsonPrimitive": {"type":["string","number","boolean"]},
+    "field": {
+      "type":"object","additionalProperties":false,
+      "required":["key","label","semanticType","control","required"],
+      "properties": {
+        "key":{"type":"string","minLength":1},
+        "label":{"type":"string","minLength":1},
+        "semanticType":{"type":"string","minLength":1},
+        "control":{"enum":["text","number","money","select","date","reference"]},
+        "required":{"type":"boolean"},
+        "readOnly":{"type":"boolean"},
+        "unit":{"type":"string"},
+        "options":{"type":"array","minItems":1,"items":{"type":"object","additionalProperties":false,"required":["value","label"],"properties":{"value":{"$ref":"#/$defs/jsonPrimitive"},"label":{"type":"string","minLength":1}}}},
+        "validation":{"type":"object","additionalProperties":false,"properties":{"min":{"type":"number"},"max":{"type":"number"},"pattern":{"type":"string"}}}
+      }
+    },
+    "action": {
+      "type":"object","additionalProperties":false,
+      "required":["id","label","type"],
+      "properties":{"id":{"type":"string","minLength":1},"label":{"type":"string","minLength":1},"type":{"enum":["submit","cancel"]},"command":{"type":"string","minLength":1},"requiresConfirmation":{"type":"boolean"}}
+    }
+  }
+}

@@ -1,27 +1,25 @@
 {
-  "name": "eidos-monorepo",
-  "version": "0.3.0",
+  "name": "@eidos/reference",
+  "version": "1.3.0-teach-and-grow.1",
   "private": true,
-  "description": "AI-Native Framework - Everything Explicit",
   "type": "module",
+  "description": "LLM-first deterministic experience capability runtime",
   "scripts": {
-    "dev": "vite playground --port 3000 --open --config configs/build-playground.ts --force --host",
-    "build": "tsx scripts/build.ts",
-    "build:core": "vite build --config configs/build-core.ts",
-    "build:playground": "vite build --config configs/build-playground.ts",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "happy-dom": "^20.11.6",
-    "tsx": "^4.0.0",
-    "typescript": "^5.3.0",
-    "vite": "^5.0.0",
-    "vite-plugin-dts": "^5.0.3",
-    "vitest": "^3.2.7"
+    "typecheck": "tsc -p tsconfig.convergence.json --noEmit",
+    "build": "tsc -p tsconfig.convergence.json",
+    "test": "npm run build && node --test tests/**/*.test.mjs",
+    "validate:repo": "node tools/validate-repository.mjs",
+    "catalog": "node tools/print-capabilities.mjs",
+    "demo:check": "node tools/check-demo.mjs",
+    "showcase:check": "node --check showcase/i18n.js && node --check showcase/showcase.js",
+    "build:release": "node tools/build-release.mjs && node tools/package-release.mjs",
+    "serve:release": "node tools/serve-release.mjs",
+    "release:check": "npm run typecheck && npm test && npm run validate:repo && npm run showcase:check && npm run build:release"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   }
 }

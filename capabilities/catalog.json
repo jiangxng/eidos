@@ -1,0 +1,106 @@
+{
+  "catalogVersion": "0.1.0",
+  "capabilities": [
+    {
+      "id": "hierarchical-selection",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "input",
+      "renderers": [
+        "web-vnode"
+      ]
+    },
+    {
+      "id": "decision-panel",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "decision",
+      "renderers": [
+        "web-vnode",
+        "html"
+      ]
+    },
+    {
+      "id": "evidence-stack",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "decision",
+      "renderers": [
+        "web-vnode",
+        "html"
+      ]
+    },
+    {
+      "id": "impact-preview",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "decision",
+      "renderers": [
+        "web-vnode",
+        "html"
+      ]
+    },
+    {
+      "id": "exception-queue",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "exception",
+      "renderers": [
+        "web-vnode",
+        "html"
+      ]
+    },
+    {
+      "id": "diff-view",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "decision",
+      "renderers": [
+        "web-vnode",
+        "html"
+      ]
+    },
+    {
+      "id": "confirmation",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "feedback",
+      "renderers": [
+        "web-vnode",
+        "html",
+        "mobile"
+      ]
+    },
+    {
+      "id": "timeline",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "display",
+      "renderers": [
+        "web-vnode",
+        "html"
+      ]
+    },
+    {
+      "id": "adaptive-layout",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "layout",
+      "renderers": [
+        "web-vnode",
+        "html",
+        "mobile"
+      ]
+    },
+    {
+      "id": "shared-focus",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "collaboration",
+      "renderers": [
+        "web-vnode",
+        "html"
+      ]
+    }
+  ]
+}

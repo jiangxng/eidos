@@ -1,0 +1,3 @@
+import type { JsonValue } from '../../runtime/contracts.js';
+export type ParsedUidlEvent={kind:'input'|'submit'|'cancel';runtimeInstanceId:string;interactionId:string;key:string;value?:JsonValue};
+export function parseUidlEvent(detail:any):ParsedUidlEvent|null{if(!detail||typeof detail.type!=='string')return null;const t=detail.type;for(const [prefix,kind] of [['UIDL_INPUT_','input'],['UIDL_SUBMIT_','submit'],['UIDL_CANCEL_','cancel']] as const){if(t.startsWith(prefix)){const rest=t.slice(prefix.length);const parts=rest.split('_');if(parts.length<3)return null;const runtimeInstanceId=parts.shift()!,interactionId=parts.shift()!,key=parts.join('_');const out:any={kind,runtimeInstanceId,interactionId,key};if(kind==='input')out.value=detail.value;return out;}}return null;}

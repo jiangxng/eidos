@@ -1,138 +1,73 @@
-# ⚡️ Eidos - AI-Native Frontend Framework
+# Eidos
 
-[License: MIT](https://opensource.org/licenses/MIT)
-[TypeScript: 5.3](https://www.typescriptlang.org/)
-[Vite: 5.0](https://vitejs.dev/)
-[PRs Welcome](http://makeapullrequest.com)
+**Eidos is deterministic for machines, adaptive for humans, and stable where shared understanding and familiarity matter.**
 
-> 显式 > 隐式 · 确定 > 便捷
-> 为 AI 和与 AI 协作的开发者设计的前端框架
+Eidos is an LLM-first Experience runtime and capability system. It is designed so that LLMs compose verified capabilities instead of repeatedly generating large amounts of unverified UI code.
 
----
+## Read in this order
 
-## 1. 什么是 Eidos？
+1. `CONSTITUTION.md`
+2. `START-HERE.md`
+3. `docs/architecture/EXPERIENCE-ARCHITECTURE.md`
+4. `docs/ec/EC-EXPECTATIONS.md`
+5. `capabilities/catalog.json`
+6. `PUBLIC-API.md`
+7. `LLM.md`
 
-Eidos 是一个为 AI 原生时代设计的前端框架。
+## Core boundary
 
-与 React、Vue、Svelte 等为人类开发者体验优化的框架不同，Eidos 为 AI 代码生成的准确性和确定性调试而优化。
+`Human Intent -> Intelligence / Experience Compiler -> Experience Contract -> Eidos -> Human Experience`
 
-我们解决的核心问题：
-- AI 生成代码时忘记依赖数组、误用 Hooks、产生难以调试的 bug
-- 错误信息是堆栈，AI 无法自动修复
-- JSX/模板语法容易拼错
+Eidos does not own Human Intent intelligence, business truth, or business execution.
 
-Eidos 的解决方案：
-- 显式声明 changedKeys，漏了直接抛 JSON 错误
-- 错误信息是结构化 JSON，自带 fix 字段
-- 纯 JSON（VNode）描述 UI，AI 生成准确率提升 40%
-- 显式 dispatch，影响范围一目了然
+## Design posture
 
-在线 Demo：可本地运行 pnpm dev 查看效果
+- LLM-first coding and maintenance (design weight >= 90%)
+- Composition before generation
+- Capability before component
+- Deterministic validation at every machine boundary
+- Personalization converges toward fit instead of creating perpetual UI churn
+- Collaboration protects shared reference and shared truth
+- Human decision, exception and attention experiences are first-class capabilities
+- Runtime does not execute arbitrary LLM-generated code by default
 
----
+## Commands
 
-## 2. 核心原则
+```bash
+npm run typecheck
+npm test
+npm run validate:repo
+```
 
-1. UI 是 JSON，不是 HTML 字符串
-2. 显式状态变更：store.dispatch(updater, changedKeys)
-3. 事件用字符串常量：onClick: 'EVENT_NAME'
-4. 结构化错误：{ code, message, fix } JSON
-5. 错误边界：createErrorBoundary 包裹可疑组件
-6. 数据管理适配器模式：支持 GraphQL、RESTful、Mock
-7. 权限控制：RBAC 角色权限
 
----
+## Large capability edition
 
-## 3. 快速上手
+This package expands Eidos into a multi-core, component-rich architecture with **203 declared semantic capabilities** across input, data, decision, exception, BI, visualization, diagram, reporting, dashboard, media, spatial, navigation, collaboration, attention, layout and direct customization.
 
-### 安装
+See:
+- `capabilities/catalog.large.json`
+- `docs/architecture/MULTI-CORE-ARCHITECTURE.md`
+- `NEAR-COMPLETE-PLAN.md`
 
-npm install eidos-core
 
-### 基础示例：计数器
+## Complete-state RC
 
-import { createStore, createApp } from 'eidos-core';
+Primary product demo: `showcase/index.html`  
+Production packaging: `npm run build:release`  
+Full verification: `npm run release:check`  
+Deployment: `DEPLOYMENT.md`  
+Release scope/maturity: `COMPLETE-STATE.md`  
+LLM tool protocol: `llm/TOOL-USAGE.md`
 
-const store = createStore({ count: 0 });
+The commercial showcase supports English, Simplified Chinese, Traditional Chinese, Japanese and Spanish.
 
-const view = (state) => ({
-  type: 'div',
-  props: { style: { padding: '20px' } },
-  children: [
-    { type: 'h1', props: { text: '计数: ' + state.count } },
-    { type: 'button', props: { text: '增加', onClick: 'INCREMENT' } }
-  ]
-});
 
-const app = createApp({ store, view, container: '#app' });
+## Teach / evaluate / promote
 
-window.addEventListener('eidos-event', (e) => {
-  if (e.detail.type === 'INCREMENT') {
-    store.dispatch((prev) => ({ count: prev.count + 1 }), ['count']);
-  }
-});
-
----
-
-## 4. 核心功能
-
-### 路由
-const routes = [
-  { path: '/', component: () => VNode },
-  { path: '/user/:id', component: (params) => VNode }
-];
-const router = createRouter(routes, store);
-
-### 数据管理
-initMockData('users', [{ id: 1, name: '张三' }])
-const adapter = new MockGraphQLAdapter('users')
-const userManager = createDataManagerWithGraphQL({
-  name: 'users', adapter, fields: [...], queries: {...}
-})
-const listPage = createListPage(userManager)
-
-### 权限控制
-const authStore = createAuthStore()
-authStore.login('user-001', '张三', 'admin')
-ifAllowed(authStore, {
-  permissions: ['user:manage'],
-  children: { type: 'div', children: '管理员面板' }
-})
-
-### 高级表格
-const columns = [{ key: 'name', title: '姓名', sortable: true }]
-const actions = [{ key: 'edit', label: '编辑', onClick: () => {} }]
-const table = renderAdvancedTable({ columns, data, pagination, actions })
-
----
-
-## 5. 项目结构
-
-eidos-ai-native/
-  src/
-    core/          框架核心
-    data/          数据管理模块
-    auth/          权限控制模块
-    components/    业务组件库
-  playground/      演示应用
-  configs/         构建配置
-  docs/            设计文档
-  EIDOS.md         AI 项目说明书
-  README.md        本文档
-
----
-
-## 6. 开发
-
-git clone https://github.com/你的用户名/eidos.git
-cd eidos
-pnpm install
-pnpm dev
-pnpm build:core
-pnpm build:playground
-
----
-
-## 7. License
-
-MIT © 2025 Eidos Contributors
+- Teach a new LLM: `llm/TEACH-ME-EIDOS.md`
+- Minimal LLM bootstrap: `llm/QUICK-CONTEXT.md`
+- LLM evaluation: `llm/EVALUATION.md`
+- External review kit: `docs/product/EXTERNAL-REVIEW-KIT.md`
+- Feedback program: `feedback/README.md`
+- Promotion plan: `docs/product/PROMOTION-PLAN.md`
+- FAQ: `docs/product/FAQ.md`

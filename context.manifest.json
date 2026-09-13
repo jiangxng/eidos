@@ -1,0 +1,74 @@
+{
+  "project": "Eidos",
+  "architectureVersion": "AC-0.1-candidate",
+  "status": "architecture-convergence-candidate",
+  "baseRevision": "55da1bd95a960132bbce10346b30cb40cafe51cf",
+  "requiredReading": [
+    "PHILOSOPHY.md",
+    "CONCEPTS.md",
+    "INVARIANTS.md",
+    "ARCHITECTURE.md",
+    "PUBLIC-API.md",
+    "LLM.md",
+    "docs/migration/CONVERGENCE-STATUS.md"
+  ],
+  "contracts": {
+    "uidlSupported": [
+      "0.1.1"
+    ],
+    "uidlBlockedPendingIdentityResolution": [
+      "0.1.0"
+    ],
+    "actionRequest": "0.1.0",
+    "renderModel": "0.1.0"
+  },
+  "moduleOwnership": {
+    "contracts": {
+      "owner": "experience-contracts",
+      "allowedDependencies": []
+    },
+    "src/runtime": {
+      "owner": "uidl-runtime",
+      "allowedDependencies": [
+        "contracts",
+        "pure-helpers"
+      ]
+    },
+    "src/renderers/vnode": {
+      "owner": "vnode-bridge",
+      "allowedDependencies": [
+        "runtime-public-api",
+        "existing-core-public-api",
+        "existing-components-public-api"
+      ]
+    },
+    "src/adapters": {
+      "owner": "host-boundary",
+      "allowedDependencies": [
+        "public-contracts",
+        "host-sdk"
+      ]
+    }
+  },
+  "forbiddenDependencies": [
+    "EVO database/business internals",
+    "Experience Compiler implementation internals",
+    "LLM chat memory"
+  ],
+  "knownGaps": [
+    "UIDL 0.1.0 schema/manifest hash identity unresolved",
+    "legacy repository typecheck and interaction defects require source-level repair on the protected repository",
+    "VNode bridge concrete bindings require existing core/component source at implementation time"
+  ],
+  "constitution": {
+    "path": "CONSTITUTION.md",
+    "status": "candidate",
+    "authority": "highest"
+  },
+  "capabilityCatalog": "capabilities/catalog.json",
+  "candidateVersion": "1.0.0-candidate.1",
+  "canonicalDefinition": "Deterministic for machines. Adaptive for humans. Stable where shared understanding and familiarity matter.",
+  "llmRepositoryMap": "llm/repository-map.json",
+  "experienceArchitecture": "docs/architecture/EXPERIENCE-ARCHITECTURE.md",
+  "ecExpectations": "docs/ec/EC-EXPECTATIONS.md"
+}

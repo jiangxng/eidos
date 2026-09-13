@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Eidos — LLM-Native Experience System</title>
+<link rel="stylesheet" href="./showcase.css"/>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="brand"><span class="mark">E</span><div><b>Eidos</b><small>Experience System</small></div></div>
+    <nav>
+      <button class="nav active" data-view="cockpit">◆ Executive Cockpit</button>
+      <button class="nav" data-view="llm">✦ LLM → Experience</button>
+      <button class="nav" data-view="capabilities">⌘ Capability Explorer</button>
+      <button class="nav" data-view="contracts">{ } Contract Inspector</button>
+      <button class="nav" data-view="beyond">◈ Beyond Forms</button>
+    </nav>
+    <div class="rail-note"><b>Core principle</b><span>LLM proposes.<br/>Eidos validates.<br/>Human decides.<br/>Host executes.</span></div>
+  </aside>
+
+  <main>
+    <header>
+      <div><div class="eyebrow">LIVE REFERENCE SHOWCASE</div><h1 id="pageTitle">Order Risk Command Center</h1></div>
+      <div class="header-actions">
+        <select id="language" aria-label="Language"><option value="en">English</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="ja">日本語</option><option value="es">Español</option></select>
+        <select id="persona"><option>Standard</option><option selected>Operations Manager</option><option>Finance Reviewer</option><option>Shared Review</option></select>
+        <button id="customize">Customize layout</button>
+        <button class="primary" data-go="llm">Ask Eidos ✦</button>
+      </div>
+    </header>
+
+    <section id="cockpit" class="view active">
+      <div class="hero">
+        <div><span class="pill">DECISION EXPERIENCE</span><h2>Focus attention where human judgment matters.</h2><p>Routine work stays quiet. Exceptions surface with evidence, impact and a bounded decision.</p></div>
+        <div class="hero-score"><span>Exposure requiring review</span><strong>$1.84M</strong><small>12 exceptions · 3 urgent</small></div>
+      </div>
+
+      <div id="workspace" class="workspace">
+        <article class="card kpis movable" draggable="true" data-id="kpis">
+          <div class="card-head"><span>Operating pulse</span><i>personal-stable</i></div>
+          <div class="kpi-grid">
+            <div><small>Revenue at risk</small><b>$1.84M</b><em>▲ 18.2%</em></div>
+            <div><small>Orders blocked</small><b>12</b><em>3 urgent</em></div>
+            <div><small>On-time rate</small><b>94.7%</b><em>+1.8 pt</em></div>
+            <div><small>Human decisions</small><b>5</b><em>today</em></div>
+          </div>
+        </article>
+
+        <article class="card chart movable" draggable="true" data-id="chart">
+          <div class="card-head"><span>Revenue exposure by cause</span><i>adaptive</i></div>
+          <div class="bars">
+            <div><label>Supply constraint</label><span style="--v:82%"></span><b>$742k</b></div>
+            <div><label>Credit hold</label><span style="--v:58%"></span><b>$526k</b></div>
+            <div><label>Capacity conflict</label><span style="--v:39%"></span><b>$351k</b></div>
+            <div><label>Data exception</label><span style="--v:24%"></span><b>$221k</b></div>
+          </div>
+        </article>
+
+        <article class="card exceptions movable" draggable="true" data-id="exceptions">
+          <div class="card-head"><span>Exception queue</span><i>shared-stable</i></div>
+          <div class="exception urgent"><span class="severity"></span><div><b>SO-48291 · Supply constraint</b><small>Customer: Northstar Retail · $428k exposure</small></div><strong>URGENT</strong></div>
+          <div class="exception"><span class="severity"></span><div><b>SO-48277 · Credit hold</b><small>Customer: Meridian Labs · $311k exposure</small></div><strong>REVIEW</strong></div>
+          <div class="exception"><span class="severity"></span><div><b>SO-48262 · Capacity conflict</b><small>Customer: Alpine Systems · $184k exposure</small></div><strong>REVIEW</strong></div>
+        </article>
+
+        <article class="card decision movable" draggable="true" data-id="decision">
+          <div class="card-head"><span>Decision · SO-48291</span><i>invariant evidence</i></div>
+          <h3>Release partial shipment or wait for full allocation?</h3>
+          <div class="evidence"><div><small>Customer impact</small><b>Launch date at risk</b></div><div><small>Available now</small><b>68% of quantity</b></div><div><small>Margin impact</small><b>-1.2 pt if split</b></div></div>
+          <div class="recommend"><span>✦ Eidos recommendation context</span><b>Partial shipment minimizes expected business impact.</b><small>Recommendation is evidence, not execution.</small></div>
+          <div class="decision-actions"><button>Wait for allocation</button><button class="primary">Approve partial shipment</button></div>
+        </article>
+
+        <article class="card process movable" draggable="true" data-id="process">
+          <div class="card-head"><span>Order resolution flow</span><i>diagram capability</i></div>
+          <div class="flow">
+            <div class="node done">Order approved</div><span>→</span><div class="node done">Allocation</div><span>→</span><div class="node alert">Exception</div><span>→</span><div class="node active">Human decision</div><span>→</span><div class="node">Host command</div>
+          </div>
+        </article>
+      </div>
+      <div id="customHint" class="hint hidden">Direct manipulation active — drag cards to reorder. This is intentionally faster than an LLM round trip. <button id="saveLayout">Save personal view</button></div>
+    </section>
+
+    <section id="llm" class="view">
+      <div class="llm-layout">
+        <div class="prompt-panel">
+          <span class="pill">PRODUCER SIDE · LLM / EC</span>
+          <h2>Describe the experience, not the framework code.</h2>
+          <textarea id="prompt">Build an executive order-risk review. Focus humans only on exceptions, show revenue exposure, include evidence and an approval decision, and show the resolution process.</textarea>
+          <div class="examples"><button data-prompt="Create a finance review with variance analysis, mandatory evidence and approval.">Finance review</button><button data-prompt="Create a shared incident review with timeline, exceptions and presenter mode.">Shared incident</button><button data-prompt="Create a warehouse digital twin review with spatial alerts and decision evidence.">Spatial review</button></div>
+          <button id="generate" class="primary big">Generate Experience Proposal ✦</button>
+          <p class="disclaimer">Offline demo: the producer is a deterministic simulator. Connect any LLM/EC adapter that emits the same contract.</p>
+        </div>
+        <div class="pipeline">
+          <div class="stage"><span>01</span><div><b>Human Intent</b><small>Natural language request</small></div></div>
+          <div class="connector"></div>
+          <div class="stage"><span>02</span><div><b>Capability Discovery</b><small id="discoverText">Waiting for proposal…</small></div></div>
+          <div class="connector"></div>
+          <div class="stage"><span>03</span><div><b>Experience Proposal</b><small>Explicit, versioned contract</small></div></div>
+          <div class="connector"></div>
+          <div class="stage gate"><span>04</span><div><b>Deterministic Gate</b><small id="gateText">Not validated</small></div></div>
+          <div class="connector"></div>
+          <div class="stage"><span>05</span><div><b>Eidos Runtime</b><small>Resolve → render → request</small></div></div>
+        </div>
+        <div class="contract-panel">
+          <div class="tabs"><button class="active">Proposal</button><button id="breakBtn">Inject invalid capability</button></div>
+          <pre id="proposal">// Generate a proposal to inspect the LLM → Eidos boundary.</pre>
+          <div id="validation" class="validation neutral">○ Waiting for deterministic validation</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="capabilities" class="view">
+      <div class="section-intro"><span class="pill">MACHINE-DISCOVERABLE TOOLBOX</span><h2>LLMs choose semantic capabilities before implementation details.</h2><p>The catalog is the primary discovery surface. Source-code archaeology is not.</p></div>
+      <div class="cap-grid" id="capGrid"></div>
+    </section>
+
+    <section id="contracts" class="view">
+      <div class="section-intro"><span class="pill">DETERMINISTIC BOUNDARY</span><h2>Small error surface. Explicit ownership.</h2></div>
+      <div class="contract-cards">
+        <article><b>EC / LLM owns</b><p>Intent interpretation, proposal, long-term personalization intelligence.</p></article>
+        <article><b>Eidos owns</b><p>Contracts, validation, capability resolution, renderer boundary, interaction semantics.</p></article>
+        <article><b>Host owns</b><p>Business truth, persistence, authorization and real-world execution.</p></article>
+        <article><b>Human owns</b><p>Judgment, explicit overrides and direct manipulation where it is faster.</p></article>
+      </div>
+      <div class="code-compare"><div><h3>Traditional generation surface</h3><pre>framework imports
+component props
+hooks / lifecycle
+callbacks
+CSS / layout
+accessibility
+chart configuration
+state synchronization
+error handling
+...</pre></div><div class="good"><h3>Eidos composition surface</h3><pre>{
+  "capability": "decision-panel",
+  "stability": "shared-stable",
+  "inputs": ["evidence", "alternatives", "impact"],
+  "outputs": ["decision-request"]
+}</pre></div></div>
+    </section>
+
+    <section id="beyond" class="view">
+      <div class="section-intro"><span class="pill">ONE CONSTITUTION · MULTIPLE CORES</span><h2>More than forms.</h2><p>BI, diagrams, reporting, collaboration and spatial experiences share the same deterministic language.</p></div>
+      <div class="beyond-grid">
+        <article><span>BI</span><h3>Semantic analytics</h3><div class="mini-bars"><i></i><i></i><i></i><i></i><i></i></div><p>Measures, dimensions, drill, variance, contribution and visualization intent.</p></article>
+        <article><span>DIAGRAM</span><h3>Process intelligence</h3><div class="mini-flow"><i></i>→<i></i>→<i></i></div><p>Flow, BPMN-like, topology, state machines and editable graph semantics.</p></article>
+        <article><span>REPORTING</span><h3>Decision-ready reports</h3><div class="mini-report"><i></i><i></i><i></i></div><p>Sections, grouping, subtotals, print/export and drillable reports.</p></article>
+        <article><span>SPATIAL</span><h3>3D / digital twin</h3><div class="cube"><i></i></div><p>Scene, camera, picking, layers, measurement, annotation and Three.js/WebGPU adapters.</p></article>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="./i18n.js"></script>
+<script src="./showcase.js"></script>
+</body>
+</html>

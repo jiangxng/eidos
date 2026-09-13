@@ -1,0 +1,27 @@
+{
+  "mapVersion": "0.1.0",
+  "authorityOrder": [
+    "CONSTITUTION.md",
+    "PHILOSOPHY.md",
+    "INVARIANTS.md",
+    "CONCEPTS.md",
+    "contracts",
+    "PUBLIC-API.md",
+    "src"
+  ],
+  "entrypoints": {
+    "architecture": "docs/architecture/EXPERIENCE-ARCHITECTURE.md",
+    "capabilities": "capabilities/catalog.json",
+    "ecBoundary": "docs/ec/EC-EXPECTATIONS.md",
+    "runtime": "src/runtime/index.ts",
+    "experience": "src/experience/index.ts",
+    "publicExports": "src/index.ts"
+  },
+  "forbiddenAssumptions": [
+    "Conversation history is required.",
+    "Field names imply business semantics.",
+    "Eidos owns business truth.",
+    "Eidos owns long-term personal learning.",
+    "Runtime may execute arbitrary generated code."
+  ]
+}

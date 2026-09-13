@@ -1,0 +1,42 @@
+{
+  "context": {
+    "contractVersion": "0.1.0",
+    "contextId": "ctx-shared-demo",
+    "mode": "shared",
+    "device": {
+      "terminal": "web"
+    },
+    "collaboration": {
+      "sessionId": "review-42",
+      "mode": "review",
+      "sharedReferenceVersion": "7",
+      "participantCount": 3
+    }
+  },
+  "composition": {
+    "contractVersion": "0.1.0",
+    "experienceId": "shared-risk-review",
+    "regions": [
+      {
+        "id": "risk-evidence",
+        "capability": "evidence-stack",
+        "stability": "invariant"
+      },
+      {
+        "id": "shared-decision",
+        "capability": "decision-panel",
+        "stability": "shared-stable"
+      },
+      {
+        "id": "shared-timeline",
+        "capability": "timeline",
+        "stability": "shared-stable"
+      },
+      {
+        "id": "my-assistant",
+        "capability": "adaptive-layout",
+        "stability": "adaptive"
+      }
+    ]
+  }
+}

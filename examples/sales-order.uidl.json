@@ -1,0 +1,11 @@
+{
+  "contractVersion":"0.1.1","kind":"form","id":"sales-order-approve","title":"Approve Sales Order","purpose":"execute-command",
+  "command":{"code":"approve-sales-order","inputVersion":"1.0"},
+  "fields":[
+    {"key":"orderNo","label":"Order No","semanticType":"SalesOrderNo","control":"text","required":true,"validation":{"pattern":"^SO-[0-9]+$"}},
+    {"key":"productId","label":"Product","semanticType":"ItemRef","control":"reference","required":true},
+    {"key":"quantity","label":"Quantity","semanticType":"Quantity","control":"number","required":true,"validation":{"min":1}},
+    {"key":"currency","label":"Currency","semanticType":"CurrencyCode","control":"select","required":true,"options":[{"value":"USD","label":"USD"},{"value":"SGD","label":"SGD"}]}
+  ],
+  "actions":[{"id":"approve","label":"Approve","type":"submit","command":"approve-sales-order","requiresConfirmation":true},{"id":"cancel","label":"Cancel","type":"cancel"}]
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Eidos ExperienceContext 0.1.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "contextId",
+    "mode",
+    "device"
+  ],
+  "properties": {
+    "contractVersion": {
+      "const": "0.1.0"
+    },
+    "contextId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "enum": [
+        "standard",
+        "role",
+        "personal",
+        "shared"
+      ]
+    },
+    "role": {
+      "type": "string"
+    },
+    "expertise": {
+      "enum": [
+        "novice",
+        "intermediate",
+        "expert"
+      ]
+    },
+    "task": {
+      "type": "string"
+    },
+    "locale": {
+      "type": "string"
+    },
+    "device": {
+      "type": "object",
+      "required": [
+        "terminal"
+      ],
+      "properties": {
+        "terminal": {
+          "enum": [
+            "web",
+            "desktop",
+            "mobile",
+            "tablet",
+            "large-screen",
+            "embedded",
+            "terminal",
+            "voice",
+            "agent"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "accessibility": {
+      "type": "object"
+    },
+    "collaboration": {
+      "type": "object"
+    },
+    "preferences": {
+      "type": "object"
+    },
+    "extensions": {
+      "type": "object"
+    }
+  }
+}

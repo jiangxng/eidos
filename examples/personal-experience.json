@@ -1,0 +1,48 @@
+{
+  "context": {
+    "contractVersion": "0.1.0",
+    "contextId": "ctx-personal-demo",
+    "mode": "personal",
+    "role": "operations-manager",
+    "expertise": "expert",
+    "device": {
+      "terminal": "web",
+      "viewportClass": "expanded",
+      "inputModes": [
+        "keyboard",
+        "pointer"
+      ]
+    },
+    "preferences": {
+      "density": "compact",
+      "explanationLevel": "minimal",
+      "preferredInteraction": "keyboard"
+    }
+  },
+  "composition": {
+    "contractVersion": "0.1.0",
+    "experienceId": "order-exception-review",
+    "regions": [
+      {
+        "id": "critical-evidence",
+        "capability": "evidence-stack",
+        "stability": "invariant",
+        "attention": {
+          "level": "requires-review",
+          "reasonCode": "decision-critical",
+          "decisionCritical": true
+        }
+      },
+      {
+        "id": "decision",
+        "capability": "decision-panel",
+        "stability": "shared-stable"
+      },
+      {
+        "id": "personal-tools",
+        "capability": "adaptive-layout",
+        "stability": "personal-stable"
+      }
+    ]
+  }
+}
