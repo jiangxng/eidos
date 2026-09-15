@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { validateCanonicalExperienceProposalV100, validateCanonicalActionRequestV100, createHostNeutralActionRequestV100 } from '../../dist/convergence/v021.js';
+const root=process.env.CONVERGENCE_FIXTURES_DIR;
+const read=rel=>JSON.parse(fs.readFileSync(path.join(root,rel),'utf8'));
+const canonicalTest=root?test:test.skip;
+canonicalTest('canonical Experience Proposal golden is accepted',()=>{assert.equal(validateCanonicalExperienceProposalV100(read('experience-proposal/decision-experience.valid.json')).ok,true);});
+canonicalTest('Shared Core personalization override fails closed',()=>{const r=validateCanonicalExperienceProposalV100(read('experience-proposal/shared-core-override.invalid.json'));assert.equal(r.ok,false);assert.ok(r.diagnostics.some(x=>x.code==='EIDOS_XP_SHARED_CORE_OVERRIDE'));});
+canonicalTest('canonical ActionRequest golden is accepted and provider can reproduce host-neutral shape',()=>{const fixture=read('action-request/approve-action.valid.json');assert.equal(validateCanonicalActionRequestV100(fixture).ok,true);const {contractVersion,...input}=fixture;const produced=createHostNeutralActionRequestV100(input);assert.equal(produced.contractVersion,contractVersion);assert.deepEqual(produced.targetRef,fixture.targetRef);assert.equal('command' in produced,false);assert.equal(produced.presentedStateEtag,fixture.presentedStateEtag);assert.equal(produced.presentedDefinitionVersion,fixture.presentedDefinitionVersion);});
+canonicalTest('tampered confirmation / trusted authorization fails closed',()=>{const r=validateCanonicalActionRequestV100(read('action-request/tampered-confirmation.invalid.json'));assert.equal(r.ok,false);assert.ok(r.diagnostics.some(x=>x.code==='EIDOS_TRUSTED_AUTH_FORBIDDEN'));});
+test('host-neutral producer cannot emit trusted authorization result through typed input',()=>{const input={actionRequestId:'ar-local',experienceInstanceId:'xi',experienceContractVersion:'1.0.0',capabilityId:'decision-panel',capabilityVersion:'1.0.0',actionSemantic:'APPROVE_RECOMMENDATION',targetRef:{host:'some-host',resourceType:'decision',resourceId:'1'},interactionContext:{surface:'desktop'},submittedValues:{choice:'B'},confirmationEvidence:{confirmed:true,method:'explicit-click'},actorContextRef:'actor-1',correlationId:'corr-1',occurredAt:'2026-09-15T08:04:00Z',presentedStateEtag:'s1',presentedDefinitionVersion:'3'};const out=createHostNeutralActionRequestV100(input);assert.equal('authorized' in out,false);assert.equal('permissionGranted' in out,false);assert.equal(out.targetRef.host,'some-host');});

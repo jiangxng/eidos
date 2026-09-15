@@ -7,6 +7,7 @@ export * from "./collaboration/index.js";
 export * from "./customization/index.js";
 export * from "./decision/index.js";
 export * from "./ec/index.js";
+export * from "./convergence/index.js";
 export * from "./adapters/index.js";
 export * from "./visualization/index.js";
 export * from "./diagram/index.js";
