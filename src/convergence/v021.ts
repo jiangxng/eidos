@@ -1,0 +1,94 @@
+import { getCapability } from "../capabilities/catalog.js";
+import type { JsonValue } from "../runtime/contracts.js";
+
+export interface ConvergenceDiagnostic { code:string; path:string; message:string }
+export interface ConvergenceValidation { ok:boolean; diagnostics:ConvergenceDiagnostic[] }
+type Obj = Record<string, unknown>;
+
+const stability = new Set(["invariant","shared-stable","personal-stable","adaptive"]);
+const forbiddenAuth = new Set(["authorized","authorizationResult","isAuthorized","permissionGranted","permission_granted","trustedAuthorization"]);
+const isObj=(v:unknown):v is Obj=>typeof v==="object"&&v!==null&&!Array.isArray(v);
+const diag=(code:string,path:string,message:string):ConvergenceDiagnostic=>({code,path,message});
+function trustedAuth(v:unknown,path="$",out:ConvergenceDiagnostic[]=[]):ConvergenceDiagnostic[]{
+  if(Array.isArray(v)){v.forEach((x,i)=>trustedAuth(x,`${path}[${i}]`,out));return out;}
+  if(!isObj(v))return out;
+  for(const [k,x] of Object.entries(v)){const p=`${path}.${k}`;if(forbiddenAuth.has(k))out.push(diag("EIDOS_TRUSTED_AUTH_FORBIDDEN",p,"Authorization results are not trusted Experience/interaction semantics"));trustedAuth(x,p,out);}
+  return out;
+}
+function required(v:Obj,names:string[],path:string,d:ConvergenceDiagnostic[]){for(const n of names)if(!(n in v)||v[n]===null||v[n]==="")d.push(diag("EIDOS_REQUIRED",`${path}.${n}`,`${n} is required`));}
+
+export function validateCanonicalExperienceProposalV100(value:unknown):ConvergenceValidation{
+  const d:ConvergenceDiagnostic[]=[];
+  if(!isObj(value))return {ok:false,diagnostics:[diag("EIDOS_XP_TYPE","$","Experience Proposal must be an object")]};
+  required(value,["contractVersion","proposalId","producedAt","experience","context","fallback"],"$",d);
+  if(value.contractVersion!=="1.0.0")d.push(diag("EIDOS_XP_VERSION","$.contractVersion","Unsupported canonical Experience Proposal version"));
+  if(isObj(value.experience)){
+    required(value.experience,["experienceId","regions"],"$.experience",d);
+    const regions=value.experience.regions;
+    if(!Array.isArray(regions)||regions.length===0)d.push(diag("EIDOS_XP_REGIONS","$.experience.regions","At least one region is required"));
+    else regions.forEach((raw,i)=>{
+      const p=`$.experience.regions[${i}]`;
+      if(!isObj(raw)){d.push(diag("EIDOS_XP_REGION_TYPE",p,"Region must be an object"));return;}
+      required(raw,["id","capabilityId","capabilityVersion","stability"],p,d);
+      const cap=typeof raw.capabilityId==="string"?getCapability(raw.capabilityId):undefined;
+      if(!cap)d.push(diag("EIDOS_XP_CAPABILITY_UNKNOWN",`${p}.capabilityId","Unknown Eidos capability"));
+      else if(raw.capabilityVersion!==cap.version)d.push(diag("EIDOS_XP_CAPABILITY_VERSION",`${p}.capabilityVersion`,`Unsupported capability version; Eidos currently publishes ${cap.id}@${cap.version}`));
+      if(typeof raw.stability!=="string"||!stability.has(raw.stability))d.push(diag("EIDOS_XP_STABILITY",`${p}.stability","Unsupported Experience Stability class"));
+      if(raw.mandatoryEvidence===true&&(!Array.isArray(raw.evidenceRefs)||raw.evidenceRefs.length===0))d.push(diag("EIDOS_XP_MANDATORY_EVIDENCE",`${p}.evidenceRefs","Mandatory evidence cannot be omitted"));
+      if((raw.stability==="invariant"||raw.stability==="shared-stable")&&isObj(raw.personalization)&&raw.personalization.overrideSharedCore===true)d.push(diag("EIDOS_XP_SHARED_CORE_OVERRIDE",`${p}.personalization.overrideSharedCore","Personalization cannot override Shared Core"));
+      if(isObj(raw.accessibility)&&raw.accessibility.required===true&&!(typeof raw.accessibility.label==="string"&&raw.accessibility.label.length>0))d.push(diag("EIDOS_XP_ACCESSIBILITY",`${p}.accessibility.label","Required accessible label is missing"));
+      if(raw.capabilityId==="decision-panel"&&raw.mandatoryEvidence!==true)d.push(diag("EIDOS_XP_DECISION_INTEGRITY",`${p}.mandatoryEvidence","Decision Experience requires mandatory evidence semantics"));
+    });
+  }else d.push(diag("EIDOS_XP_EXPERIENCE_TYPE","$.experience","experience must be an object"));
+  if(!isObj(value.context))d.push(diag("EIDOS_XP_CONTEXT_TYPE","$.context","context must be an object"));
+  if(!isObj(value.fallback)||value.fallback.mode!=="standard")d.push(diag("EIDOS_XP_FALLBACK","$.fallback","Canonical v1 proof requires deterministic standard fallback"));
+  d.push(...trustedAuth(value));
+  return {ok:d.length===0,diagnostics:d};
+}
+
+export interface HostNeutralActionInput {
+  actionRequestId:string; experienceInstanceId:string; experienceContractVersion:string;
+  capabilityId:string; capabilityVersion:string; actionSemantic:string;
+  targetRef:{host:string;resourceType:string;resourceId:string}; interactionContext:Record<string,JsonValue>;
+  submittedValues:Record<string,JsonValue>; confirmationEvidence:{confirmed:boolean;method:string};
+  actorContextRef:string; correlationId:string; causationId?:string; occurredAt:string;
+  presentedStateEtag:string; presentedDefinitionVersion:string;
+}
+export function createHostNeutralActionRequestV100(input:HostNeutralActionInput):Record<string,unknown>{
+  const out:Record<string,unknown>={contractVersion:"1.0.0",...input};
+  const result=validateCanonicalActionRequestV100(out);if(!result.ok)throw new Error(result.diagnostics.map(x=>`${x.code}:${x.path}`).join(","));return out;
+}
+export function validateCanonicalActionRequestV100(value:unknown):ConvergenceValidation{
+  const d:ConvergenceDiagnostic[]=[];
+  if(!isObj(value))return {ok:false,diagnostics:[diag("EIDOS_AR_TYPE","$","ActionRequest must be an object")]};
+  required(value,["contractVersion","actionRequestId","experienceInstanceId","experienceContractVersion","capabilityId","capabilityVersion","actionSemantic","targetRef","interactionContext","submittedValues","confirmationEvidence","actorContextRef","correlationId","occurredAt","presentedStateEtag","presentedDefinitionVersion"],"$",d);
+  if(value.contractVersion!=="1.0.0")d.push(diag("EIDOS_AR_VERSION","$.contractVersion","Unsupported canonical ActionRequest version"));
+  const cap=typeof value.capabilityId==="string"?getCapability(value.capabilityId):undefined;
+  if(!cap)d.push(diag("EIDOS_AR_CAPABILITY_UNKNOWN","$.capabilityId","Unknown Eidos capability"));
+  else if(value.capabilityVersion!==cap.version)d.push(diag("EIDOS_AR_CAPABILITY_VERSION","$.capabilityVersion","Unsupported Eidos capability version"));
+  if(!isObj(value.targetRef))d.push(diag("EIDOS_AR_TARGET","$.targetRef","Host-neutral targetRef is required"));
+  else required(value.targetRef,["host","resourceType","resourceId"],"$.targetRef",d);
+  if("command" in value||value.type==="command")d.push(diag("EIDOS_AR_HOST_NEUTRAL","$","Universal ActionRequest cannot require EVO Command semantics"));
+  if(!isObj(value.confirmationEvidence))d.push(diag("EIDOS_AR_CONFIRMATION","$.confirmationEvidence","Confirmation evidence is required"));
+  else required(value.confirmationEvidence,["confirmed","method"],"$.confirmationEvidence",d);
+  d.push(...trustedAuth(value));
+  return {ok:d.length===0,diagnostics:d};
+}
+
+export interface LegacyAdapterResult { status:"OK"|"UNSUPPORTED"; value?:Record<string,unknown>; diagnostics:ConvergenceDiagnostic[]; mapping:{preserved:string[];transformed:string[];defaulted:string[];unsupported:string[]} }
+export function adaptEcExperienceProposalV010(value:unknown, capabilityVersionMap:Readonly<Record<string,string>>={}):LegacyAdapterResult{
+  const mapping={preserved:["proposalId","producedAt","composition.experienceId","composition.regions.id","composition.regions.stability","context","rationale/evidence where representable"],transformed:["composition.regions.capability -> capabilityId + capabilityVersion","composition -> experience"],defaulted:["fallback.mode=standard (Eidos deterministic policy)"],unsupported:["mandatoryEvidence when not explicit in v0.1","explicit Shared Core partition","canonical action contract identity","canonical Decision Integrity fields not present in v0.1"]};
+  const d:ConvergenceDiagnostic[]=[];
+  if(!isObj(value)||value.contractVersion!=="0.1.0"||!isObj(value.composition)||!Array.isArray(value.composition.regions))return {status:"UNSUPPORTED",diagnostics:[diag("EIDOS_V010_ADAPTER_INPUT","$","Not an EcExperienceProposalV010 shape")],mapping};
+  const regions:Record<string,unknown>[]=[];
+  value.composition.regions.forEach((raw,i)=>{
+    if(!isObj(raw)||typeof raw.capability!=="string"){d.push(diag("EIDOS_V010_CAPABILITY",`$.composition.regions[${i}].capability","Legacy capability is missing"));return;}
+    const version=capabilityVersionMap[raw.capability];
+    if(!version){d.push(diag("EIDOS_V010_VERSION_MAP",`$.composition.regions[${i}].capability`,`Canonical capability version requires an explicit certified mapping; silent guessing is forbidden`));return;}
+    regions.push({id:raw.id,capabilityId:raw.capability,capabilityVersion:version,stability:raw.stability,...(raw.attention!==undefined?{attention:raw.attention}:{}),...(raw.motion!==undefined?{motion:raw.motion}:{})});
+  });
+  if(d.length)return {status:"UNSUPPORTED",diagnostics:d,mapping};
+  const canonical={contractVersion:"1.0.0",proposalId:value.proposalId,producedAt:value.producedAt,experience:{experienceId:value.composition.experienceId,regions},context:value.context,fallback:{mode:"standard"}};
+  const checked=validateCanonicalExperienceProposalV100(canonical);
+  return checked.ok?{status:"OK",value:canonical,diagnostics:[],mapping}:{status:"UNSUPPORTED",diagnostics:checked.diagnostics,mapping};
+}
