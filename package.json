@@ -8,6 +8,7 @@
     "typecheck": "tsc -p tsconfig.convergence.json --noEmit",
     "build": "tsc -p tsconfig.convergence.json",
     "test": "npm run build && node --test tests/**/*.test.mjs",
+    "test:convergence:v0.2.1": "npm run build && node --test tests/compat/convergence-v021-canonical.test.mjs && EIDOS_CONVERGENCE_ADAPTER=tools/convergence-v021-fixture-adapter.mjs node tools/convergence-fixture-harness.mjs",
     "validate:repo": "node tools/validate-repository.mjs",
     "catalog": "node tools/print-capabilities.mjs",
     "demo:check": "node tools/check-demo.mjs",
@@ -16,10 +17,6 @@
     "serve:release": "node tools/serve-release.mjs",
     "release:check": "npm run typecheck && npm test && npm run validate:repo && npm run showcase:check && npm run build:release"
   },
-  "engines": {
-    "node": ">=20"
-  },
-  "devDependencies": {
-    "typescript": "^5.8.3"
-  }
+  "engines": {"node": ">=20"},
+  "devDependencies": {"typescript": "^5.8.3"}
 }
