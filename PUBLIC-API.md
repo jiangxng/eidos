@@ -50,3 +50,9 @@ The returned host exposes:
 - `dispose()`
 
 App Host validates manifests, assembles deterministic navigation/routes, rejects ambiguous cross-package conflicts and lazily loads page definitions. It does not install Packages or activate Features.
+
+
+### `createAppManagerExperienceSource(options)`
+Adapts the EVO App Manager MVP HTTP API to Eidos `ExperienceSource`.
+
+It consumes only public endpoints for effective experience discovery and page loading. App Host remains unaware of App Manager private implementation.
