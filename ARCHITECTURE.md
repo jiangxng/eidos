@@ -41,3 +41,31 @@ existing DOM renderer/layout
 
 Legacy VNode routes continue unchanged unless explicitly migrated. UIDL is added as a second, versioned entry path.
 List/dashboard/layout capabilities are not forced into the form-only UIDL contract.
+
+
+## Three-part production architecture
+
+The long-term Eidos product boundary is:
+
+```text
+Eidos
+├─ Core
+├─ Component Library
+└─ App Host
+```
+
+- **Core** validates, normalizes, binds and renders declarative frontend experience.
+- **Component Library** provides reusable generic UI capabilities for LLM selection/composition.
+- **App Host** bootstraps the application, discovers manifests/pages/navigation, registers adapters/components and hosts the rendered experience.
+
+Business-specific pages such as Sales Order Form, Inventory List or Balance Sheet Page are application compositions, not Eidos Core semantics.
+
+The authoritative target model is documented in:
+
+`docs/architecture/EIDOS-CORE-COMPONENTS-APP-HOST-v0.1.md`
+
+## Installable application boundary
+
+An external business package may contribute an Eidos experience manifest/pages/navigation while owning its backend capability elsewhere.
+
+Eidos consumes that contribution through public frontend contracts only. It does not import EVO or another backend's private implementation.
