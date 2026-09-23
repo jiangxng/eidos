@@ -1,4 +1,7 @@
 import { renderToHtml } from "../renderers/html/index.js";
+import { assertValidUidl } from "../runtime/validate.js";
+import type { JsonValue } from "../runtime/contracts.js";
+import { executeAppHostPageAction, type AppHostActionExecutor } from "./action-executor.js";
 import type { AppHost, AppHostLoadedPageV010, AppHostSnapshotV010 } from "./contracts.js";
 
 export interface BrowserAppHostShellOptions {
@@ -6,6 +9,8 @@ export interface BrowserAppHostShellOptions {
   container: HTMLElement | string;
   title?: string;
   renderPage?: (page: AppHostLoadedPageV010) => string | Node;
+  actionExecutor?: AppHostActionExecutor;
+  onActionResult?: (result: unknown, page: AppHostLoadedPageV010) => void;
 }
 
 export interface BrowserAppHostShell {
@@ -23,6 +28,44 @@ function resolveContainer(value: HTMLElement | string): HTMLElement {
   const element = document.querySelector<HTMLElement>(value);
   if (!element) throw new Error(`EIDOS_APP_HOST_CONTAINER_NOT_FOUND: ${value}`);
   return element;
+}
+
+
+function collectFormValues(
+  form: HTMLFormElement,
+  definition: unknown
+): Record<string, JsonValue> {
+  const document = assertValidUidl(definition);
+  const values: Record<string, JsonValue> = {};
+
+  for (const field of document.fields) {
+    const control = form.elements.namedItem(field.key);
+    if (!(control instanceof HTMLInputElement) && !(control instanceof HTMLSelectElement)) continue;
+
+    const raw = control.value;
+    if (raw === "") {
+      values[field.key] = "";
+      continue;
+    }
+
+    if (field.control === "number" || field.control === "money") {
+      values[field.key] = Number(raw);
+      continue;
+    }
+
+    if (field.control === "select" && control instanceof HTMLSelectElement) {
+      const selected = control.selectedOptions[0];
+      const valueType = selected?.dataset.valueType;
+      if (valueType === "number") values[field.key] = Number(raw);
+      else if (valueType === "boolean") values[field.key] = raw === "true";
+      else values[field.key] = raw;
+      continue;
+    }
+
+    values[field.key] = raw;
+  }
+
+  return values;
 }
 
 function currentPath(): string {
@@ -104,6 +147,44 @@ export async function mountBrowserAppHostShell(
       const pre = document.createElement("pre");
       pre.textContent = error instanceof Error ? error.message : String(error);
       pageContainer.appendChild(pre);
+    }
+
+    const form = pageContainer.querySelector<HTMLFormElement>("form[data-eidos-id]");
+    if (form) {
+      const actionStatus = document.createElement("div");
+      actionStatus.setAttribute("data-eidos-action-status", "");
+      actionStatus.setAttribute("role", "status");
+      actionStatus.style.marginTop = "12px";
+      pageContainer.appendChild(actionStatus);
+
+      form.addEventListener("submit", event => {
+        event.preventDefault();
+        void (async () => {
+          if (!options.actionExecutor) {
+            actionStatus.textContent = "No App Host ActionExecutor is configured.";
+            return;
+          }
+
+          const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+          if (submit) submit.disabled = true;
+          actionStatus.textContent = "Executing…";
+
+          try {
+            const values = collectFormValues(form, loaded.definition);
+            const execution = await executeAppHostPageAction(
+              loaded,
+              values,
+              options.actionExecutor
+            );
+            actionStatus.textContent = `Completed: ${execution.request.command.code}`;
+            options.onActionResult?.(execution.result, loaded);
+          } catch (error) {
+            actionStatus.textContent = `Action failed: ${error instanceof Error ? error.message : String(error)}`;
+          } finally {
+            if (submit) submit.disabled = false;
+          }
+        })();
+      });
     }
 
     main.appendChild(pageContainer);
