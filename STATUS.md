@@ -206,3 +206,26 @@ Still not production-complete:
 - Company Notes domain persistence;
 - live real-LLM local proof;
 - Trading Lite → EVO dependency proof.
+
+
+## Trading Lite local Proof B — PASS — 2026-09-23
+
+The user confirmed the current local browser proof succeeds with the deterministic Enterprise Agent development model.
+
+Verified user-visible path:
+
+```text
+Eidos Browser Shell
+→ user requests "帮我安装 Trading Lite"
+→ Enterprise Agent
+→ App Manager capability dependency resolution
+→ evo.core reference dependency activated
+→ Trading Lite activated
+→ App Host refresh
+→ Trading Lite appears in navigation
+→ Trading Lite reference page renders
+```
+
+This confirms that Eidos can surface a newly installed application that depends on foundation capabilities without Trading Lite-specific Eidos source changes.
+
+This does **not** yet prove the real EVO business runtime path. The current Trading Lite page is a minimal Eidos-compatible reference form; its business command is not yet wired to authoritative EVO execution.
