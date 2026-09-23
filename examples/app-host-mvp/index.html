@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Eidos App Host MVP</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; }
+    #harness {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 10px 14px;
+      border-bottom: 1px solid #ddd;
+      background: #fff;
+    }
+    #harness-status { font-size: 12px; white-space: pre-wrap; }
+    button { cursor: pointer; }
+    form { display: grid; gap: 12px; max-width: 640px; }
+    label { display: grid; gap: 6px; }
+    input, select, button { padding: 8px 10px; font: inherit; }
+  </style>
+</head>
+<body>
+  <div id="harness">
+    <strong>MVP Test Harness</strong>
+    <button id="install-company-notes" type="button">Install Company Notes</button>
+    <button id="refresh-host" type="button">Refresh App Host</button>
+    <span id="harness-status"></span>
+  </div>
+  <div id="app"></div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
