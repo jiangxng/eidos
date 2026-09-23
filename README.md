@@ -2,23 +2,35 @@
 
 **Eidos is deterministic for machines, adaptive for humans, and stable where shared understanding and familiarity matter.**
 
-Eidos is an LLM-first Experience runtime and capability system. It is designed so that LLMs compose verified capabilities instead of repeatedly generating large amounts of unverified UI code.
+Eidos is a pure, LLM-native frontend framework. It is designed so that LLMs compose verified frontend capabilities instead of repeatedly generating large amounts of unverified UI code.
 
 ## Read in this order
 
 1. `CONSTITUTION.md`
 2. `START-HERE.md`
-3. `docs/architecture/EXPERIENCE-ARCHITECTURE.md`
-4. `docs/ec/EC-EXPECTATIONS.md`
-5. `capabilities/catalog.json`
-6. `PUBLIC-API.md`
-7. `LLM.md`
+3. `docs/architecture/EIDOS-CORE-COMPONENTS-APP-HOST-v0.1.md`
+4. `docs/architecture/EXPERIENCE-ARCHITECTURE.md`
+5. `docs/ec/EC-EXPECTATIONS.md`
+6. `capabilities/catalog.json`
+7. `PUBLIC-API.md`
+8. `LLM.md`
 
-## Core boundary
+## Product boundary
 
-`Human Intent -> Intelligence / Experience Compiler -> Experience Contract -> Eidos -> Human Experience`
+Eidos has three long-term production parts:
 
-Eidos does not own Human Intent intelligence, business truth, or business execution.
+```text
+Eidos
+├─ Core
+├─ Component Library
+└─ App Host
+```
+
+Examples / Showcase are validation assets, not a production layer.
+
+Eidos does not own Human Intent intelligence, enterprise business truth, enterprise persistence, or backend business execution. EVO is one possible host, not a required dependency.
+
+See `docs/architecture/EIDOS-CORE-COMPONENTS-APP-HOST-v0.1.md`.
 
 ## Design posture
 
