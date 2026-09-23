@@ -108,3 +108,30 @@ App Manager
 ```
 
 The adapter is replaceable by Memory/Mock/REST/custom sources and does not change Eidos Core.
+
+
+## Browser Shell foundation — 2026-09-23
+
+CI-verified minimal browser shell now exists under `src/app-host/browser-shell.ts`.
+
+It provides:
+
+- App Host navigation rendering;
+- hash-route navigation;
+- lazy route/page loading;
+- default UIDL rendering through the existing Eidos HTML renderer;
+- host refresh support so newly activated App experiences appear without Eidos source changes;
+- backend independence through `ExperienceSource`.
+
+Current next proof:
+
+```text
+start App Manager
+→ open Eidos Browser Shell
+→ install Company Notes
+→ refresh App Host
+→ Company Notes appears in navigation
+→ open page
+```
+
+This is still a test/MVP shell, not a final product visual design.
