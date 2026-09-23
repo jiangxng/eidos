@@ -229,3 +229,29 @@ Eidos Browser Shell
 This confirms that Eidos can surface a newly installed application that depends on foundation capabilities without Trading Lite-specific Eidos source changes.
 
 This does **not** yet prove the real EVO business runtime path. The current Trading Lite page is a minimal Eidos-compatible reference form; its business command is not yet wired to authoritative EVO execution.
+
+
+## App Host ActionHost execution boundary — 2026-09-23
+
+CI-verified App Host action execution now reuses the existing backend-independent `ActionHost` port.
+
+Implemented path:
+
+```text
+rendered UIDL form
+→ createActionRequest()
+→ ActionHost
+→ replaceable host/backend adapter
+```
+
+The browser shell prevents direct HTML form business execution, surfaces structured action success/failure, and delegates execution to the supplied ActionHost.
+
+A generic `AppManagerActionHost` adapter sends ActionRequest to:
+
+```text
+POST /v1/actions
+```
+
+Eidos Core contains no EVO, Trading Lite or Sales Order business semantics.
+
+This is CI verified. The cross-repository Trading Lite → App Manager → EVO local browser Proof C is still pending user confirmation.
