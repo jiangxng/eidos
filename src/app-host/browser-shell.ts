@@ -1,7 +1,8 @@
 import { renderToHtml } from "../renderers/html/index.js";
 import { assertValidUidl } from "../runtime/validate.js";
 import type { JsonValue } from "../runtime/contracts.js";
-import { executeAppHostPageAction, type AppHostActionExecutor } from "./action-executor.js";
+import { executeAppHostPageAction } from "./action-executor.js";
+import type { ActionHost } from "../adapters/ports.js";
 import type { AppHost, AppHostLoadedPageV010, AppHostSnapshotV010 } from "./contracts.js";
 
 export interface BrowserAppHostShellOptions {
@@ -9,7 +10,7 @@ export interface BrowserAppHostShellOptions {
   container: HTMLElement | string;
   title?: string;
   renderPage?: (page: AppHostLoadedPageV010) => string | Node;
-  actionExecutor?: AppHostActionExecutor;
+  actionHost?: ActionHost;
   onActionResult?: (result: unknown, page: AppHostLoadedPageV010) => void;
 }
 
@@ -160,8 +161,8 @@ export async function mountBrowserAppHostShell(
       form.addEventListener("submit", event => {
         event.preventDefault();
         void (async () => {
-          if (!options.actionExecutor) {
-            actionStatus.textContent = "No App Host ActionExecutor is configured.";
+          if (!options.actionHost) {
+            actionStatus.textContent = "No App Host ActionHost is configured.";
             return;
           }
 
@@ -174,7 +175,7 @@ export async function mountBrowserAppHostShell(
             const execution = await executeAppHostPageAction(
               loaded,
               values,
-              options.actionExecutor
+              options.actionHost
             );
             actionStatus.textContent = `Completed: ${execution.request.command.code}`;
             options.onActionResult?.(execution.result, loaded);
