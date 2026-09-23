@@ -69,3 +69,21 @@ The authoritative target model is documented in:
 An external business package may contribute an Eidos experience manifest/pages/navigation while owning its backend capability elsewhere.
 
 Eidos consumes that contribution through public frontend contracts only. It does not import EVO or another backend's private implementation.
+
+
+## Enterprise Agent boundary update — 2026-09-23
+
+The former EC / Experience Compiler product identity is being replaced by the **Enterprise Agent** model.
+
+For Eidos, the durable local rule is:
+
+- Enterprise Agent may produce/select/compose Eidos experience contracts through public Eidos contracts;
+- Enterprise Agent is not part of Eidos Core or App Host;
+- Eidos must work without any Agent or LLM;
+- Eidos must not depend on the Agent's private memory, knowledge, model provider or implementation;
+- Agent-generated experience must still pass deterministic Eidos validation;
+- App Host may load Agent-produced experience only through the same public experience/package contracts used by other producers.
+
+The canonical Agent Package definition belongs to `EVO-App-Platform/docs/architecture/AGENT-PACKAGE-MODEL-v0.1.md`.
+
+The historical EC-to-Enterprise-Agent transition is recorded in `Experience-Compiler/docs/adr/0004-ec-to-enterprise-agent.md`.
