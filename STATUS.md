@@ -64,3 +64,28 @@ The supplied historical UIDL `0.1.0` artifact has an identity/hash inconsistency
 - Eidos does not own business truth.
 - Eidos does not execute arbitrary LLM/EC-generated executable code in Core Runtime.
 - Personalization is not required for correctness.
+
+
+## App Host foundation — 2026-09-23
+
+Initial `src/app-host` implementation now exists on the pure-frontend positioning branch.
+
+Implemented foundation:
+
+- public ExperienceSource port;
+- effective experience manifest contract;
+- manifest validation;
+- deterministic refresh/snapshot;
+- navigation assembly;
+- route resolution;
+- lazy page loading;
+- cross-package collision diagnostics;
+- tests for discovery, refresh, loading and conflict rejection.
+
+Not yet complete:
+
+- browser shell/navigation renderer;
+- live App Manager-backed ExperienceSource;
+- integration with component registry/page renderer;
+- Company Notes end-to-end proof;
+- Enterprise Agent UI.
