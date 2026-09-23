@@ -1,35 +1,44 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Eidos App Host MVP</title>
+  <title>Eidos + Enterprise Agent MVP</title>
   <style>
     body { margin: 0; font-family: system-ui, sans-serif; }
     #harness {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      padding: 10px 14px;
+      padding: 12px 14px;
       border-bottom: 1px solid #ddd;
       background: #fff;
     }
-    #harness-status { font-size: 12px; white-space: pre-wrap; }
-    button { cursor: pointer; }
+    #agent-row { display: flex; gap: 8px; align-items: center; }
+    #agent-input { flex: 1; min-width: 240px; padding: 9px 10px; font: inherit; }
+    #agent-log {
+      margin-top: 8px;
+      padding: 8px 10px;
+      min-height: 38px;
+      white-space: pre-wrap;
+      background: #f6f7f8;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+    #harness-meta { margin-top: 6px; font-size: 11px; opacity: .7; }
+    button { cursor: pointer; padding: 8px 10px; font: inherit; }
     form { display: grid; gap: 12px; max-width: 640px; }
     label { display: grid; gap: 6px; }
-    input, select, button { padding: 8px 10px; font: inherit; }
+    input, select { padding: 8px 10px; font: inherit; }
   </style>
 </head>
 <body>
   <div id="harness">
-    <strong>MVP Test Harness</strong>
-    <button id="install-company-notes" type="button">Install Company Notes</button>
-    <button id="refresh-host" type="button">Refresh App Host</button>
-    <span id="harness-status"></span>
+    <div id="agent-row">
+      <strong>Enterprise Agent</strong>
+      <input id="agent-input" value="帮我安装 Company Notes" aria-label="Message to Enterprise Agent">
+      <button id="agent-send" type="button">发送</button>
+      <button id="refresh-host" type="button">刷新 App Host</button>
+    </div>
+    <div id="agent-log" role="log">输入安装请求，然后点击“发送”。</div>
+    <div id="harness-meta">MVP: Agent model is a deterministic development adapter; AgentModel is replaceable.</div>
   </div>
   <div id="app"></div>
   <script type="module" src="./main.js"></script>
