@@ -1,41 +1,19 @@
 import { createActionRequest } from "../runtime/action.js";
-import type { ActionRequestV010, JsonValue } from "../runtime/contracts.js";
+import type { JsonValue } from "../runtime/contracts.js";
+import type { ActionExecutionResult, ActionHost } from "../adapters/ports.js";
 import type { AppHostLoadedPageV010 } from "./contracts.js";
 
-export interface AppHostActionContextV010 {
-  readonly experienceId: string;
-  readonly packageId: string;
-  readonly featureId: string;
-  readonly pageId: string;
-  readonly routePath: string;
-}
-
-export interface AppHostActionExecutor {
-  execute(
-    request: ActionRequestV010,
-    context: AppHostActionContextV010
-  ): Promise<unknown>;
-}
-
 export interface AppHostActionExecutionV010 {
-  readonly request: ActionRequestV010;
-  readonly result: unknown;
+  readonly request: ReturnType<typeof createActionRequest>;
+  readonly result: ActionExecutionResult;
 }
 
 export async function executeAppHostPageAction(
   page: AppHostLoadedPageV010,
   values: Record<string, JsonValue>,
-  executor: AppHostActionExecutor
+  host: ActionHost
 ): Promise<AppHostActionExecutionV010> {
   const request = createActionRequest(page.definition, values);
-
-  const result = await executor.execute(request, {
-    experienceId: page.experienceId,
-    packageId: page.packageId,
-    featureId: page.featureId,
-    pageId: page.page.id,
-    routePath: page.route.path
-  });
-
+  const result = await host.execute(request);
   return { request, result };
 }
