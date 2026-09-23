@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { executeAppHostPageAction } from "../../dist/app-host/index.js";
 
-test("App Host action execution uses Eidos ActionRequest and a replaceable Host executor", async () => {
+test("App Host action execution uses existing ActionHost port", async () => {
   let captured;
   const page = {
     experienceId: "trading-lite",
@@ -16,12 +16,12 @@ test("App Host action execution uses Eidos ActionRequest and a replaceable Host 
       id: "trading-lite.home",
       title: "Trading Lite",
       purpose: "execute-command",
-      command: { code: "sales_order.approve-sales-order", inputVersion: "1" },
+      command: { code: "trading-lite.create-order", inputVersion: "0.1.0" },
       fields: [
         {
-          key: "orderNo",
-          label: "Order No",
-          semanticType: "sales-order-number",
+          key: "customer",
+          label: "Customer",
+          semanticType: "customer-name",
           control: "text",
           required: true
         },
@@ -38,7 +38,7 @@ test("App Host action execution uses Eidos ActionRequest and a replaceable Host 
           id: "create-order",
           label: "Create Order",
           type: "submit",
-          command: "sales_order.approve-sales-order",
+          command: "trading-lite.create-order",
           requiresConfirmation: false
         }
       ]
@@ -47,23 +47,21 @@ test("App Host action execution uses Eidos ActionRequest and a replaceable Host 
 
   const execution = await executeAppHostPageAction(
     page,
-    { orderNo: "SO-1", quantity: 3 },
+    { customer: "ACME", quantity: 3 },
     {
-      async execute(request, context) {
-        captured = { request, context };
-        return { ok: true, businessDataId: "bd-1" };
+      async execute(request) {
+        captured = request;
+        return {
+          ok: true,
+          correlationId: "corr-1",
+          result: { businessDataId: "bd-1" }
+        };
       }
     }
   );
 
-  assert.equal(captured.request.command.code, "sales_order.approve-sales-order");
-  assert.deepEqual(captured.request.values, { orderNo: "SO-1", quantity: 3 });
-  assert.deepEqual(captured.context, {
-    experienceId: "trading-lite",
-    packageId: "trading-lite",
-    featureId: "trading-lite.default",
-    pageId: "trading-lite.home",
-    routePath: "/trading"
-  });
-  assert.deepEqual(execution.result, { ok: true, businessDataId: "bd-1" });
+  assert.equal(captured.command.code, "trading-lite.create-order");
+  assert.deepEqual(captured.values, { customer: "ACME", quantity: 3 });
+  assert.equal(execution.result.ok, true);
+  assert.deepEqual(execution.result.result, { businessDataId: "bd-1" });
 });
