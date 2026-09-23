@@ -6,20 +6,23 @@ import {
 
 const params = new URLSearchParams(window.location.search);
 const managerUrl = params.get("manager") ?? "http://localhost:4100";
-const status = document.querySelector("#harness-status");
-const installButton = document.querySelector("#install-company-notes");
+const agentUrl = params.get("agent") ?? "http://localhost:4300";
+
+const log = document.querySelector("#agent-log");
+const input = document.querySelector("#agent-input");
+const sendButton = document.querySelector("#agent-send");
 const refreshButton = document.querySelector("#refresh-host");
 
-function setStatus(value) {
-  status.textContent = value;
+function setLog(value) {
+  log.textContent = value;
 }
 
-async function postJson(path, body) {
-  const response = await fetch(`${managerUrl}${path}`, {
+async function postJson(baseUrl, path, body) {
+  const response = await fetch(`${baseUrl}${path}`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      "accept": "application/json"
+      accept: "application/json"
     },
     body: JSON.stringify(body)
   });
@@ -36,45 +39,68 @@ const shell = await mountBrowserAppHostShell({
   title: "Eidos"
 });
 
-installButton.addEventListener("click", async () => {
-  installButton.disabled = true;
-  try {
-    setStatus("Planning installation...");
-    const plan = await postJson("/v1/install/plan", { packageId: "company-notes" });
+async function sendToAgent() {
+  const message = input.value.trim();
+  if (!message) return;
 
-    if (plan.blockers?.length) {
-      setStatus(`Blocked: ${JSON.stringify(plan.blockers)}`);
-      return;
+  sendButton.disabled = true;
+  input.disabled = true;
+  try {
+    setLog(`用户：${message}\n\nEnterprise Agent：处理中…`);
+
+    const reply = await postJson(agentUrl, "/v1/chat", { message });
+    const trace = (reply.observations ?? [])
+      .map(item => `${item.ok ? "✓" : "✗"} ${item.tool}`)
+      .join("\n");
+
+    const installed = (reply.observations ?? []).some(
+      item => item.tool === "app.install.execute" && item.ok
+    );
+
+    let refreshMessage = "";
+    if (installed) {
+      const snapshot = await shell.refresh();
+      refreshMessage = `\n\nApp Host 已刷新：revision ${snapshot.revision}；导航：${snapshot.navigation
+        .map(item => item.label)
+        .join("、") || "无"}`;
     }
 
-    setStatus(
-      `Plan: install [${plan.installPackages.join(", ")}], activate [${plan.activateFeatures.join(", ")}]`
-    );
-
-    await postJson("/v1/install", { packageId: "company-notes" });
-    const snapshot = await shell.refresh();
-
-    setStatus(
-      `Installed. App Host revision ${snapshot.revision}; active navigation: ${snapshot.navigation
-        .map(item => item.label)
-        .join(", ")}`
+    setLog(
+      `用户：${message}\n\nEnterprise Agent：${reply.message}` +
+      (trace ? `\n\n工具轨迹：\n${trace}` : "") +
+      refreshMessage
     );
   } catch (error) {
-    setStatus(error instanceof Error ? error.message : String(error));
+    setLog(`请求失败：${error instanceof Error ? error.message : String(error)}`);
   } finally {
-    installButton.disabled = false;
+    sendButton.disabled = false;
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+sendButton.addEventListener("click", () => {
+  void sendToAgent();
+});
+
+input.addEventListener("keydown", event => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    void sendToAgent();
   }
 });
 
 refreshButton.addEventListener("click", async () => {
   try {
     const snapshot = await shell.refresh();
-    setStatus(
-      `Refreshed revision ${snapshot.revision}; ${snapshot.navigation.length} navigation item(s)`
+    setLog(
+      `App Host 已刷新：revision ${snapshot.revision}；${snapshot.navigation.length} 个导航项。`
     );
   } catch (error) {
-    setStatus(error instanceof Error ? error.message : String(error));
+    setLog(`刷新失败：${error instanceof Error ? error.message : String(error)}`);
   }
 });
 
-setStatus(`Connected to App Manager: ${managerUrl}`);
+setLog(
+  `已连接。App Manager: ${managerUrl}\nEnterprise Agent: ${agentUrl}\n\n试试：“帮我安装 Company Notes”`
+);
