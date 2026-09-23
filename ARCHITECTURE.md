@@ -87,3 +87,21 @@ For Eidos, the durable local rule is:
 The canonical Agent Package definition belongs to `EVO-App-Platform/docs/architecture/AGENT-PACKAGE-MODEL-v0.1.md`.
 
 The historical EC-to-Enterprise-Agent transition is recorded in `Experience-Compiler/docs/adr/0004-ec-to-enterprise-agent.md`.
+
+
+## Package → Feature → Contribution boundary update — 2026-09-23
+
+Eidos participates in the EVO App Platform's generic lifecycle model without owning it.
+
+For Eidos:
+
+- Eidos runtime/App Host may be distributed as Foundation Packages/Features;
+- generic frontend capabilities may be exposed as Features/capabilities;
+- business applications contribute Eidos pages, navigation, routes, dashboards and bindings as frontend Contributions;
+- installing a Package does not necessarily activate every Eidos Feature;
+- Eidos App Host must render only effective/active experience Contributions;
+- generic UI primitives remain Eidos-owned; business-specific compositions remain App-owned;
+- Eidos must not infer package lifecycle from Git repository layout.
+
+The canonical package/feature lifecycle authority belongs to:
+`EVO-App-Platform/docs/architecture/PACKAGE-FEATURE-CONTRIBUTION-MODEL-v0.1.md`.
