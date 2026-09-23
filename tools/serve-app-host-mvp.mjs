@@ -53,6 +53,7 @@ const server = createServer((request, response) => {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   server.listen(port, () => {
     console.log(`Eidos App Host MVP: http://localhost:${port}`);
-    console.log("Expected App Manager: http://localhost:4100");\n    console.log("Expected Enterprise Agent: http://localhost:4300");
+    console.log("Expected App Manager: http://localhost:4100");
+    console.log("Expected Enterprise Agent: http://localhost:4300");
   });
 }
