@@ -156,3 +156,53 @@ User types: 帮我安装 Company Notes
 ```
 
 The current backend model is explicitly a deterministic development adapter, not a production LLM. The Agent runtime is model-independent through the `AgentModel` contract.
+
+
+## Local Agent-driven installation proof — PASS — 2026-09-23
+
+The user successfully confirmed the current local MVP on branch `eidos/pure-frontend-positioning-v0.1`.
+
+Verified user-visible path:
+
+```text
+Eidos Browser Shell
+→ Enterprise Agent chat input
+→ App Manager lifecycle
+→ Company Notes Feature activation
+→ effective Experience discovery
+→ App Host refresh
+→ Company Notes visible
+```
+
+A first-run static path defect was found:
+
+```text
+GET http://localhost:4200/main.js 404
+```
+
+Root cause: the root-served MVP HTML used a relative `./main.js` URL even though the actual module lives under `/examples/app-host-mvp/`.
+
+Fixed by using:
+
+```text
+/examples/app-host-mvp/main.js
+```
+
+Fix commit:
+
+```text
+4e4d4ed3fc8cf2f61ccd9b80e1646e3249c8ff6c
+```
+
+CI after the fix: PASS.
+
+This supersedes earlier status text that listed Browser Shell, live App Manager ExperienceSource, Company Notes proof, or Enterprise Agent UI as not yet implemented. Those MVP foundations now exist and have been exercised together locally.
+
+Still not production-complete:
+
+- visual/product-quality shell design;
+- production authentication/security;
+- durable App Manager lifecycle state;
+- Company Notes domain persistence;
+- live real-LLM local proof;
+- Trading Lite → EVO dependency proof.
