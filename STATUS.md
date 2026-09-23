@@ -89,3 +89,22 @@ Not yet complete:
 - integration with component registry/page renderer;
 - Company Notes end-to-end proof;
 - Enterprise Agent UI.
+
+
+## App Manager source integration — 2026-09-23
+
+CI-verified `AppManagerExperienceSource` now adapts the App Manager HTTP API to the backend-independent Eidos `ExperienceSource` port.
+
+Verified flow:
+
+```text
+App Manager
+→ /v1/experiences/effective
+→ AppManagerExperienceSource
+→ App Host refresh
+→ navigation/routes
+→ /v1/experience-pages
+→ page definition
+```
+
+The adapter is replaceable by Memory/Mock/REST/custom sources and does not change Eidos Core.
