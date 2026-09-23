@@ -177,7 +177,11 @@ export async function mountBrowserAppHostShell(
               values,
               options.actionHost
             );
-            actionStatus.textContent = `Completed: ${execution.request.command.code}`;
+            if (execution.result.ok) {
+              actionStatus.textContent = `Completed: ${execution.request.command.code}`;
+            } else {
+              actionStatus.textContent = `Action failed: ${execution.result.error?.message ?? "Unknown action error"}`;
+            }
             options.onActionResult?.(execution.result, loaded);
           } catch (error) {
             actionStatus.textContent = `Action failed: ${error instanceof Error ? error.message : String(error)}`;
