@@ -1,6 +1,7 @@
 import {
   createAppHost,
   createAppManagerExperienceSource,
+  createAppManagerActionHost,
   mountBrowserAppHostShell
 } from "../../dist/app-host/index.js";
 
@@ -32,11 +33,16 @@ async function postJson(baseUrl, path, body) {
 }
 
 const source = createAppManagerExperienceSource({ baseUrl: managerUrl });
+const actionHost = createAppManagerActionHost({ baseUrl: managerUrl });
 const host = createAppHost(source);
 const shell = await mountBrowserAppHostShell({
   host,
   container: "#app",
-  title: "Eidos"
+  title: "Eidos",
+  actionHost,
+  onActionResult(result) {
+    setLog(`业务操作结果：\n${JSON.stringify(result, null, 2)}`);
+  }
 });
 
 async function sendToAgent() {
