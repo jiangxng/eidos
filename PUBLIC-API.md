@@ -28,3 +28,25 @@ Bridge contract for existing VNode/components. The initial overlay defines the p
 
 ### `ActionHost`
 Host execution port. Confirmation/authorization/execution occur outside runtime.
+
+
+## App Host API
+
+### `createAppHost(source)`
+Creates a backend-independent App Host runtime for effective active Eidos experiences.
+
+The supplied `ExperienceSource` exposes only:
+
+- `listEffectiveExperienceManifests()`
+- `loadPage(page)`
+
+The returned host exposes:
+
+- `refresh()`
+- `getSnapshot()`
+- `resolveRoute(path)`
+- `loadRoute(path)`
+- `subscribe(listener)`
+- `dispose()`
+
+App Host validates manifests, assembles deterministic navigation/routes, rejects ambiguous cross-package conflicts and lazily loads page definitions. It does not install Packages or activate Features.
