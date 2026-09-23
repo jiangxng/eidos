@@ -135,3 +135,24 @@ start App Manager
 ```
 
 This is still a test/MVP shell, not a final product visual design.
+
+
+## Enterprise Agent chat harness — 2026-09-23
+
+The App Host MVP browser harness now exposes an Enterprise Agent chat input instead of a direct install button.
+
+Current intended local proof:
+
+```text
+User types: 帮我安装 Company Notes
+→ Enterprise Agent /v1/chat
+→ app.catalog.list
+→ app.install.plan
+→ app.install.execute
+→ App Manager lifecycle state changes
+→ Eidos App Host refresh
+→ Company Notes navigation appears
+→ Company Notes UIDL page opens
+```
+
+The current backend model is explicitly a deterministic development adapter, not a production LLM. The Agent runtime is model-independent through the `AgentModel` contract.
