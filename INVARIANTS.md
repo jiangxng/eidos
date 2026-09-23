@@ -13,3 +13,7 @@
 - **EIDOS-11** New runtime work must not silently break promised legacy API behavior.
 - **EIDOS-12** Equal explicit input + registry + environment snapshot produces equal normalized model/request.
 - **EIDOS-13** New interactions are runtime-instance scoped and disposable; listeners/subscriptions must be releasable.
+
+- **EIDOS-14** App Host consumes only effective active Experience Contributions through public host/source contracts; it does not own Package/Feature installation lifecycle.
+- **EIDOS-15** App Host must reject ambiguous cross-package page/route/navigation collisions rather than silently selecting a winner.
+- **EIDOS-16** Replacing an EVO-backed ExperienceSource with a Mock/REST/custom ExperienceSource must not require Eidos Core changes.
