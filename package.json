@@ -15,7 +15,8 @@
     "build:release": "node tools/build-release.mjs && node tools/package-release.mjs",
     "serve:release": "node tools/serve-release.mjs",
     "release:check": "npm run typecheck && npm test && npm run validate:repo && npm run showcase:check && npm run build:release",
-    "demo:app-host": "npm run build && node tools/serve-app-host-mvp.mjs"
+    "demo:app-host": "npm run build && node tools/serve-app-host-mvp.mjs",
+    "check:app-host-mvp": "node --check examples/app-host-mvp/main.js && node --check tools/serve-app-host-mvp.mjs"
   },
   "engines": {
     "node": ">=20"
