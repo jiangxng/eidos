@@ -46,3 +46,22 @@ App Host must not:
 - treat frontend state as business truth.
 
 App Manager owns Package/Feature lifecycle. App Host only consumes the effective active Experience Contributions.
+
+
+## App Manager adapter
+
+`createAppManagerExperienceSource({ baseUrl })` is the first real backend adapter.
+
+It maps:
+
+- `GET /v1/experiences/effective` → effective manifests;
+- `GET /v1/experience-pages?source=...` → page definitions.
+
+This adapter proves the intended boundary:
+
+```text
+App Manager lifecycle backend
+→ public experience discovery API
+→ Eidos ExperienceSource
+→ App Host
+```
