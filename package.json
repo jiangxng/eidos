@@ -14,7 +14,8 @@
     "showcase:check": "node --check showcase/i18n.js && node --check showcase/showcase.js",
     "build:release": "node tools/build-release.mjs && node tools/package-release.mjs",
     "serve:release": "node tools/serve-release.mjs",
-    "release:check": "npm run typecheck && npm test && npm run validate:repo && npm run showcase:check && npm run build:release"
+    "release:check": "npm run typecheck && npm test && npm run validate:repo && npm run showcase:check && npm run build:release",
+    "demo:app-host": "npm run build && node tools/serve-app-host-mvp.mjs"
   },
   "engines": {
     "node": ">=20"
