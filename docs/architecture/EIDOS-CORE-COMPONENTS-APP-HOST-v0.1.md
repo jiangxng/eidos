@@ -319,3 +319,33 @@ Eidos architecture is considered aligned when:
 6. business-specific composition remains outside Eidos Core;
 7. no business package requires private Eidos implementation imports;
 8. no Eidos runtime path requires EVO internals.
+
+
+## 16. App Host implementation baseline — 2026-09-23
+
+The first implementation now lives under `src/app-host/`.
+
+Its core port is deliberately backend-independent:
+
+```text
+ExperienceSource
+├─ listEffectiveExperienceManifests()
+└─ loadPage(page)
+```
+
+App Host:
+
+```text
+discover
+→ validate
+→ deterministically merge
+→ expose navigation/routes
+→ resolve route
+→ lazily load page
+```
+
+It consumes **effective active Experience Contributions**. It does not call Package install/activate operations itself.
+
+A future App Manager-backed source and a Mock source must be interchangeable from App Host's perspective.
+
+Ambiguous cross-package route/page/navigation collisions fail closed with diagnostics instead of using load order as hidden precedence.
