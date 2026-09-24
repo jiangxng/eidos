@@ -1,4 +1,5 @@
 import { renderToHtml } from "../renderers/html/index.js";
+import { renderCatalogBrowserToHtml } from "../catalog-browser/render.js";
 import { assertValidUidl } from "../runtime/validate.js";
 import type { JsonValue } from "../runtime/contracts.js";
 import { executeAppHostPageAction } from "./action-executor.js";
@@ -21,6 +22,10 @@ export interface BrowserAppHostShell {
 }
 
 export function renderAppHostPageToHtml(page: AppHostLoadedPageV010): string {
+  const definition = page.definition as { kind?: unknown };
+  if (definition?.kind === "catalog-browser") {
+    return renderCatalogBrowserToHtml(page.definition as import("../catalog-browser/contracts.js").CatalogBrowserV010);
+  }
   return renderToHtml(page.definition);
 }
 
@@ -148,6 +153,66 @@ export async function mountBrowserAppHostShell(
       const pre = document.createElement("pre");
       pre.textContent = error instanceof Error ? error.message : String(error);
       pageContainer.appendChild(pre);
+    }
+
+    const catalogButtons = pageContainer.querySelectorAll<HTMLButtonElement>("[data-eidos-catalog-action]");
+    if (catalogButtons.length > 0) {
+      const actionStatus = document.createElement("pre");
+      actionStatus.setAttribute("data-eidos-action-status", "");
+      actionStatus.setAttribute("role", "status");
+      actionStatus.style.marginTop = "12px";
+      pageContainer.appendChild(actionStatus);
+
+      for (const button of catalogButtons) {
+        button.addEventListener("click", () => {
+          void (async () => {
+            const actionType = button.dataset.eidosActionType;
+            const route = button.dataset.eidosRoute;
+            if (actionType === "navigate") {
+              if (!route) throw new Error("EIDOS_CATALOG_NAVIGATE_ROUTE_REQUIRED");
+              await navigate(route);
+              return;
+            }
+            if (actionType !== "command") return;
+            if (!options.actionHost) {
+              actionStatus.textContent = "No App Host ActionHost is configured.";
+              return;
+            }
+            const command = button.dataset.eidosCommand;
+            const itemId = button.dataset.eidosItemId;
+            if (!command || !itemId) {
+              actionStatus.textContent = "Catalog command action is incomplete.";
+              return;
+            }
+            if (button.dataset.eidosConfirm === "true" && !window.confirm(button.textContent ?? "Confirm action?")) {
+              return;
+            }
+            button.disabled = true;
+            actionStatus.textContent = "Executing…";
+            try {
+              const request = {
+                contractVersion: "0.1.0" as const,
+                type: "command" as const,
+                command: { code: command, inputVersion: button.dataset.eidosInputVersion ?? "0.1.0" },
+                values: { itemId },
+                sourceInteractionId: (page.definition as { id?: string }).id ?? loaded.page.id,
+                actionId: button.dataset.eidosCatalogAction ?? command,
+                requiresConfirmation: button.dataset.eidosConfirm === "true"
+              };
+              const result = await options.actionHost.execute(request);
+              actionStatus.textContent = result.ok
+                ? JSON.stringify(result.result ?? { ok: true }, null, 2)
+                : `Action failed: ${result.error?.message ?? "Unknown action error"}`;
+              options.onActionResult?.(result, loaded);
+              if (result.ok) await refresh();
+            } catch (error) {
+              actionStatus.textContent = `Action failed: ${error instanceof Error ? error.message : String(error)}`;
+            } finally {
+              button.disabled = false;
+            }
+          })();
+        });
+      }
     }
 
     const form = pageContainer.querySelector<HTMLFormElement>("form[data-eidos-id]");
