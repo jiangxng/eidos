@@ -14,12 +14,21 @@
     "showcase:check": "node --check showcase/i18n.js && node --check showcase/showcase.js",
     "build:release": "node tools/build-release.mjs && node tools/package-release.mjs",
     "serve:release": "node tools/serve-release.mjs",
-    "release:check": "npm run typecheck && npm test && npm run validate:repo && npm run showcase:check && npm run build:release"
+    "release:check": "npm run typecheck && npm test && npm run validate:repo && npm run showcase:check && npm run build:release",
+    "prepare": "npm run build"
   },
   "engines": {
     "node": ">=20"
   },
   "devDependencies": {
     "typescript": "^5.8.3"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   }
 }
