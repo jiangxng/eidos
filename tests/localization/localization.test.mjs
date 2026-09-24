@@ -94,8 +94,8 @@ test("catalog chrome localizes without taking ownership of package display names
       messages: {
         "catalog.evo.plugin-store.title": "EVO Plugin Store",
         "catalog.evo.plugin-store.description": "Discover and manage plugins.",
-        "catalog.evo.plugin-store.item.enterprise-agent.status": "Not installed",
-        "catalog.evo.plugin-store.item.enterprise-agent.action.install.label": "Install"
+        "catalog.evo.plugin-store.status.not-installed.label": "Not installed",
+        "catalog.evo.plugin-store.action.install.label": "Install"
       }
     }
   ], { locale: "en" });
@@ -115,7 +115,7 @@ test("catalog chrome localizes without taking ownership of package display names
       items: [{
         id: "enterprise-agent",
         title: "Enterprise Agent",
-        status: { label: "未安装" },
+        status: { id: "not-installed", label: "未安装" },
         primaryAction: { id: "install", label: "安装", type: "command", command: "install" }
       }]
     }
