@@ -22,7 +22,7 @@ Eidos does not own Human Intent intelligence, business truth, or business execut
 
 ## Design posture
 
-- LLM-first coding and maintenance (design weight >= 90%)
+- LLM-primary engineering (~99.9% target for software design, implementation, extension, testing, documentation and maintenance)
 - Composition before generation
 - Capability before component
 - Deterministic validation at every machine boundary
@@ -33,7 +33,7 @@ Eidos does not own Human Intent intelligence, business truth, or business execut
 
 ## Human + LLM operability
 
-Eidos is LLM-first in construction and business-user-first in ordinary operation: a capable LLM should understand the system deterministically, while a novice user should be able to understand and use normal business experiences without developer assistance.
+Eidos is LLM-first in construction and business-user-first in ordinary operation: a capable LLM should understand the system deterministically, while a novice user should be able to understand and use normal business experiences without human developer assistance; human developers are not an assumed system role.
 
 See `docs/architecture/HUMAN-LLM-OPERABILITY-v0.1.md`.
 
