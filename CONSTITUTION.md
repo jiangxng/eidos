@@ -20,9 +20,9 @@ Eidos does not exist to help LLMs generate more code. Eidos exists so that LLMs 
 
 ## Article I — LLM First
 
-Eidos is overwhelmingly LLM-oriented. The design weight of LLM usage is 90% or higher.
+Eidos is overwhelmingly LLM-oriented. The target operating model is approximately 99.9% LLM-executed software engineering work. Human software developers are not an assumed system role.
 
-Humans may use and extend Eidos, but repository structure, architecture, documentation, contracts, APIs, errors, tests and capability discovery are optimized first for reliable LLM understanding and use.
+LLMs are the default engineers for architecture, implementation, extension, migration, tests, documentation and maintenance. Humans primarily provide intent, judgment, authorization, constraints and acceptance. Repository structure, architecture, documentation, contracts, APIs, errors, tests and capability discovery are optimized for reliable LLM understanding and use.
 
 Prefer explicit over implicit, deterministic over guessed, stable interfaces over hidden convention, bounded context over whole-repository reconstruction, and structured knowledge over author memory.
 
@@ -220,7 +220,7 @@ The following are constitutional Experience Invariants:
 
 Eidos experiences must make domain capability understandable to both LLMs and humans.
 
-Normal business operation should not depend on developers translating business intent into source code, SQL or hidden implementation structures.
+Normal business operation must not depend on human developers translating business intent into source code, SQL or hidden implementation structures. LLMs are expected to perform ordinary software engineering and capability extension work.
 
 The default experience must be usable by a novice through business terminology and guided interaction. Advanced technical detail may be progressively disclosed, but must not dominate ordinary operation.
 
