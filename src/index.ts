@@ -18,3 +18,4 @@ export * from "./data-grid/index.js";
 export * from "./workspace/index.js";
 export * from "./exception/index.js";
 export * as llmTools from "./llm-tools/index.js";
+export * from "./renderers/html/index.js";
