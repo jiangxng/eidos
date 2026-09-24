@@ -25,3 +25,4 @@ export * from "./localization/index.js";
 export * from "./chat/index.js";
 export * from "./settings/index.js";
 export * from "./workbench/contracts.js";
+export * from "./workbench/index.js";
