@@ -214,3 +214,18 @@ The following are constitutional Experience Invariants:
 - Personalization must be reversible and resettable.
 - Eidos must remain usable with a deterministic standard experience when EC or personalization context is unavailable.
 - Runtime does not silently learn or maintain a competing user-personality model; EC owns long-term learning and preference resolution.
+
+
+## Article XIV — Human + LLM Operability
+
+Eidos experiences must make domain capability understandable to both LLMs and humans.
+
+Normal business operation should not depend on developers translating business intent into source code, SQL or hidden implementation structures.
+
+The default experience must be usable by a novice through business terminology and guided interaction. Advanced technical detail may be progressively disclosed, but must not dominate ordinary operation.
+
+Human-readable and machine-readable representations must share one declared semantic truth. Eidos may render schemas, AST-backed configuration and compiled contracts, but it must not force business users to reason directly in those internal representations.
+
+Business-facing validation and errors explain the business problem first; implementation diagnostics are secondary.
+
+Authority: `docs/architecture/HUMAN-LLM-OPERABILITY-v0.1.md`.

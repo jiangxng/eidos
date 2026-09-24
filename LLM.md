@@ -18,3 +18,17 @@ Never assume:
 - chat memory can replace repository authority.
 
 If accepted contracts/ADRs conflict at the same priority, record the conflict and block only the affected acceptance claim. Do not rewrite history to make the conflict disappear.
+
+
+## Human + LLM operability
+
+When realizing a business-facing capability:
+
+- preserve domain language;
+- prefer guided human-readable forms over exposing raw AST/internal IDs;
+- keep one semantic truth across UI, contracts and runtime;
+- use progressive disclosure for advanced detail;
+- do not require developer intervention for normal business configuration;
+- make validation/errors understandable to a novice before showing technical detail.
+
+Authority: `docs/architecture/HUMAN-LLM-OPERABILITY-v0.1.md`.
