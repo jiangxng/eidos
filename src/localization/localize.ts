@@ -79,12 +79,21 @@ export function localizeAppHostPageDefinition(
     if (Array.isArray(definition.items)) {
       for (const item of definition.items) {
         if (!isObject(item) || typeof item.id !== "string") continue;
-        const prefix = `catalog.${catalogId}.item.${item.id}`;
         if (typeof item.summary === "string") {
-          item.summary = localization.resolve(namespace, `${prefix}.summary`, item.summary);
+          item.summary = localization.resolve(
+            namespace,
+            `catalog.${catalogId}.item.summary`,
+            item.summary,
+            isObject(item.metadata) ? item.metadata : undefined
+          );
         }
         if (isObject(item.status) && typeof item.status.label === "string") {
-          item.status.label = localization.resolve(namespace, `${prefix}.status`, item.status.label);
+          const statusId = typeof item.status.id === "string" ? item.status.id : "default";
+          item.status.label = localization.resolve(
+            namespace,
+            `catalog.${catalogId}.status.${statusId}.label`,
+            item.status.label
+          );
         }
         const actions = [
           ...(isObject(item.primaryAction) ? [item.primaryAction] : []),
@@ -93,13 +102,13 @@ export function localizeAppHostPageDefinition(
         for (const action of actions) {
           if (typeof action.id !== "string") continue;
           if (typeof action.label === "string") {
-            action.label = localization.resolve(namespace, `${prefix}.action.${action.id}.label`, action.label);
+            action.label = localization.resolve(namespace, `catalog.${catalogId}.action.${action.id}.label`, action.label);
           }
           if (typeof action.helpText === "string") {
-            action.helpText = localization.resolve(namespace, `${prefix}.action.${action.id}.help`, action.helpText);
+            action.helpText = localization.resolve(namespace, `catalog.${catalogId}.action.${action.id}.help`, action.helpText);
           }
           if (typeof action.disabledReason === "string") {
-            action.disabledReason = localization.resolve(namespace, `${prefix}.action.${action.id}.disabled`, action.disabledReason);
+            action.disabledReason = localization.resolve(namespace, `catalog.${catalogId}.action.${action.id}.disabled`, action.disabledReason);
           }
         }
       }
