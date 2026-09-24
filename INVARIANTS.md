@@ -15,3 +15,4 @@
 - **EIDOS-13** New interactions are runtime-instance scoped and disposable; listeners/subscriptions must be releasable.
 - **EIDOS-14** A product surface counts as Eidos-based only when its semantic controls/interactions are realized through Eidos public contracts and supported runtime/renderer boundaries; bespoke look-alike HTML/JS cannot satisfy Eidos product acceptance.
 - **EIDOS-15** When an Eidos-based product needs a human-experience capability that Eidos cannot yet express, the owning product MUST extend Eidos through a reusable public capability/renderer boundary rather than bypass Eidos with product-specific frontend implementation.
+- **EIDOS-16** App Host is the canonical production container for Eidos Experiences in Eidos-adopting systems; product Experiences are discovered and mounted through App Host rather than each creating an independent application shell.
