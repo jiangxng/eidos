@@ -36,6 +36,10 @@ Supported activity kinds:
 
 Selecting the currently active side activity toggles the Side Panel.
 
+Activity sets are runtime-replaceable through the public Workbench shell API. This lets a host compose platform-owned Activities with currently effective extension Contributions without remounting the shell. Activity IDs must be unique, route-based Activities must declare a route, and Activities may choose primary or secondary placement.
+
+If the currently active Activity disappears because a package is disabled or uninstalled, Workbench falls back deterministically to the host default Activity (or the first effective Activity) and reconciles Side Panel visibility. Persisted layout state never keeps a removed extension effective.
+
 ### Layout persistence
 
 User interface layout state may persist:
@@ -83,3 +87,5 @@ On narrow screens, Workbench retains Activity semantics but shows one working su
 ## Compatibility
 
 Existing Standard Shell and Agent Workspace Shell remain valid. Workbench is an additional shell composition and does not change the App Host route or ActionHost contracts.
+
+Workbench does not discover packages itself. Package lifecycle and Contribution aggregation belong to the host/platform; Eidos only validates and renders the effective Activity set supplied through its public contract.
