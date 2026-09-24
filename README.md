@@ -31,6 +31,12 @@ Eidos does not own Human Intent intelligence, business truth, or business execut
 - Human decision, exception and attention experiences are first-class capabilities
 - Runtime does not execute arbitrary LLM-generated code by default
 
+## Human + LLM operability
+
+Eidos is LLM-first in construction and business-user-first in ordinary operation: a capable LLM should understand the system deterministically, while a novice user should be able to understand and use normal business experiences without developer assistance.
+
+See `docs/architecture/HUMAN-LLM-OPERABILITY-v0.1.md`.
+
 ## Commands
 
 ```bash
