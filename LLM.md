@@ -28,7 +28,8 @@ When realizing a business-facing capability:
 - prefer guided human-readable forms over exposing raw AST/internal IDs;
 - keep one semantic truth across UI, contracts and runtime;
 - use progressive disclosure for advanced detail;
-- do not require developer intervention for normal business configuration;
+- do not assume a human developer role; LLMs are the default engineers for implementation and extension;
+- do not require human developer intervention for normal business configuration;
 - make validation/errors understandable to a novice before showing technical detail.
 
 Authority: `docs/architecture/HUMAN-LLM-OPERABILITY-v0.1.md`.
