@@ -163,7 +163,7 @@ export async function mountBrowserAppHostShell(
       actionStatus.style.marginTop = "12px";
       pageContainer.appendChild(actionStatus);
 
-      for (const button of catalogButtons) {
+      for (const button of Array.from(catalogButtons)) {
         button.addEventListener("click", () => {
           void (async () => {
             const actionType = button.dataset.eidosActionType;
@@ -195,7 +195,7 @@ export async function mountBrowserAppHostShell(
                 type: "command" as const,
                 command: { code: command, inputVersion: button.dataset.eidosInputVersion ?? "0.1.0" },
                 values: { itemId },
-                sourceInteractionId: (page.definition as { id?: string }).id ?? loaded.page.id,
+                sourceInteractionId: (loaded.definition as { id?: string }).id ?? loaded.page.id,
                 actionId: button.dataset.eidosCatalogAction ?? command,
                 requiresConfirmation: button.dataset.eidosConfirm === "true"
               };
