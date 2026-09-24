@@ -28,3 +28,7 @@ Bridge contract for existing VNode/components. The initial overlay defines the p
 
 ### `ActionHost`
 Host execution port. Confirmation/authorization/execution occur outside runtime.
+
+## Package entry point
+
+The repository package exports the converged public API from `@eidos/reference`. Git/package consumers must use the public package entry point instead of importing private source paths. The public entry point includes `renderToHtml` for the supported UIDL form profile.

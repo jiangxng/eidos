@@ -229,3 +229,14 @@ Human-readable and machine-readable representations must share one declared sema
 Business-facing validation and errors explain the business problem first; implementation diagnostics are secondary.
 
 Authority: `docs/architecture/HUMAN-LLM-OPERABILITY-v0.1.md`.
+
+
+## Article XV — Eidos Usage Integrity
+
+A human-facing product surface may be described or accepted as **Eidos-based** only when its semantic interaction model is realized through Eidos public contracts/capabilities and a supported Eidos runtime/renderer boundary.
+
+Visual imitation is not Eidos integration. A bespoke HTML/JS page that merely resembles an Eidos experience MUST NOT be used as evidence that a product surface is Eidos-based.
+
+For EVO-family product verification, diagnostic-only bespoke surfaces may exist when explicitly labelled non-product, but they MUST NOT satisfy product UX, installation-flow or business-experience acceptance gates.
+
+Host applications may own transport, authentication, routing and outer chrome. Business-facing controls, actions and experience semantics claimed as Eidos-based must remain traceable to Eidos public contracts and deterministic rendering/interaction behavior.
