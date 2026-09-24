@@ -32,3 +32,6 @@ Host execution port. Confirmation/authorization/execution occur outside runtime.
 ## Package entry point
 
 The repository package exports the converged public API from `@eidos/reference`. Git/package consumers must use the public package entry point instead of importing private source paths. The public entry point includes `renderToHtml` for the supported UIDL form profile.
+
+### `renderCatalogBrowserToHtml(model)`
+Reference HTML renderer for the generic `catalog-browser` capability. The host supplies catalog truth/status/actions and remains responsible for executing requested actions.

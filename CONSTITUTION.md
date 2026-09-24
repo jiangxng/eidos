@@ -240,3 +240,27 @@ Visual imitation is not Eidos integration. A bespoke HTML/JS page that merely re
 For EVO-family product verification, diagnostic-only bespoke surfaces may exist when explicitly labelled non-product, but they MUST NOT satisfy product UX, installation-flow or business-experience acceptance gates.
 
 Host applications may own transport, authentication, routing and outer chrome. Business-facing controls, actions and experience semantics claimed as Eidos-based must remain traceable to Eidos public contracts and deterministic rendering/interaction behavior.
+
+
+## Article XVI — Framework Before Product-Specific Frontend
+
+For EVO-family and other projects that adopt Eidos as their experience framework, human-facing frontend work MUST pass through Eidos public capabilities/contracts.
+
+When a product requirement cannot be expressed by current Eidos capability:
+
+1. identify the missing reusable experience capability;
+2. implement it in Eidos behind a stable public contract and renderer boundary;
+3. validate it inside Eidos;
+4. consume that capability from the product project.
+
+The product project MUST NOT solve the gap by creating a parallel business-UI framework or bespoke semantic frontend. Host-owned shell/chrome, transport and routing remain allowed, but product interaction semantics belong to Eidos.
+
+This rule preserves layering:
+
+```text
+Product business/lifecycle semantics
+        ↓ public experience contract
+Eidos capability/runtime/renderer
+        ↓
+Human experience
+```
