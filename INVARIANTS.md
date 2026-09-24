@@ -21,3 +21,6 @@
 - **EIDOS-19** Literal human-facing strings remain valid deterministic fallbacks. Localization resolution may override only declared/stable semantic text slots and MUST NOT change machine identifiers, command codes, field keys, semantic types, or business data.
 - **EIDOS-20** Agent-first layouts are generic App Host capabilities. Eidos may host an assistant route, chat surface, and workspace browser, but MUST NOT depend on a specific Agent, model provider, or enterprise product.
 - **EIDOS-21** Responsive product acceptance requires normal workflows to remain usable on narrow screens; multi-pane desktop layouts MUST provide a single-pane mobile interaction model without losing active chat/workspace state.
+- **EIDOS-22** Workbench Activity Bar items select View Containers or workspace targets; they are not a compressed duplicate of application navigation. Side panels are user-toggleable and resizable, and layout state may persist without becoming business truth.
+- **EIDOS-23** Simple extension configuration SHOULD use a declarative Settings Editor contract. Secrets/credentials MUST NOT be represented as ordinary Settings values; secure secret handling is a separate platform boundary.
+- **EIDOS-24** Workbench layout persistence is user-interface state only. Failure to persist layout MUST NOT prevent the App Host or business Experiences from operating.
