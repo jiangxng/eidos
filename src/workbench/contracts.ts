@@ -11,6 +11,10 @@ export interface WorkbenchActivityV010 {
   kind: WorkbenchActivityKind;
   route?: string;
   order?: number;
+  localization?: {
+    namespace: string;
+    key: string;
+  };
 }
 
 export interface WorkbenchLayoutStateV010 {
