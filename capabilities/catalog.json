@@ -2,6 +2,15 @@
   "catalogVersion": "0.1.0",
   "capabilities": [
     {
+      "id": "catalog-browser",
+      "version": "0.1.0",
+      "maturity": "candidate",
+      "category": "navigation",
+      "renderers": [
+        "html"
+      ]
+    },
+    {
       "id": "hierarchical-selection",
       "version": "0.1.0",
       "maturity": "candidate",
