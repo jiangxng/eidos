@@ -7,9 +7,9 @@
 
 All EVO-family products and plugins must be designed so that:
 
-> LLMs can understand and maintain them, business users can understand and operate them, and ordinary users should not depend on developers for normal configuration and use.
+> LLMs are the primary software builders and maintainers, business users can understand and operate the system directly, and ordinary users should not depend on human developers for normal configuration, operation or evolution.
 
-This is a cross-project product and engineering principle, not a Ledger Runtime-specific rule.
+This is a cross-project product and engineering principle, not a Ledger Runtime-specific rule. The target operating model is that approximately 99.9% of software design, implementation, extension, migration, testing, documentation and maintenance work is performed by LLMs rather than human developers.
 
 ## What LLM-native means here
 
@@ -56,9 +56,9 @@ runtime
 
 Both forms must map to the same declared semantics.
 
-## No-developer dependency
+## LLM-primary engineering and no human-developer dependency
 
-Normal business operations should not require a developer to:
+The architecture must not assume a human developer role. Normal business operations, configuration and routine product evolution should not require a human developer to:
 
 - edit source code;
 - write SQL;
@@ -67,7 +67,7 @@ Normal business operations should not require a developer to:
 - understand class names or framework internals;
 - manually translate business rules into implementation structures.
 
-Developers extend engine capabilities. They are not the mandatory operators of ordinary business configuration.
+LLMs are the default engineers for extending engine capabilities, implementing plugins, migrations, tests, documentation and maintenance. Humans primarily provide business intent, judgment, authorization, constraints and acceptance. Human software developers may participate exceptionally, but they are not a required system role.
 
 ## Progressive disclosure
 
@@ -82,7 +82,7 @@ novice
 advanced user
 → formulas, conditions, dependencies, versions
 
-developer / LLM
+LLM / engine-internal view
 → schemas, AST, contracts, diagnostics, implementation
 ```
 
