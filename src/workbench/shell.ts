@@ -252,7 +252,13 @@ export async function mountWorkbenchShell(
     sideContent.replaceChildren();
 
     const activity = activityById(state.activeActivityId) ?? defaultActivity;
-    sideTitle.textContent = activity.title;
+    sideTitle.textContent = activity.localization && localization
+      ? localization.resolve(
+          activity.localization.namespace,
+          activity.localization.key,
+          activity.title
+        )
+      : activity.title;
 
     if (!state.sidePanelVisible || !sideKind(activity)) return;
 
@@ -395,8 +401,15 @@ export async function mountWorkbenchShell(
       button.type = "button";
       button.dataset.activityId = activity.id;
       button.dataset.active = activity.id === state.activeActivityId ? "true" : "false";
-      button.title = activity.title;
-      button.setAttribute("aria-label", activity.title);
+      const activityTitle = activity.localization && localization
+        ? localization.resolve(
+            activity.localization.namespace,
+            activity.localization.key,
+            activity.title
+          )
+        : activity.title;
+      button.title = activityTitle;
+      button.setAttribute("aria-label", activityTitle);
       const icon = document.createElement("span");
       icon.setAttribute("data-eidos-activity-icon", "");
       icon.textContent = activity.icon;
