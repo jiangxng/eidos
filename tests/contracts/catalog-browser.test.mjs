@@ -26,3 +26,29 @@ test("catalog browser renderer exposes semantic Eidos item/action markers", () =
   assert.match(html, /data-eidos-catalog-item="demo"/);
   assert.match(html, /data-eidos-catalog-action="install"/);
 });
+
+test("catalog browser action may be disabled with a human-readable reason", () => {
+  const html = renderCatalogBrowserToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-browser",
+    id: "plugin-store-state",
+    title: "Plugin Store",
+    items: [{
+      id: "demo",
+      title: "Demo",
+      primaryAction: {
+        id: "install",
+        label: "Install",
+        type: "command",
+        command: "install",
+        enabled: false,
+        disabledReason: "Generate the installation plan first.",
+        helpText: "Review dependencies before installation."
+      }
+    }]
+  });
+  assert.match(html, /data-eidos-catalog-action="install"/);
+  assert.match(html, /disabled/);
+  assert.match(html, /data-eidos-disabled-reason="Generate the installation plan first\."/);
+  assert.match(html, /data-eidos-action-help/);
+});
