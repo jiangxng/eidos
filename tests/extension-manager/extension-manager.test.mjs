@@ -110,3 +110,24 @@ test("Extension Manager renders trust, permissions and runtime posture", () => {
   assert.match(html, /Runtime: worker \/ worker/);
   assert.match(html, /Storage: available/);
 });
+
+
+test("Extension Manager renders process-isolated runtime posture", () => {
+  const definition = {
+    contractVersion: "0.1.0",
+    kind: "extension-manager",
+    id: "process-runtime",
+    title: "Extensions",
+    protocol: { name: "EVO Plugin Protocol", version: "0.1.0", status: "preview" },
+    host: { name: "EVO App Platform" },
+    items: [{
+      id: "process-plugin",
+      title: "Process Plugin",
+      version: "0.1.0",
+      status: { id: "enabled", label: "Enabled" },
+      runtime: { kind: "process", isolation: "process", status: "ready" }
+    }]
+  };
+  const html = renderExtensionManagerToHtml(definition);
+  assert.match(html, /Runtime: process \/ process · ready/);
+});
