@@ -20,6 +20,7 @@ export * from "./exception/index.js";
 export * as llmTools from "./llm-tools/index.js";
 export * from "./renderers/html/index.js";
 export * from "./catalog-browser/index.js";
+export * from "./extension-manager/index.js";
 export * from "./app-host/index.js";
 export * from "./localization/index.js";
 export * from "./chat/index.js";
