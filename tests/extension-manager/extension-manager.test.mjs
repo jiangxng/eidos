@@ -131,3 +131,48 @@ test("Extension Manager renders process-isolated runtime posture", () => {
   const html = renderExtensionManagerToHtml(definition);
   assert.match(html, /Runtime: process \/ process · ready/);
 });
+
+
+test("Extension Manager renders integrity and runtime observability posture", () => {
+  const definition = {
+    contractVersion: "0.1.0",
+    kind: "extension-manager",
+    id: "integrity-runtime",
+    title: "Extensions",
+    protocol: { name: "EVO Plugin Protocol", version: "0.1.0", status: "preview" },
+    host: { name: "EVO App Platform" },
+    items: [{
+      id: "signed-runtime",
+      title: "Signed Runtime",
+      version: "0.1.0",
+      status: { id: "enabled", label: "Enabled" },
+      integrity: {
+        state: "verified",
+        label: "Signature verified",
+        algorithm: "Ed25519",
+        keyId: "release-key-1",
+        digest: "sha256:abc",
+        provenance: "internal-ci"
+      },
+      runtime: {
+        kind: "process",
+        isolation: "process",
+        status: "ready",
+        health: "healthy",
+        metrics: {
+          invocations: 12,
+          failures: 1,
+          timeouts: 1,
+          crashes: 0,
+          restarts: 1,
+          lastEventAt: "2026-09-25T00:00:00Z"
+        }
+      }
+    }]
+  };
+  const html = renderExtensionManagerToHtml(definition);
+  assert.match(html, /Signature verified/);
+  assert.match(html, /Ed25519/);
+  assert.match(html, /Runtime: process \/ process · ready · healthy/);
+  assert.match(html, /12 inv · 1 fail · 1 timeout · 0 crash · 1 restart/);
+});
