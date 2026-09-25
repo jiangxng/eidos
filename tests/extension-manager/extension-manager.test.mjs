@@ -176,3 +176,38 @@ test("Extension Manager renders integrity and runtime observability posture", ()
   assert.match(html, /Runtime: process \/ process · ready · healthy/);
   assert.match(html, /12 inv · 1 fail · 1 timeout · 0 crash · 1 restart/);
 });
+
+
+test("Extension Manager renders recent runtime operational history", () => {
+  const definition = {
+    contractVersion: "0.1.0",
+    kind: "extension-manager",
+    id: "runtime-history",
+    title: "Extensions",
+    protocol: { name: "EVO Plugin Protocol", version: "0.1.0", status: "preview" },
+    host: { name: "EVO App Platform" },
+    items: [{
+      id: "history-plugin",
+      title: "History Plugin",
+      version: "0.1.0",
+      status: { id: "enabled", label: "Enabled" },
+      runtime: {
+        kind: "process",
+        isolation: "process",
+        status: "ready",
+        history: [{
+          sequence: 9,
+          occurredAt: "2026-09-25T10:00:00.000Z",
+          type: "INVOCATION_FAILED",
+          method: "run",
+          durationMs: 21,
+          message: "example failure"
+        }]
+      }
+    }]
+  };
+  const html = renderExtensionManagerToHtml(definition);
+  assert.match(html, /Recent runtime activity/);
+  assert.match(html, /INVOCATION_FAILED/);
+  assert.match(html, /example failure/);
+});
