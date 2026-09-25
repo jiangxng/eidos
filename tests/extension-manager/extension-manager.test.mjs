@@ -80,3 +80,33 @@ test("App Host recognizes Extension Manager as a first-class Eidos capability", 
   const html = renderAppHostPageToHtml(page);
   assert.match(html, /data-eidos-extension-manager=/);
 });
+
+
+test("Extension Manager renders trust, permissions and runtime posture", () => {
+  const definition = {
+    contractVersion: "0.1.0",
+    kind: "extension-manager",
+    id: "security-test",
+    title: "Extensions",
+    protocol: { name: "EVO Plugin Protocol", version: "0.1.0", status: "preview" },
+    host: { name: "EVO App Platform" },
+    items: [{
+      id: "sample",
+      title: "Sample",
+      version: "0.1.0",
+      status: { id: "enabled", label: "Enabled" },
+      trust: { level: "review", label: "Review required", publisher: "Example" },
+      permissions: [{ id: "network", label: "Network access", risk: "medium", granted: false }],
+      activation: { mode: "on-demand", events: ["onCommand"] },
+      runtime: { kind: "worker", isolation: "worker", status: "inactive" },
+      storage: { scope: "package", state: "available" },
+      events: { publish: ["sample.changed"], subscribe: ["host.ready"] }
+    }]
+  };
+  const html = renderExtensionManagerToHtml(definition);
+  assert.match(html, /data-eidos-extension-trust/);
+  assert.match(html, /Network access/);
+  assert.match(html, /Activation: on-demand/);
+  assert.match(html, /Runtime: worker \/ worker/);
+  assert.match(html, /Storage: available/);
+});
