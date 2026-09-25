@@ -84,6 +84,12 @@ The host/platform decides how settings Contributions become effective routes, ho
 
 On narrow screens, Workbench retains Activity semantics but shows one working surface at a time. A desktop-only resizer is not required to complete normal mobile workflows.
 
+## Visual and interaction authority
+
+Workbench visual realization follows `docs/product/EIDOS-PRODUCTIVE-DESIGN-LANGUAGE-v0.1.md`.
+
+The Workbench shell owns the stable geometry and interaction semantics of Activity Bar, Side Panel, Workspace, contextual toolbars and Status Bar. Host products supply content and Contributions; they do not redefine ordinary spacing, button hierarchy, focus treatment or shell chrome.
+
 ## Compatibility
 
 Existing Standard Shell and Agent Workspace Shell remain valid. Workbench is an additional shell composition and does not change the App Host route or ActionHost contracts.

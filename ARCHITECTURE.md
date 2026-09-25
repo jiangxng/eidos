@@ -41,3 +41,12 @@ existing DOM renderer/layout
 
 Legacy VNode routes continue unchanged unless explicitly migrated. UIDL is added as a second, versioned entry path.
 List/dashboard/layout capabilities are not forced into the form-only UIDL contract.
+
+
+## Design language ownership
+
+`src/design-language` owns the default Productive Design Language tokens and Workbench stylesheet used by Eidos-adopting hosts.
+
+Human Experience contracts express semantics; Eidos realizes ordinary visual hierarchy, spacing, focus, responsive behavior and action styling. Host products/plugins may theme or extend through declared public capabilities but must not fork ordinary Workbench chrome or standard control semantics.
+
+Authority: `docs/product/EIDOS-PRODUCTIVE-DESIGN-LANGUAGE-v0.1.md`.

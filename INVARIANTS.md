@@ -24,3 +24,8 @@
 - **EIDOS-22** Workbench Activity Bar items select View Containers or workspace targets; they are not a compressed duplicate of application navigation. Side panels are user-toggleable and resizable, and layout state may persist without becoming business truth.
 - **EIDOS-23** Simple extension configuration SHOULD use a declarative Settings Editor contract. Secrets/credentials MUST NOT be represented as ordinary Settings values; secure secret handling is a separate platform boundary.
 - **EIDOS-24** Workbench layout persistence is user-interface state only. Failure to persist layout MUST NOT prevent the App Host or business Experiences from operating.
+
+- **EIDOS-25** Eidos owns the default visual/interaction language for App Host, Workbench and standard Experience capabilities. Host products and plugins MUST consume Eidos design tokens/patterns instead of silently forking ordinary shell, spacing, focus or button semantics.
+- **EIDOS-26** Standard action scopes expose at most one visually primary action. Supporting, destructive and navigation actions use semantically distinct lower-emphasis treatments and stable placement rules defined by the Eidos Productive Design Language.
+- **EIDOS-27** Productive density MUST NOT reduce mobile/touch hit targets below the Eidos minimum or remove visible keyboard focus. Icon-only controls require accessible names and discoverable labels/tooltips.
+- **EIDOS-28** Workbench layout follows stable container semantics: Activity Bar selects context, Side Panel hosts secondary/contextual Views, Main Workspace owns the primary task, and toolbars expose only context-relevant actions. Plugins MUST NOT repurpose these regions into competing navigation systems.
