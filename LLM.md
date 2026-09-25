@@ -6,7 +6,7 @@
 
 A fresh LLM must be able to work from a clean checkout without prior conversation.
 
-> **Design authority (2026-09-25):** Before changing App Host, Workbench, standard Eidos capabilities, button hierarchy, spacing, toolbar placement, responsive layout or plugin-facing visual patterns, read `docs/product/EIDOS-PRODUCTIVE-DESIGN-LANGUAGE-v0.1.md` and use `src/design-language/tokens.ts`. Do not invent a parallel visual language inside a host product or plugin.
+> **Design authority (2026-09-25):** Before changing App Host, Workbench, standard Eidos capabilities, button hierarchy, spacing, toolbar placement, responsive layout or plugin-facing visual patterns, read `docs/product/EIDOS-PRODUCTIVE-DESIGN-LANGUAGE-v0.1.md` and use `src/design-language/tokens.ts`. For icons, also read `docs/product/EIDOS-ICON-SYSTEM-v0.1.md` and use the semantic registry in `src/design-language/icons`. Do not invent a parallel visual/icon language inside a host product or plugin.
 
 Before editing code, identify:
 - base revision and architecture version;

@@ -33,3 +33,7 @@
 - **EIDOS-29** Participating LLMs are proactive framework stewards, not request-only implementers. They MUST review mature UI/runtime foundations and surface material omissions even when the human did not name the engineering concept.
 - **EIDOS-30** Reusable UI/interaction gaps are classified NOW / SOON / WATCH in `llm.foundation-map.json`. A NOW gap that is already causing duplication, drift, accessibility/reliability risk or expensive future migration MUST be addressed before broad feature expansion.
 - **EIDOS-31** A clean-room fresh-LLM review from repository authority is a required architecture-health technique. Repeated rediscovery of the same missing design/runtime foundation is an Eidos documentation/architecture defect.
+
+- **EIDOS-32** Eidos owns the standard product icon language. Workbench and ordinary plugin UI MUST prefer registered semantic Eidos icon names over raw Unicode glyphs, arbitrary SVG, copied brand assets or independent icon-library dependencies.
+- **EIDOS-33** The Eidos Icon Registry is additive and semantic-name stable. Missing domain icons are added to Eidos at the reusable owner boundary rather than being privately invented inside each plugin.
+- **EIDOS-34** Icon-only controls MUST provide accessible names/tooltips; decorative icon SVG is aria-hidden and MUST NOT be the sole carrier of state.
