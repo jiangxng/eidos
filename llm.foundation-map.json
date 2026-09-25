@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "authority": "docs/architecture/LLM-PROACTIVE-ENGINEERING-INSTINCTS-v0.1.md",
+  "reviewModel": "NOW_SOON_WATCH",
+  "reviewTriggers": [
+    "before broad platform expansion",
+    "when the same workaround appears twice",
+    "when CI/context grows with unrelated modules",
+    "when a second consumer needs the same capability",
+    "before declaring a foundation stable",
+    "during periodic clean-room architecture review"
+  ],
+  "project": "Eidos",
+  "domains": {
+    "productiveDesignLanguage": "NOW",
+    "workbenchAppHostContracts": "NOW",
+    "extensionContributionUi": "NOW",
+    "accessibilityKeyboardFocus": "NOW",
+    "responsiveMobile": "NOW",
+    "themingTokens": "SOON",
+    "componentInteractionConsistency": "SOON",
+    "pluginVisualGovernance": "NOW",
+    "performanceBudgets": "SOON",
+    "diagnosticsObservability": "SOON",
+    "compatibilityDeprecation": "SOON",
+    "llmContextArchitecture": "NOW"
+  }
+}
