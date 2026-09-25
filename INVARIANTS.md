@@ -29,3 +29,7 @@
 - **EIDOS-26** Standard action scopes expose at most one visually primary action. Supporting, destructive and navigation actions use semantically distinct lower-emphasis treatments and stable placement rules defined by the Eidos Productive Design Language.
 - **EIDOS-27** Productive density MUST NOT reduce mobile/touch hit targets below the Eidos minimum or remove visible keyboard focus. Icon-only controls require accessible names and discoverable labels/tooltips.
 - **EIDOS-28** Workbench layout follows stable container semantics: Activity Bar selects context, Side Panel hosts secondary/contextual Views, Main Workspace owns the primary task, and toolbars expose only context-relevant actions. Plugins MUST NOT repurpose these regions into competing navigation systems.
+
+- **EIDOS-29** Participating LLMs are proactive framework stewards, not request-only implementers. They MUST review mature UI/runtime foundations and surface material omissions even when the human did not name the engineering concept.
+- **EIDOS-30** Reusable UI/interaction gaps are classified NOW / SOON / WATCH in `llm.foundation-map.json`. A NOW gap that is already causing duplication, drift, accessibility/reliability risk or expensive future migration MUST be addressed before broad feature expansion.
+- **EIDOS-31** A clean-room fresh-LLM review from repository authority is a required architecture-health technique. Repeated rediscovery of the same missing design/runtime foundation is an Eidos documentation/architecture defect.
