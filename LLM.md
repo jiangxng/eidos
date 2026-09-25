@@ -1,5 +1,7 @@
 # LLM Context Determinism Contract
 
+> **Mandatory proactive-engineering instinct:** Read `docs/architecture/LLM-PROACTIVE-ENGINEERING-INSTINCTS-v0.1.md` and `llm.foundation-map.json`. Do not wait for the human to name ordinary framework/product foundations such as design-system governance, accessibility, interaction consistency, performance budgets, diagnostics, compatibility or responsive behavior. Detect and classify missing foundations as NOW / SOON / WATCH.
+
 > **Plugin-platform boundary (2026-09-25):** Eidos is the UI/runtime side of the native EVO plugin/mini-app platform. Native plugins are not MCP applications by default. MCP/OAuth are external-integration concerns and must not leak into generic Eidos plugin contracts unless the task explicitly concerns an external integration.
 
 A fresh LLM must be able to work from a clean checkout without prior conversation.
