@@ -212,3 +212,20 @@ Design decisions that introduce a new reusable pattern belong in Eidos first.
 A fresh LLM modifying Workbench or a plugin Experience MUST read this document and the machine-readable tokens before inventing new layout/button conventions.
 
 Visual consistency is product behavior, not optional polish.
+
+
+## Icon language
+
+Eidos owns the standard icon language used by Workbench and standard plugin surfaces.
+
+Authority: `docs/product/EIDOS-ICON-SYSTEM-v0.1.md`.
+
+Rules:
+
+- standard UI uses semantic Eidos icon names rather than raw Unicode glyphs or plugin-owned SVG;
+- icon geometry follows the Eidos 24×24 productive stroke system;
+- icon-only controls require accessible labels and tooltips;
+- plugins inherit the Eidos icon registry by default;
+- third-party icon libraries are not a default dependency;
+- brand icons are governed separately from ordinary product icons;
+- the registry grows additively as new business domains require new semantics.
