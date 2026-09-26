@@ -195,7 +195,8 @@ test("Assistant Chat v0.2 localizes Japanese and Traditional Chinese chrome with
     }
   ];
 
-  const ja = localizeAppHostPageDefinition(page, createLocalizationRuntime(bundles, { locale: "ja" }));
+  const jaPage = { ...page, definition: definitionV020 };
+  const ja = localizeAppHostPageDefinition(jaPage, createLocalizationRuntime(bundles, { locale: "ja" }));
   assert.equal(ja.title, "パーソナルエージェント");
   assert.equal(ja.command.code, "assistant.chat");
   assert.equal(ja.context.selector.ariaLabel, "コンテキストを選択");
