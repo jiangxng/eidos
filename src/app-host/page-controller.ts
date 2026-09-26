@@ -154,17 +154,17 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
     listeners.push(() => catalogSearch.removeEventListener("input", filterCatalog));
   }
 
-  const extensionActionButtons = container.querySelectorAll<HTMLButtonElement>(
-    "[data-eidos-catalog-action],[data-eidos-extension-action]"
+  const hostActionButtons = container.querySelectorAll<HTMLButtonElement>(
+    "[data-eidos-catalog-action],[data-eidos-extension-action],[data-eidos-setup-action],[data-eidos-chat-action]"
   );
-  if (extensionActionButtons.length > 0) {
+  if (hostActionButtons.length > 0) {
     const actionStatus = document.createElement("pre");
     actionStatus.setAttribute("data-eidos-action-status", "");
     actionStatus.setAttribute("role", "status");
     actionStatus.style.marginTop = "12px";
     container.appendChild(actionStatus);
 
-    for (const button of Array.from(extensionActionButtons)) {
+    for (const button of Array.from(hostActionButtons)) {
       const handler = () => {
         void (async () => {
           if (button.disabled) {
@@ -192,10 +192,10 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
 
           const command = button.dataset.eidosCommand;
           const itemId = button.dataset.eidosItemId;
-          if (!command || !itemId) {
+          if (!command) {
             actionStatus.textContent = hostText(
               "shell.actionIncomplete",
-              "Catalog command action is incomplete."
+              "Command action is incomplete."
             );
             return;
           }
@@ -219,12 +219,14 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
                 inputVersion: button.dataset.eidosInputVersion ?? "0.1.0"
               },
               values: {
-                itemId,
+                ...(itemId ? { itemId } : {}),
                 confirmed: button.dataset.eidosConfirm === "true"
               },
               sourceInteractionId: (page.definition as { id?: string }).id ?? page.page.id,
               actionId: button.dataset.eidosCatalogAction
                 ?? button.dataset.eidosExtensionAction
+                ?? button.dataset.eidosSetupAction
+                ?? button.dataset.eidosChatAction
                 ?? command,
               requiresConfirmation: button.dataset.eidosConfirm === "true"
             };
