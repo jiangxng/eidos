@@ -211,3 +211,28 @@ test("Extension Manager renders recent runtime operational history", () => {
   assert.match(html, /INVOCATION_FAILED/);
   assert.match(html, /example failure/);
 });
+
+
+test("Extension Manager separates readiness from lifecycle and collapses technical detail", () => {
+  const readyDefinition = structuredClone(definition);
+  readyDefinition.technicalDetailsLabel = "Technical details";
+  readyDefinition.items[0].status = { id: "enabled", label: "Enabled", tone: "positive" };
+  readyDefinition.items[0].readiness = {
+    id: "setup-required",
+    label: "Needs setup",
+    tone: "warning",
+    message: "Configure a required provider."
+  };
+  readyDefinition.items[0].primaryAction = {
+    id: "setup",
+    label: "Set up",
+    type: "navigate",
+    route: "/setup"
+  };
+  const html = renderExtensionManagerToHtml(readyDefinition);
+  assert.match(html, /data-readiness="setup-required"/);
+  assert.match(html, /Needs setup/);
+  assert.match(html, /<details data-eidos-extension-technical>/);
+  assert.match(html, /Technical details/);
+  assert.match(html, /data-eidos-extension-action="setup"/);
+});
