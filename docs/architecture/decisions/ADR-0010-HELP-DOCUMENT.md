@@ -75,6 +75,10 @@ A Help document is already a locale-specific content variant.
 
 Eidos does not translate Help body text at runtime. The Host selects the correct locale variant according to its localization policy and fallback chain.
 
+Eidos does localize renderer-owned Help chrome (for example breadcrumb accessibility labels, Related, owner/review metadata, Help kind and audience labels) through the normal `LocalizationRuntime`. The rendered article declares the document locale with the HTML `lang` attribute.
+
+`AppManagerExperienceSource` may propagate the active locale as a Host request hint for experience discovery and page loading. Hosts remain responsible for deterministic locale fallback and must not make stable route/document identity depend on whether a translation exists.
+
 Machine identifiers, action codes and error codes remain stable across locales.
 
 ## Compatibility
