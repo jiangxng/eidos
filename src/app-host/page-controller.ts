@@ -3,17 +3,23 @@ import type { ActionRequestV010, JsonValue } from "../runtime/contracts.js";
 import type { ActionHost } from "../adapters/ports.js";
 import {
   isChatExperienceV010,
+  isChatExperienceV020,
   renderChatMessageToHtml,
-  type ChatMessageV010
+  type ChatMessageV010,
+  type ChatMessageV020
 } from "../chat/index.js";
-import { isSettingsEditorV010 } from "../settings/index.js";
+import {
+  isSettingsEditorV010,
+  isSettingsEditorV020,
+  type SettingsFieldV010
+} from "../settings/index.js";
 import type { LocalizationRuntime } from "../localization/contracts.js";
 import type { AppHostLoadedPageV010 } from "./contracts.js";
 import { executeAppHostPageAction } from "./action-executor.js";
 import { renderAppHostPageToHtml } from "./page-renderer.js";
 
 export interface AppHostChatState {
-  messages: ChatMessageV010[];
+  messages: Array<ChatMessageV010 | ChatMessageV020>;
 }
 
 export interface MountAppHostPageOptions {
@@ -74,6 +80,39 @@ function resultMessage(result: unknown): string {
     if (typeof message === "string" && message.trim()) return message;
   }
   return JSON.stringify(result ?? { ok: true }, null, 2);
+}
+
+function settingsFields(definition: unknown): SettingsFieldV010[] {
+  if (isSettingsEditorV010(definition)) return definition.settings;
+  if (isSettingsEditorV020(definition)) return definition.groups.flatMap(group => group.settings);
+  return [];
+}
+
+function resultMessageV020(
+  result: unknown,
+  id: string,
+  ok: boolean,
+  fallbackError?: string
+): ChatMessageV020 {
+  if (ok && result !== null && typeof result === "object" && !Array.isArray(result)) {
+    const parts = (result as { messageParts?: unknown }).messageParts;
+    if (Array.isArray(parts)) {
+      return {
+        id,
+        contractVersion: "0.2.0",
+        role: "assistant",
+        parts: structuredClone(parts) as ChatMessageV020["parts"]
+      };
+    }
+  }
+  return {
+    id,
+    contractVersion: "0.2.0",
+    role: ok ? "assistant" : "error",
+    parts: ok
+      ? [{ type: "text", text: resultMessage(result) }]
+      : [{ type: "notice", tone: "danger", text: fallbackError ?? "Unknown action error" }]
+  };
 }
 
 export function mountAppHostLoadedPage(options: MountAppHostPageOptions): MountedAppHostPage {
