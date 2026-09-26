@@ -52,3 +52,36 @@ test("catalog browser action may be disabled with a human-readable reason", () =
   assert.match(html, /data-eidos-disabled-reason="Generate the installation plan first\."/);
   assert.match(html, /data-eidos-action-help/);
 });
+
+
+test("catalog browser may expose deterministic local search metadata", () => {
+  const html = renderCatalogBrowserToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-browser",
+    id: "help-index",
+    title: "Help",
+    search: {
+      placeholder: "Search help",
+      noResultsMessage: "No matching help."
+    },
+    items: [{
+      id: "provider-binding",
+      title: "Provider Binding",
+      summary: "Choose a Provider by capability and scope.",
+      category: "How-to",
+      metadata: { errorCode: "PROVIDER_RESOLUTION_AMBIGUOUS" },
+      primaryAction: {
+        id: "open",
+        label: "Open",
+        type: "navigate",
+        route: "/help/provider-binding"
+      }
+    }]
+  });
+
+  assert.match(html, /data-eidos-catalog-search-input/);
+  assert.match(html, /placeholder="Search help"/);
+  assert.match(html, /data-eidos-catalog-search-text="[^"]*provider binding/);
+  assert.match(html, /provider_resolution_ambiguous/i);
+  assert.match(html, /data-eidos-catalog-search-empty/);
+});
