@@ -85,7 +85,27 @@ const definitionV020 = {
   id: "assistant.home",
   title: "Personal Agent",
   command: { code: "assistant.chat", inputVersion: "0.1.0" },
-  context: { label: "Context", value: "Personal" },
+  context: {
+    label: "Context",
+    value: "Personal",
+    selector: {
+      key: "activeContext",
+      ariaLabel: "Choose context",
+      selectedId: "personal",
+      options: [
+        {
+          id: "personal",
+          label: "Personal",
+          value: { kind: "PERSONAL", contextId: "personal:default" }
+        },
+        {
+          id: "enterprise-acme",
+          label: "Acme",
+          value: { kind: "ENTERPRISE", contextId: "enterprise:acme", enterpriseId: "acme" }
+        }
+      ]
+    }
+  },
   readiness: {
     state: "setup-required",
     label: "Needs setup",
@@ -111,6 +131,9 @@ test("Assistant Chat v0.2 renders context readiness and suggested prompts", () =
   const html = renderChatExperienceToHtml(definitionV020);
   assert.match(html, /data-chat-version="0\.2\.0"/);
   assert.match(html, /data-eidos-chat-context/);
+  assert.match(html, /data-eidos-chat-context-selector/);
+  assert.match(html, /data-eidos-chat-context-value=/);
+  assert.match(html, /<option[^>]+selected[^>]*>Personal<\/option>/);
   assert.match(html, /data-eidos-chat-readiness/);
   assert.match(html, /data-eidos-chat-action="setup"/);
   assert.match(html, /data-eidos-chat-suggestion="attention"/);
@@ -151,6 +174,7 @@ test("Assistant Chat v0.2 localizes Japanese and Traditional Chinese chrome with
         "chat.assistant.home.composer.placeholder": "相談内容やタスクを入力",
         "chat.assistant.home.composer.sendLabel": "送信",
         "chat.assistant.home.context.label": "コンテキスト",
+        "chat.assistant.home.context.selector.ariaLabel": "コンテキストを選択",
         "chat.assistant.home.readiness.setup-required.label": "セットアップが必要",
         "chat.assistant.home.readiness.setup-required.message": "プロバイダーを設定してください。",
         "chat.assistant.home.action.setup.label": "設定する",
@@ -171,13 +195,24 @@ test("Assistant Chat v0.2 localizes Japanese and Traditional Chinese chrome with
     }
   ];
 
-  const ja = localizeAppHostPageDefinition(page, createLocalizationRuntime(bundles, { locale: "ja" }));
+  const jaPage = { ...page, definition: definitionV020 };
+  const ja = localizeAppHostPageDefinition(jaPage, createLocalizationRuntime(bundles, { locale: "ja" }));
   assert.equal(ja.title, "パーソナルエージェント");
   assert.equal(ja.command.code, "assistant.chat");
+  assert.equal(ja.context.selector.ariaLabel, "コンテキストを選択");
 
   const twPage = { ...page, definition: definitionV020 };
   const tw = localizeAppHostPageDefinition(twPage, createLocalizationRuntime(bundles, { locale: "zh-TW" }));
   assert.equal(tw.title, "個人 Agent");
   assert.equal(tw.composer.sendLabel, "傳送");
   assert.equal(tw.command.code, "assistant.chat");
+});
+
+
+test("Assistant Chat v0.2 context selector keeps machine values opaque to presentation", () => {
+  const html = renderChatExperienceToHtml(definitionV020);
+  assert.match(html, /value="enterprise-acme"/);
+  assert.match(html, /Acme/);
+  assert.match(html, /enterprise:acme/);
+  assert.match(html, /enterpriseId/);
 });
