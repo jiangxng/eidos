@@ -1,7 +1,7 @@
 import { renderToHtml } from "../renderers/html/index.js";
 import { renderCatalogBrowserToHtml } from "../catalog-browser/render.js";
 import { isChatExperienceV010, isChatExperienceV020, renderChatExperienceToHtml } from "../chat/index.js";
-import { isSettingsEditorV010, renderSettingsEditorToHtml } from "../settings/index.js";
+import { isSettingsEditorV010, isSettingsEditorV020, renderSettingsEditorToHtml } from "../settings/index.js";
 import { isExtensionManagerV010, renderExtensionManagerToHtml } from "../extension-manager/index.js";
 import { isHelpDocumentV010, renderHelpDocumentToHtml } from "../help/index.js";
 import { isSetupFlowV010, renderSetupFlowToHtml } from "../setup-flow/index.js";
@@ -26,7 +26,7 @@ export function renderAppHostPageToHtml(
     return renderChatExperienceToHtml(localizedDefinition);
   }
 
-  if (isSettingsEditorV010(localizedDefinition)) {
+  if (isSettingsEditorV010(localizedDefinition) || isSettingsEditorV020(localizedDefinition)) {
     return renderSettingsEditorToHtml(localizedDefinition);
   }
 
