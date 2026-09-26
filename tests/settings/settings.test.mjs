@@ -22,6 +22,12 @@ const document = {
       defaultValue: "gpt-test"
     },
     {
+      key: "adminToken",
+      label: "Admin token",
+      type: "secret",
+      value: ""
+    },
+    {
       key: "enabled",
       label: "Enabled",
       type: "boolean",
@@ -41,6 +47,9 @@ test("Settings Editor renders typed controls and save action", () => {
   assert.match(html, /data-eidos-settings-editor="provider\.settings"/);
   assert.match(html, /name="model"/);
   assert.match(html, /data-setting-type="string"/);
+  assert.match(html, /name="adminToken"/);
+  assert.match(html, /type="password"/);
+  assert.match(html, /data-setting-type="secret"/);
   assert.match(html, /name="enabled"/);
   assert.match(html, /type="checkbox"/);
   assert.match(html, />Save</);
