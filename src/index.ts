@@ -26,6 +26,7 @@ export * from "./app-host/index.js";
 export * from "./localization/index.js";
 export * from "./chat/index.js";
 export * from "./settings/index.js";
+export * from "./setup-flow/index.js";
 export * from "./workbench/contracts.js";
 export * from "./workbench/index.js";
 
