@@ -80,7 +80,7 @@ test("Setup Flow localizes Japanese and Traditional Chinese without changing act
         "setup.personal-agent.setup.description": "必要な手順を完了してください。",
         "setup.personal-agent.setup.step.provider.title": "LLMプロバイダー",
         "setup.personal-agent.setup.step.provider.description": "プロバイダーを選択してください。",
-        "setup.personal-agent.setup.step.provider.status": "必須",
+        "setup.personal-agent.setup.step.provider.status.current": "必須",
         "setup.personal-agent.setup.action.choose-provider.label": "プロバイダーを選ぶ",
         "setup.personal-agent.setup.action.open-agent.label": "パーソナルエージェントを開く"
       }
@@ -110,4 +110,34 @@ test("Setup Flow rejects duplicate step ids at render time", () => {
     () => renderSetupFlowToHtml({ ...definition, steps: [definition.steps[0], definition.steps[0]] }),
     /EIDOS_SETUP_STEP_DUPLICATE/
   );
+});
+
+
+test("Setup Flow localizes status by the current state instead of a fixed step label", () => {
+  const bundles = [{
+    contractVersion: "0.1.0",
+    namespace: "enterprise-agent",
+    locale: "ja",
+    messages: {
+      "setup.personal-agent.setup.step.provider.status.current": "必須",
+      "setup.personal-agent.setup.step.provider.status.complete": "完了"
+    }
+  }];
+  const runtime = createLocalizationRuntime(bundles, { locale: "ja" });
+  const current = localizeAppHostPageDefinition(page, runtime);
+  assert.equal(current.steps[0].statusDetail, "必須");
+
+  const completePage = {
+    ...page,
+    definition: {
+      ...definition,
+      steps: [{
+        ...definition.steps[0],
+        state: "complete",
+        statusDetail: "Complete"
+      }, definition.steps[1]]
+    }
+  };
+  const complete = localizeAppHostPageDefinition(completePage, runtime);
+  assert.equal(complete.steps[0].statusDetail, "完了");
 });
