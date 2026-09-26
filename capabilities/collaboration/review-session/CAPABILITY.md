@@ -2,23 +2,37 @@
 
 **Family:** `collaboration`  
 **Version:** `0.1.0`  
-**Maturity:** `planned`
+**Maturity:** `candidate`
 
 ## Purpose
-Canonical semantic capability placeholder for the Eidos capability system.
+
+Human review of proposed changes through the reusable Eidos Review Queue pattern.
+
+## Public realization
+
+Current reference realization:
+
+- contract: `src/review-queue/contracts.ts`
+- renderer: `src/review-queue/render.ts`
+- product authority: `docs/product/REVIEW-QUEUE-EXPERIENCE-PATTERN-v0.1.md`
 
 ## LLM contract
-An LLM should select this capability by semantic intent, not by guessing framework-specific component APIs.
+
+Select this capability when a workflow requires a person to inspect evidence, optionally edit proposal fields, and accept/reject a proposed state change before the owning Host commits it.
+
+Do not use it as a generic card list.
 
 ## Constitutional requirements
-- explicit inputs/outputs before promotion to `stable`;
-- no hidden business truth;
-- no hidden Host side effects;
+
+- proposal and committed business truth remain separate;
+- Eidos has no hidden business side effects;
+- one primary action per review item;
+- evidence remains inspectable;
+- machine ids and commands remain stable across locales;
+- authorization and persistence remain Host-owned;
 - renderer-independent semantics;
-- deterministic validation before stable admission;
-- direct manipulation is allowed where it is the lowest-cost reliable interaction.
+- deterministic validation before stable admission.
 
 ## Promotion
-`planned -> candidate -> stable`
 
-This file intentionally defines the semantic slot before every renderer is implemented. It prevents future implementations from inventing incompatible meanings.
+`candidate -> stable` after at least two independent domain consumers and keyboard/mobile behavior verification.
