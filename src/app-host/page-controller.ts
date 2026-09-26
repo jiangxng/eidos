@@ -339,7 +339,12 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
             contractVersion: "0.1.0",
             type: "command",
             command: { ...definition.command },
-            values: { [definition.composer.key]: message },
+            values: {
+              [definition.composer.key]: message,
+              ...(localization?.getContext().locale
+                ? { locale: localization.getContext().locale }
+                : {})
+            },
             sourceInteractionId: definition.id,
             actionId: "chat.send",
             requiresConfirmation: false
