@@ -276,7 +276,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
   }
 
   const definition = page.definition;
-  if (isChatExperienceV010(definition)) {
+  if (isChatExperienceV010(definition) || isChatExperienceV020(definition)) {
     const state = options.chatState ?? { messages: [] };
     const transcript = container.querySelector<HTMLElement>("[data-eidos-chat-transcript]");
     const form = container.querySelector<HTMLFormElement>("[data-eidos-chat-composer]");
@@ -295,20 +295,38 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
         const message = textarea.value.trim();
         if (!message) return;
 
-        state.messages.push({
-          id: `user-${Date.now()}-${state.messages.length}`,
-          role: "user",
-          text: message
-        });
+        state.messages.push(definition.contractVersion === "0.2.0"
+          ? {
+              id: `user-${Date.now()}-${state.messages.length}`,
+              contractVersion: "0.2.0",
+              role: "user",
+              parts: [{ type: "text", text: message }]
+            }
+          : {
+              id: `user-${Date.now()}-${state.messages.length}`,
+              role: "user",
+              text: message
+            });
         textarea.value = "";
         renderTranscript();
 
         if (!options.actionHost) {
-          state.messages.push({
-            id: `error-${Date.now()}-${state.messages.length}`,
-            role: "error",
-            text: hostText("shell.noActionHost", "No App Host ActionHost is configured.")
-          });
+          state.messages.push(definition.contractVersion === "0.2.0"
+            ? {
+                id: `error-${Date.now()}-${state.messages.length}`,
+                contractVersion: "0.2.0",
+                role: "error",
+                parts: [{
+                  type: "notice",
+                  tone: "danger",
+                  text: hostText("shell.noActionHost", "No App Host ActionHost is configured.")
+                }]
+              }
+            : {
+                id: `error-${Date.now()}-${state.messages.length}`,
+                role: "error",
+                text: hostText("shell.noActionHost", "No App Host ActionHost is configured.")
+              });
           renderTranscript();
           return;
         }
@@ -328,21 +346,37 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
           };
 
           const result = await options.actionHost.execute(request);
-          state.messages.push({
-            id: `${result.ok ? "assistant" : "error"}-${Date.now()}-${state.messages.length}`,
-            role: result.ok ? "assistant" : "error",
-            text: result.ok
-              ? resultMessage(result.result)
-              : result.error?.message ?? "Unknown action error"
-          });
+          const resultId = `${result.ok ? "assistant" : "error"}-${Date.now()}-${state.messages.length}`;
+          state.messages.push(definition.contractVersion === "0.2.0"
+            ? resultMessageV020(
+                result.result,
+                resultId,
+                result.ok,
+                result.error?.message ?? "Unknown action error"
+              )
+            : {
+                id: resultId,
+                role: result.ok ? "assistant" : "error",
+                text: result.ok
+                  ? resultMessage(result.result)
+                  : result.error?.message ?? "Unknown action error"
+              });
           renderTranscript();
           await options.onActionResult?.(result, page);
         } catch (error) {
-          state.messages.push({
-            id: `error-${Date.now()}-${state.messages.length}`,
-            role: "error",
-            text: error instanceof Error ? error.message : String(error)
-          });
+          const message = error instanceof Error ? error.message : String(error);
+          state.messages.push(definition.contractVersion === "0.2.0"
+            ? {
+                id: `error-${Date.now()}-${state.messages.length}`,
+                contractVersion: "0.2.0",
+                role: "error",
+                parts: [{ type: "notice", tone: "danger", text: message }]
+              }
+            : {
+                id: `error-${Date.now()}-${state.messages.length}`,
+                role: "error",
+                text: message
+              });
           renderTranscript();
         } finally {
           if (button) button.disabled = false;
@@ -364,6 +398,16 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
       textarea.addEventListener("keydown", keyHandler);
       listeners.push(() => form.removeEventListener("submit", submitHandler));
       listeners.push(() => textarea.removeEventListener("keydown", keyHandler));
+
+      const suggestions = container.querySelectorAll<HTMLButtonElement>("[data-eidos-chat-suggestion]");
+      for (const suggestion of Array.from(suggestions)) {
+        const handler = () => {
+          textarea.value = suggestion.dataset.eidosChatPrompt ?? "";
+          textarea.focus();
+        };
+        suggestion.addEventListener("click", handler);
+        listeners.push(() => suggestion.removeEventListener("click", handler));
+      }
     }
 
     return {
@@ -373,7 +417,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
     };
   }
 
-  if (isSettingsEditorV010(definition)) {
+  if (isSettingsEditorV010(definition) || isSettingsEditorV020(definition)) {
     const form = container.querySelector<HTMLFormElement>("[data-eidos-settings-form]");
     const status = document.createElement("div");
     status.setAttribute("data-eidos-action-status", "");
@@ -390,7 +434,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
           }
 
           const values: Record<string, JsonValue> = {};
-          for (const field of definition.settings) {
+          for (const field of settingsFields(definition)) {
             const control = form.elements.namedItem(field.key);
             if (!(control instanceof HTMLInputElement) && !(control instanceof HTMLSelectElement)) continue;
             if (field.readOnly) continue;
