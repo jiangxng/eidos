@@ -11,3 +11,6 @@
 10. EC owns long-term personal learning; Eidos does not silently create a competing profile.
 11. Standard deterministic fallback works without EC.
 12. Arbitrary generated executable code is not a Core Runtime personalization mechanism.
+13. Help documents are declarative content; arbitrary executable HTML/JavaScript is not a Help capability.
+14. Eidos owns Help rendering semantics, not host/product knowledge, Help authorization or search truth.
+15. Help locale variants preserve stable machine identifiers such as document IDs, action codes and error codes.
