@@ -8,12 +8,14 @@ import {
 test("AppManagerExperienceSource connects effective manifests and page loading", async () => {
   const requests = [];
   let installed = false;
+  let locale = "zh-CN";
 
   const fetchImpl = async (input) => {
     const url = input instanceof URL ? input : new URL(String(input));
     requests.push(url.toString());
 
     if (url.pathname === "/v1/experiences/effective") {
+      assert.equal(url.searchParams.get("locale"), locale);
       return Response.json(installed ? [{
         contractVersion: "0.1.0",
         experienceId: "company-notes",
@@ -41,6 +43,7 @@ test("AppManagerExperienceSource connects effective manifests and page loading",
 
     if (url.pathname === "/v1/experience-pages") {
       assert.equal(url.searchParams.get("source"), "app://company-notes/pages/home");
+      assert.equal(url.searchParams.get("locale"), locale);
       return Response.json({
         contractVersion: "0.1.1",
         kind: "form",
@@ -53,7 +56,8 @@ test("AppManagerExperienceSource connects effective manifests and page loading",
 
   const source = createAppManagerExperienceSource({
     baseUrl: "http://app-manager.test/",
-    fetchImpl
+    fetchImpl,
+    locale: () => locale
   });
   const host = createAppHost(source);
 
@@ -65,8 +69,14 @@ test("AppManagerExperienceSource connects effective manifests and page loading",
   assert.equal(after.manifests.length, 1);
   assert.equal(after.navigation[0].label, "Company Notes");
 
+  locale = "en-US";
   const page = await host.loadRoute("/notes");
   assert.equal(page.definition.id, "company-notes.home");
-  assert.ok(requests.some(x => x.includes("/v1/experiences/effective")));
-  assert.ok(requests.some(x => x.includes("/v1/experience-pages?source=")));
+  assert.ok(requests.some(x => new URL(x).pathname === "/v1/experiences/effective"));
+  assert.ok(requests.some(x => {
+    const requestUrl = new URL(x);
+    return requestUrl.pathname === "/v1/experience-pages"
+      && requestUrl.searchParams.get("source") === "app://company-notes/pages/home"
+      && requestUrl.searchParams.get("locale") === "en-US";
+  }));
 });

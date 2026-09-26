@@ -127,3 +127,45 @@ test("catalog chrome localizes without taking ownership of package display names
   assert.equal(localized.items[0].status.label, "Not installed");
   assert.equal(localized.items[0].primaryAction.label, "Install");
 });
+
+
+test("catalog search chrome follows the active Eidos localization runtime", () => {
+  const runtime = createLocalizationRuntime([
+    {
+      contractVersion: "0.1.0",
+      namespace: "evo-app-platform",
+      locale: "zh-CN",
+      messages: {
+        "catalog.evo.help.title": "帮助",
+        "catalog.evo.help.search.placeholder": "搜索帮助…",
+        "catalog.evo.help.search.ariaLabel": "搜索帮助",
+        "catalog.evo.help.search.noResults": "没有匹配的帮助内容。"
+      }
+    }
+  ], { locale: "zh-CN", fallbackLocales: ["en"] });
+
+  const localized = localizeAppHostPageDefinition({
+    experienceId: "evo-help",
+    packageId: "evo-app-platform",
+    featureId: "evo-help.system",
+    route: { id: "evo-help.home", path: "/help", pageId: "evo-help.home" },
+    page: { id: "evo-help.home", source: "memory://help" },
+    definition: {
+      contractVersion: "0.1.0",
+      kind: "catalog-browser",
+      id: "evo.help",
+      title: "Help",
+      search: {
+        placeholder: "Search help…",
+        ariaLabel: "Search Help",
+        noResultsMessage: "No matching Help documents."
+      },
+      items: []
+    }
+  }, runtime);
+
+  assert.equal(localized.title, "帮助");
+  assert.equal(localized.search.placeholder, "搜索帮助…");
+  assert.equal(localized.search.ariaLabel, "搜索帮助");
+  assert.equal(localized.search.noResultsMessage, "没有匹配的帮助内容。");
+});

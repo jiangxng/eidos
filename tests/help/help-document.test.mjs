@@ -7,6 +7,10 @@ import {
   renderHelpDocumentToHtml
 } from "../../dist/help/index.js";
 import { renderAppHostPageToHtml } from "../../dist/app-host/index.js";
+import {
+  createLocalizationRuntime,
+  eidosAppHostLocalizationBundles
+} from "../../dist/localization/index.js";
 
 function document(overrides = {}) {
   return {
@@ -110,4 +114,39 @@ test("App Host renders help-document through the Eidos Help capability", () => {
 
   assert.match(html, /data-eidos-help-document=/);
   assert.match(html, /Bind a Provider/);
+});
+
+
+test("Help renderer localizes Eidos-owned chrome and preserves document locale semantics", () => {
+  const runtime = createLocalizationRuntime(
+    eidosAppHostLocalizationBundles,
+    { locale: "zh-CN", fallbackLocales: ["en"] }
+  );
+
+  const html = renderAppHostPageToHtml({
+    experienceId: "help",
+    packageId: "evo-app-platform",
+    featureId: "help.system",
+    route: { id: "help.provider-binding", path: "/help/evo.providers.binding", pageId: "help.provider-binding" },
+    page: { id: "help.provider-binding", source: "app://platform/help/evo.providers.binding" },
+    definition: document({
+      locale: "zh-CN",
+      title: "配置 Provider 绑定",
+      breadcrumbs: [
+        { label: "帮助", route: "/help" },
+        { label: "操作指南" }
+      ],
+      related: [
+        { id: "evo.providers.health", title: "Provider 健康状态", route: "/help/evo.providers.health" }
+      ]
+    })
+  }, runtime);
+
+  assert.match(html, /lang="zh-CN"/);
+  assert.match(html, /aria-label="面包屑导航"/);
+  assert.match(html, /所有者：evo-app-platform/);
+  assert.match(html, /已复核：2026-09-26/);
+  assert.match(html, /操作指南/);
+  assert.match(html, /管理员/);
+  assert.match(html, /相关内容/);
 });
