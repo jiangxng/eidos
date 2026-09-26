@@ -22,7 +22,8 @@ Typical uses include:
 - catalog items;
 - item status;
 - human-readable metadata;
-- declared item actions.
+- declared item actions;
+- optional deterministic local search presentation.
 
 ## Outputs
 
@@ -57,6 +58,20 @@ type = navigate
 ```
 
 Catalog Browser never executes package installation or business logic directly.
+
+## Search
+
+A host may opt into a built-in local search field. Search filters the already-supplied catalog items using rendered title, summary, version, category, badges and metadata.
+
+This is presentation filtering only:
+
+- it does not query a backend;
+- it does not change catalog truth;
+- it does not use an LLM or embeddings;
+- it does not authorize hidden items;
+- the Host remains responsible for deciding which items may be supplied to the browser.
+
+This lightweight mode is suitable for Help indexes and other bounded catalogs. Large/remote datasets should use an explicit Host query/search boundary instead.
 
 ## Renderer
 
