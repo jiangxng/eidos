@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 
 import {
   isChatExperienceV010,
-  renderChatExperienceToHtml
+  isChatExperienceV020,
+  renderChatExperienceToHtml,
+  renderChatMessageToHtml
 } from "../../dist/chat/index.js";
 import {
   createLocalizationRuntime,
@@ -74,4 +76,108 @@ test("Chat Experience chrome is localized through the owning package namespace",
   assert.equal(localized.composer.placeholder, "告诉我你要完成什么");
   assert.equal(localized.composer.sendLabel, "发送");
   assert.equal(localized.emptyState, "开始一段对话。");
+});
+
+
+const definitionV020 = {
+  contractVersion: "0.2.0",
+  kind: "chat",
+  id: "assistant.home",
+  title: "Personal Agent",
+  command: { code: "assistant.chat", inputVersion: "0.1.0" },
+  context: { label: "Context", value: "Personal" },
+  readiness: {
+    state: "setup-required",
+    label: "Needs setup",
+    message: "Configure a provider.",
+    action: { id: "setup", label: "Set up", type: "navigate", route: "/setup" }
+  },
+  composer: {
+    key: "message",
+    placeholder: "Ask or describe a task",
+    sendLabel: "Send"
+  },
+  emptyState: {
+    title: "How can I help?",
+    description: "I can inspect your current context and prepare an opinion.",
+    suggestions: [
+      { id: "attention", label: "What needs attention?", prompt: "What needs my attention?" }
+    ]
+  }
+};
+
+test("Assistant Chat v0.2 renders context readiness and suggested prompts", () => {
+  assert.equal(isChatExperienceV020(definitionV020), true);
+  const html = renderChatExperienceToHtml(definitionV020);
+  assert.match(html, /data-chat-version="0\.2\.0"/);
+  assert.match(html, /data-eidos-chat-context/);
+  assert.match(html, /data-eidos-chat-readiness/);
+  assert.match(html, /data-eidos-chat-action="setup"/);
+  assert.match(html, /data-eidos-chat-suggestion="attention"/);
+  assert.match(html, /textarea[^>]+disabled/);
+});
+
+test("Assistant Chat v0.2 renders observable activity evidence and proposal parts", () => {
+  const html = renderChatMessageToHtml({
+    id: "assistant-1",
+    contractVersion: "0.2.0",
+    role: "assistant",
+    parts: [
+      { type: "text", text: "I reviewed the current context." },
+      { type: "activity", label: "Checked current Context", state: "complete" },
+      { type: "evidence", title: "Inventory balance", context: "Enterprise A", route: "/inventory" },
+      {
+        type: "proposal",
+        title: "Review purchase exception",
+        reasons: ["Inventory cover is low"],
+        actions: [{ id: "review", label: "Review", type: "navigate", route: "/purchase/1", primary: true }]
+      }
+    ]
+  });
+  assert.match(html, /data-eidos-chat-part="activity"/);
+  assert.match(html, /data-eidos-chat-part="evidence"/);
+  assert.match(html, /data-eidos-chat-part="proposal"/);
+  assert.match(html, /data-eidos-primary="true"/);
+});
+
+test("Assistant Chat v0.2 localizes Japanese and Traditional Chinese chrome without changing machine ids", () => {
+  const bundles = [
+    {
+      contractVersion: "0.1.0",
+      namespace: "assistant",
+      locale: "ja",
+      messages: {
+        "page.assistant.home.title": "パーソナルエージェント",
+        "chat.assistant.home.composer.placeholder": "相談内容やタスクを入力",
+        "chat.assistant.home.composer.sendLabel": "送信",
+        "chat.assistant.home.context.label": "コンテキスト",
+        "chat.assistant.home.readiness.setup-required.label": "セットアップが必要",
+        "chat.assistant.home.readiness.setup-required.message": "プロバイダーを設定してください。",
+        "chat.assistant.home.action.setup.label": "設定する",
+        "chat.assistant.home.empty.title": "何をお手伝いしましょうか？",
+        "chat.assistant.home.empty.description": "現在のコンテキストを確認して意見を整理できます。",
+        "chat.assistant.home.suggestion.attention.label": "注意が必要な項目"
+      }
+    },
+    {
+      contractVersion: "0.1.0",
+      namespace: "assistant",
+      locale: "zh-TW",
+      messages: {
+        "page.assistant.home.title": "個人 Agent",
+        "chat.assistant.home.composer.placeholder": "輸入問題或工作內容",
+        "chat.assistant.home.composer.sendLabel": "傳送"
+      }
+    }
+  ];
+
+  const ja = localizeAppHostPageDefinition(page, createLocalizationRuntime(bundles, { locale: "ja" }));
+  assert.equal(ja.title, "パーソナルエージェント");
+  assert.equal(ja.command.code, "assistant.chat");
+
+  const twPage = { ...page, definition: definitionV020 };
+  const tw = localizeAppHostPageDefinition(twPage, createLocalizationRuntime(bundles, { locale: "zh-TW" }));
+  assert.equal(tw.title, "個人 Agent");
+  assert.equal(tw.composer.sendLabel, "傳送");
+  assert.equal(tw.command.code, "assistant.chat");
 });
