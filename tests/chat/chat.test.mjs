@@ -181,3 +181,10 @@ test("Assistant Chat v0.2 localizes Japanese and Traditional Chinese chrome with
   assert.equal(tw.composer.sendLabel, "傳送");
   assert.equal(tw.command.code, "assistant.chat");
 });
+
+
+test("Chat controller propagates active locale with command values", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../../dist/app-host/page-controller.js", import.meta.url), "utf8");
+  assert.match(source, /locale:\s*localization\.getContext\(\)\.locale/);
+});
