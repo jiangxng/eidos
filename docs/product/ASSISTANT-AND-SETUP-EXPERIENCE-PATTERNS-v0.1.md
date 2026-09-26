@@ -328,6 +328,26 @@ Product/extension content stays in the owning Package namespace.
 
 Contracts keep stable machine identifiers across locales.
 
+The first production consumer requires four first-class locales from the start:
+
+- `en` — English;
+- `zh-CN` — Simplified Chinese;
+- `ja` — Japanese;
+- `zh-TW` — Traditional Chinese.
+
+Eidos assistant/setup/extension/settings chrome introduced for this generation MUST be designed so all four locales can be supplied without custom host CSS or contract changes.
+
+Layout rules:
+
+- do not assume English text width;
+- do not concatenate localized fragments into sentences;
+- action/status labels are independently localizable;
+- use locale-aware number/date formatting where relevant;
+- machine ids, routes, action codes and enum values remain untranslated;
+- exact-locale resolution falls back deterministically to `en` when a translation is unavailable.
+
+Fallback is resilience. It does not replace required four-locale coverage for newly delivered reusable Eidos chrome.
+
 ## 10. Compatibility
 
 Do not break chat@0.1.0 immediately.
@@ -353,7 +373,8 @@ This RFC is implemented when:
 6. Settings supports grouped Provider/credential UX or an equivalent Eidos-native structure;
 7. desktop/mobile keyboard behavior is tested;
 8. all visual realization uses Eidos tokens/icons;
-9. no product-specific CSS is needed by consuming hosts.
+9. no product-specific CSS is needed by consuming hosts;
+10. newly introduced reusable assistant/setup chrome is validated in en / zh-CN / ja / zh-TW and remains usable under text expansion.
 
 ## 12. First consumer
 
