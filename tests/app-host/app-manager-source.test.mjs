@@ -72,6 +72,11 @@ test("AppManagerExperienceSource connects effective manifests and page loading",
   locale = "en-US";
   const page = await host.loadRoute("/notes");
   assert.equal(page.definition.id, "company-notes.home");
-  assert.ok(requests.some(x => x.includes("/v1/experiences/effective")));
-  assert.ok(requests.some(x => x.includes("/v1/experience-pages?source=")));
+  assert.ok(requests.some(x => new URL(x).pathname === "/v1/experiences/effective"));
+  assert.ok(requests.some(x => {
+    const requestUrl = new URL(x);
+    return requestUrl.pathname === "/v1/experience-pages"
+      && requestUrl.searchParams.get("source") === "app://company-notes/pages/home"
+      && requestUrl.searchParams.get("locale") === "en-US";
+  }));
 });
