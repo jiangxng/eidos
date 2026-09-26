@@ -23,6 +23,16 @@
     "performanceBudgets": "SOON",
     "diagnosticsObservability": "SOON",
     "compatibilityDeprecation": "SOON",
-    "llmContextArchitecture": "NOW"
+    "llmContextArchitecture": "NOW",
+    "platformHelpRendering": "NOW"
+  },
+  "platformHelp": {
+    "status": "HELP_DOCUMENT_P0_IMPLEMENTED",
+    "authority": "docs/architecture/decisions/ADR-0010-HELP-DOCUMENT.md",
+    "contract": "help-document@0.1.0",
+    "rendering": "SAFE_STRUCTURED_BLOCKS",
+    "arbitraryHtml": "PROHIBITED",
+    "navigator": "REUSE_EXISTING_EIDOS_CAPABILITIES",
+    "hostOwnership": "CONTENT_INDEX_SEARCH_CONTEXT_AUTHORIZATION"
   }
 }
