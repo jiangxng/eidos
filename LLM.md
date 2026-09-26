@@ -39,3 +39,10 @@ When realizing a business-facing capability:
 - make validation/errors understandable to a novice before showing technical detail.
 
 Authority: `docs/architecture/HUMAN-LLM-OPERABILITY-v0.1.md`.
+
+
+## Help capability
+
+Before changing in-product Help rendering or Help-facing App Host behavior, read `docs/architecture/decisions/ADR-0010-HELP-DOCUMENT.md`.
+
+Eidos owns the generic `help-document` contract and safe Productive Design Language rendering only. Host products own Help content, indexing, search, lifecycle, authorization and contextual matching. Do not embed EVO/App Platform product knowledge inside Eidos, do not add arbitrary HTML/JavaScript Help execution, and reuse existing Eidos capabilities such as `catalog-browser` for Help discovery when they already satisfy the interaction.
