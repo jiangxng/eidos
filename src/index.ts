@@ -1,5 +1,6 @@
 export * from "./runtime/index.js";
 export * from "./experience/index.js";
+export * from "./experience-architecture/index.js";
 export * from "./capabilities/index.js";
 export * from "./attention/index.js";
 export * from "./motion/index.js";

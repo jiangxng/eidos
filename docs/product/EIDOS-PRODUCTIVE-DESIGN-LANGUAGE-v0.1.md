@@ -4,6 +4,14 @@
 **Date:** 2026-09-25  
 **Applies to:** App Host, Workbench, Eidos capabilities, and plugin-contributed human interfaces
 
+## Authority relationship
+
+The Productive Design Language is the visual/interaction realization layer below the **Eidos Experience Architecture Constitution**.
+
+Authority: `docs/product/EIDOS-EXPERIENCE-ARCHITECTURE-CONSTITUTION-v0.1.md`.
+
+A page is not product-complete merely because it matches Eidos visual tokens. Page archetype, Human goal, state-aware actions, journey continuity, direct manipulation, feedback, recovery and Agent boundaries are defined by the higher-level Experience Architecture authority.
+
 ## Purpose
 
 Eidos owns the visual/interaction language used by EVO App Host and plugin Experiences.

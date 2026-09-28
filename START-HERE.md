@@ -5,12 +5,14 @@ Read `CONSTITUTION.md` first. It is the highest-authority Eidos document.
 Then read, in order:
 
 1. `ARCHITECTURE-MAP.md`
-2. `docs/architecture/EXPERIENCE-ARCHITECTURE.md`
-3. `llm/repository-map.json`
-4. `capabilities/catalog.json`
-5. `docs/ec/EC-EXPECTATIONS.md`
-6. `PUBLIC-API.md`
-7. the nearest capability/contract document for the task
+2. `docs/product/EIDOS-EXPERIENCE-ARCHITECTURE-CONSTITUTION-v0.1.md`
+3. `docs/architecture/EXPERIENCE-ARCHITECTURE.md`
+4. `docs/product/EIDOS-PRODUCTIVE-DESIGN-LANGUAGE-v0.1.md` for Human-facing work
+5. `llm/repository-map.json`
+6. `capabilities/catalog.json`
+7. `docs/ec/EC-EXPECTATIONS.md`
+8. `PUBLIC-API.md`
+9. the nearest capability/contract document for the task
 
 ## Default LLM rule
 
@@ -32,6 +34,8 @@ npm run validate:repo
 ```
 
 If a deterministic check can prove a rule, do not replace it with an LLM opinion.
+
+For Human-facing candidate/production Experiences, run the Experience Architecture validator as part of the owning project's CI. Visual review confirms pixels; it does not replace structural journey/action validation.
 
 
 ## Teaching a new LLM
