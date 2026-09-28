@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   consumeJourneyContinuationV010,
   journeyContinuationStorageKeyV010,
+  peekJourneyContinuationV010,
   persistJourneyContinuationV010
 } from "../../dist/app-host/page-controller.js";
 
@@ -132,6 +133,28 @@ test("item-scoped continuation never consumes without a matching item id", () =>
   assert.equal(
     consumeJourneyContinuationV010("/store", "install", state, 1_100),
     undefined
+  );
+  assert.equal(state.snapshot().size, 1);
+});
+
+
+test("journey continuation can be inspected without consuming it", () => {
+  const state = storage();
+  persistJourneyContinuationV010(
+    "/settings/provider",
+    "settings.save",
+    "/agent/setup",
+    state,
+    1_000
+  );
+  assert.deepEqual(
+    peekJourneyContinuationV010("/settings/provider", state, 1_100),
+    {
+      targetRoute: "/settings/provider",
+      onActionId: "settings.save",
+      returnRoute: "/agent/setup",
+      createdAt: 1_000
+    }
   );
   assert.equal(state.snapshot().size, 1);
 });
