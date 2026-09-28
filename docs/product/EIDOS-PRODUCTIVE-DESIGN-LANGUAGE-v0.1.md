@@ -205,6 +205,57 @@ Use responsive **reflow and re-architecture**, not desktop shrinking.
 - mobile: one active work surface with preserved state;
 - low-priority actions move to overflow rather than wrapping into visual noise.
 
+
+## AI conversation surfaces
+
+Agent chat is a productive work surface, not a social-message imitation.
+
+Default pattern:
+
+- assistant output uses the reading surface directly instead of wrapping every answer in a heavy card or bubble;
+- Human messages may use a restrained, right-aligned surface so turn boundaries remain easy to scan;
+- execution activity, evidence and proposals remain semantically distinct from prose and visually subordinate to the main answer;
+- thread/history controls belong in the chat header and use quiet toolbar treatment;
+- the composer stays visually anchored near the conversation edge, may use a floating bordered surface, and must not cause transcript geometry to jump during ordinary state refresh;
+- composer focus is visible but should not flood the whole pane with accent color;
+- long-running conversations favor stable scroll position, predictable message width and minimal chrome;
+- passive recovery/hydration must not cause visible remount loops or repeated transcript replacement when content has not changed.
+
+The intended character is contemporary AI workbench: calm, content-first and operationally transparent.
+
+Do not default to:
+
+- avatars for every message;
+- large colored assistant bubbles;
+- permanent tool-debug output mixed with prose;
+- decorative gradients or motion without state meaning;
+- rebuilding the entire chat surface for background polling or recovery.
+
+## Settings information architecture
+
+New configuration surfaces should prefer the grouped Settings Editor capability when multiple concerns are present.
+
+Recommended grouping for Provider-style configuration:
+
+```text
+Runtime / model selection
+Credentials
+Governance / administrator authorization
+Runtime status / diagnostics
+Advanced
+```
+
+Rules:
+
+- ordinary runtime values and sensitive credentials are visually separated even when submitted through one Host action;
+- secrets remain non-readable after save and expose state through semantic status, not echoed values;
+- administrator/bootstrap authorization is advanced governance UI and should not visually compete with normal configuration;
+- health/resolution/status is read-only state, not presented as an editable setting;
+- advanced and low-frequency controls use progressive disclosure;
+- settings rows may use a compact two-column desktop layout, but reflow to one column on narrow screens;
+- one save action owns the form scope; avoid a primary button per settings group.
+
+
 ## Governance
 
 Design decisions that introduce a new reusable pattern belong in Eidos first.
