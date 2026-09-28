@@ -99,8 +99,8 @@ function renderItem(item: ReviewQueueItemV010, technicalDetailsLabel: string): s
       + "</dl></details>"
     : "";
   const actions = [
-    ...(item.primaryAction ? [renderAction({ ...item.primaryAction, primary: true }, item.id)] : []),
-    ...(item.secondaryActions ?? []).map(action => renderAction(action, item.id))
+    ...(item.secondaryActions ?? []).map(action => renderAction(action, item.id)),
+    ...(item.primaryAction ? [renderAction({ ...item.primaryAction, primary: true }, item.id)] : [])
   ].join("");
 
   return "<li data-eidos-review-item"
