@@ -30,8 +30,9 @@ const definition = {
         type: "navigate",
         route: "/plugins",
         continuation: {
-          onActionId: "settings.save",
-          route: "/enterprise-agent/setup"
+          onActionId: "install",
+          route: "/enterprise-agent/setup",
+          onItemIds: ["openai-provider", "deepseek-provider"]
         }
       }
     },
@@ -66,8 +67,9 @@ test("Setup Flow contract and renderer express one current actionable step", () 
   assert.match(html, /aria-current="step"/);
   assert.match(html, /data-eidos-setup-action="choose-provider"/);
   assert.match(html, /data-eidos-setup-action="open-agent"/);
-  assert.match(html, /data-eidos-continuation-action-id="settings\.save"/);
+  assert.match(html, /data-eidos-continuation-action-id="install"/);
   assert.match(html, /data-eidos-continuation-route="\/enterprise-agent\/setup"/);
+  assert.match(html, /data-eidos-continuation-item-ids="\[&quot;openai-provider&quot;,&quot;deepseek-provider&quot;\]"/);
 });
 
 test("App Host renders Setup Flow as a first-class Eidos capability", () => {
@@ -106,8 +108,9 @@ test("Setup Flow localizes Japanese and Traditional Chinese without changing act
   assert.equal(ja.title, "パーソナルエージェントのセットアップ");
   assert.equal(ja.steps[0].primaryAction.route, "/plugins");
   assert.deepEqual(ja.steps[0].primaryAction.continuation, {
-    onActionId: "settings.save",
-    route: "/enterprise-agent/setup"
+    onActionId: "install",
+    route: "/enterprise-agent/setup",
+    onItemIds: ["openai-provider", "deepseek-provider"]
   });
 
   const tw = localizeAppHostPageDefinition(page, createLocalizationRuntime(bundles, { locale: "zh-TW" }));
