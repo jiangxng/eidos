@@ -32,3 +32,17 @@ test("design policy encodes toolbar and action hierarchy for LLM/plugin generati
   assert.equal(eidosDesignPolicyV010.plugin.inheritHostTokens, true);
   assert.equal(eidosDesignPolicyV010.accessibility.ariaRoleRequiresKeyboardBehavior, true);
 });
+
+
+test("productive design language includes modern agent chat and grouped settings patterns", () => {
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-chat-thread-controls/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-chat-thread-selector/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-chat-composer\]:focus-within/);
+  assert.match(eidosProductiveWorkbenchCss, /scrollbar-gutter:stable/);
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-settings-version="0\.2\.0"\][^{]*\[data-eidos-setting\]/
+  );
+  assert.match(eidosProductiveWorkbenchCss, /grid-template-columns:minmax\(180px/);
+  assert.match(eidosProductiveWorkbenchCss, /details\[data-eidos-settings-group\]/);
+});
