@@ -96,6 +96,7 @@ const definitionV020 = {
         {
           id: "personal",
           label: "Personal",
+          localizationKey: "personal",
           value: { kind: "PERSONAL", contextId: "personal:default" }
         },
         {
@@ -175,6 +176,7 @@ test("Assistant Chat v0.2 localizes Japanese and Traditional Chinese chrome with
         "chat.assistant.home.composer.sendLabel": "送信",
         "chat.assistant.home.context.label": "コンテキスト",
         "chat.assistant.home.context.selector.ariaLabel": "コンテキストを選択",
+        "chat.assistant.home.context.option.personal.label": "個人",
         "chat.assistant.home.readiness.setup-required.label": "セットアップが必要",
         "chat.assistant.home.readiness.setup-required.message": "プロバイダーを設定してください。",
         "chat.assistant.home.action.setup.label": "設定する",
@@ -200,6 +202,8 @@ test("Assistant Chat v0.2 localizes Japanese and Traditional Chinese chrome with
   assert.equal(ja.title, "パーソナルエージェント");
   assert.equal(ja.command.code, "assistant.chat");
   assert.equal(ja.context.selector.ariaLabel, "コンテキストを選択");
+  assert.equal(ja.context.selector.options[0].label, "個人");
+  assert.equal(ja.context.selector.options[1].label, "Acme");
 
   const twPage = { ...page, definition: definitionV020 };
   const tw = localizeAppHostPageDefinition(twPage, createLocalizationRuntime(bundles, { locale: "zh-TW" }));
