@@ -115,6 +115,87 @@ function resultMessageV020(
   };
 }
 
+export interface AppHostJourneyContinuationV010 {
+  targetRoute: string;
+  onActionId: string;
+  returnRoute: string;
+  createdAt: number;
+}
+
+export interface JourneyContinuationStorageV010 {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+  removeItem(key: string): void;
+}
+
+const JOURNEY_CONTINUATION_PREFIX = "eidos.journey.continuation:";
+const JOURNEY_CONTINUATION_TTL_MS = 30 * 60 * 1000;
+
+function browserJourneyStorage(): JourneyContinuationStorageV010 | undefined {
+  try {
+    return typeof globalThis.sessionStorage === "undefined"
+      ? undefined
+      : globalThis.sessionStorage;
+  } catch {
+    return undefined;
+  }
+}
+
+export function journeyContinuationStorageKeyV010(targetRoute: string): string {
+  return JOURNEY_CONTINUATION_PREFIX + targetRoute;
+}
+
+export function persistJourneyContinuationV010(
+  targetRoute: string,
+  onActionId: string,
+  returnRoute: string,
+  storage: JourneyContinuationStorageV010 | undefined = browserJourneyStorage(),
+  now = Date.now()
+): void {
+  if (!storage) return;
+  if (!targetRoute.startsWith("/") || !returnRoute.startsWith("/") || !onActionId.trim()) {
+    throw new Error("EIDOS_JOURNEY_CONTINUATION_INVALID");
+  }
+  const value: AppHostJourneyContinuationV010 = {
+    targetRoute,
+    onActionId,
+    returnRoute,
+    createdAt: now
+  };
+  storage.setItem(journeyContinuationStorageKeyV010(targetRoute), JSON.stringify(value));
+}
+
+export function consumeJourneyContinuationV010(
+  targetRoute: string,
+  completedActionId: string,
+  storage: JourneyContinuationStorageV010 | undefined = browserJourneyStorage(),
+  now = Date.now()
+): AppHostJourneyContinuationV010 | undefined {
+  if (!storage) return undefined;
+  const key = journeyContinuationStorageKeyV010(targetRoute);
+  const raw = storage.getItem(key);
+  if (!raw) return undefined;
+  try {
+    const value = JSON.parse(raw) as Partial<AppHostJourneyContinuationV010>;
+    const valid = value.targetRoute === targetRoute
+      && typeof value.onActionId === "string"
+      && typeof value.returnRoute === "string"
+      && value.returnRoute.startsWith("/")
+      && typeof value.createdAt === "number"
+      && Number.isFinite(value.createdAt);
+    if (!valid || now - value.createdAt > JOURNEY_CONTINUATION_TTL_MS) {
+      storage.removeItem(key);
+      return undefined;
+    }
+    if (value.onActionId !== completedActionId) return undefined;
+    storage.removeItem(key);
+    return value as AppHostJourneyContinuationV010;
+  } catch {
+    storage.removeItem(key);
+    return undefined;
+  }
+}
+
 export function mountAppHostLoadedPage(options: MountAppHostPageOptions): MountedAppHostPage {
   const { page, container, localization } = options;
   const renderPage = options.renderPage ?? ((value: AppHostLoadedPageV010) =>
@@ -177,6 +258,18 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
           const route = button.dataset.eidosRoute;
           if (actionType === "navigate") {
             if (!route) throw new Error("EIDOS_CATALOG_NAVIGATE_ROUTE_REQUIRED");
+            const continuationActionId = button.dataset.eidosContinuationActionId;
+            const continuationRoute = button.dataset.eidosContinuationRoute;
+            if (continuationActionId || continuationRoute) {
+              if (!continuationActionId || !continuationRoute) {
+                throw new Error("EIDOS_JOURNEY_CONTINUATION_INCOMPLETE");
+              }
+              persistJourneyContinuationV010(
+                route,
+                continuationActionId,
+                continuationRoute
+              );
+            }
             await options.onNavigate?.(route);
             return;
           }
@@ -515,6 +608,16 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
                   "Action failed: {message}",
                   { message: result.error?.message ?? "Unknown action error" }
                 );
+            const continuation = result.ok && options.onNavigate
+              ? consumeJourneyContinuationV010(page.route.path, "settings.save")
+              : undefined;
+            if (continuation) {
+              status.textContent = hostText(
+                "shell.settingsSavedContinuing",
+                "Settings saved. Continuing…"
+              );
+              await options.onNavigate?.(continuation.returnRoute);
+            }
             await options.onActionResult?.(result, page);
           } catch (error) {
             status.textContent = hostText(
