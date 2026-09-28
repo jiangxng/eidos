@@ -177,13 +177,14 @@ export function consumeJourneyContinuationV010(
   if (!raw) return undefined;
   try {
     const value = JSON.parse(raw) as Partial<AppHostJourneyContinuationV010>;
+    const createdAt = value.createdAt;
     const valid = value.targetRoute === targetRoute
       && typeof value.onActionId === "string"
       && typeof value.returnRoute === "string"
       && value.returnRoute.startsWith("/")
-      && typeof value.createdAt === "number"
-      && Number.isFinite(value.createdAt);
-    if (!valid || now - value.createdAt > JOURNEY_CONTINUATION_TTL_MS) {
+      && typeof createdAt === "number"
+      && Number.isFinite(createdAt);
+    if (!valid || typeof createdAt !== "number" || now - createdAt > JOURNEY_CONTINUATION_TTL_MS) {
       storage.removeItem(key);
       return undefined;
     }
