@@ -18,6 +18,7 @@ const definition = {
   title: "Memory review",
   description: "Review proposed durable knowledge.",
   emptyMessage: "Nothing to review.",
+  technicalDetailsLabel: "Technical details",
   items: [{
     id: "proposal:1",
     title: "Supplier account changes need two-person review",
@@ -37,10 +38,16 @@ const definition = {
     ],
     evidence: [{
       id: "e1",
+      localizationKey: "policy",
       title: "Policy",
-      source: "ACME",
+      source: "System evidence",
       detail: "Supplier payment controls",
       route: "/policy/7"
+    }],
+    technicalDetails: [{
+      key: "proposalId",
+      label: "Proposal ID",
+      value: "proposal:1"
     }],
     primaryAction: {
       id: "accept",
@@ -78,6 +85,9 @@ test("Review Queue contract and renderer expose review semantics without domain-
   assert.match(html, /data-eidos-review-action="accept"/);
   assert.match(html, /data-eidos-confirm="true"/);
   assert.match(html, /data-eidos-primary="true"/);
+  assert.match(html, /data-eidos-review-technical/);
+  assert.match(html, /Technical details/);
+  assert.match(html, /Proposal ID/);
 });
 
 test("App Host renders Review Queue as a first-class Eidos capability", () => {
@@ -102,7 +112,10 @@ test("Review Queue localizes chrome while preserving machine ids commands and va
         "review.memory.review.field.kind.option.PRACTICE.label": "プラクティス",
         "review.memory.review.field.summary.label": "要約",
         "review.memory.review.action.accept.label": "承認",
-        "review.memory.review.action.reject.label": "却下"
+        "review.memory.review.action.reject.label": "却下",
+        "review.memory.review.technicalDetails.label": "技術情報",
+        "review.memory.review.technicalDetail.proposalId.label": "提案 ID",
+        "review.memory.review.evidence.policy.source": "システム証拠"
       }
     },
     {
@@ -125,6 +138,10 @@ test("Review Queue localizes chrome while preserving machine ids commands and va
   assert.equal(ja.items[0].fields[0].label, "種類");
   assert.equal(ja.items[0].fields[0].options[0].value, "PRACTICE");
   assert.equal(ja.items[0].primaryAction.command, "memory.proposal.accept");
+  assert.equal(ja.technicalDetailsLabel, "技術情報");
+  assert.equal(ja.items[0].technicalDetails[0].label, "提案 ID");
+  assert.equal(ja.items[0].technicalDetails[0].value, "proposal:1");
+  assert.equal(ja.items[0].evidence[0].source, "システム証拠");
 
   const tw = localizeAppHostPageDefinition(
     page,
