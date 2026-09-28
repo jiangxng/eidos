@@ -225,3 +225,21 @@ test("App Host runtime chrome covers first-class chat controls and human locale 
     }
   }
 });
+
+
+test("App Host first-class locale bundles keep exact key parity", () => {
+  const bundles = Object.fromEntries(
+    eidosAppHostLocalizationBundles.map(bundle => [bundle.locale, bundle.messages])
+  );
+  const locales = ["en", "zh-CN", "ja", "zh-TW"];
+  assert.deepEqual(Object.keys(bundles).sort(), [...locales].sort());
+
+  const baseline = Object.keys(bundles.en).sort();
+  for (const locale of locales) {
+    assert.deepEqual(
+      Object.keys(bundles[locale]).sort(),
+      baseline,
+      locale + " App Host localization keys diverged from en"
+    );
+  }
+});
