@@ -66,3 +66,22 @@ Customization is constrained composition, not arbitrary DOM mutation.
 
 ## Failure mode
 If EC or profile context is unavailable, Eidos falls back to a deterministic standard experience.
+
+
+## Product experience completeness
+
+The product-level authority for complete Human journeys is:
+
+`docs/product/EIDOS-EXPERIENCE-ARCHITECTURE-CONSTITUTION-v0.1.md`
+
+The deterministic contract boundary now applies not only to layout/capability realization but also to product experience semantics.
+
+For bounded work:
+
+```text
+Experience = Archetype + Goal + Subject + State + Journey + Actions + Feedback + Recovery + Agent Assistance
+```
+
+LLM/AGI assistance is an interaction channel inside this architecture, not a replacement for deterministic direct manipulation. Frequent low-ambiguity actions remain directly operable; Agents recommend or execute only Host-declared actions under policy.
+
+Critical product goals are certified with Golden Journeys so a page-render test cannot falsely certify a broken end-to-end task.
