@@ -30,6 +30,15 @@ export const eidosAppHostLocalizationBundles: LocalizationBundleV010[] = [
       "shell.mobileChat": "Chat",
       "shell.mobileWorkspace": "Workspace",
       "shell.settingsSaved": "Settings saved.",
+      "shell.chatHistory": "Conversation history",
+      "shell.chatNew": "New chat",
+      "shell.chatArchive": "Archive",
+      "shell.chatUntitled": "New chat",
+      "shell.chatArchivedLabel": "[Archived] {title}",
+      "shell.locale.en": "English",
+      "shell.locale.zh-CN": "简体中文",
+      "shell.locale.ja": "日本語",
+      "shell.locale.zh-TW": "繁體中文",
       "workbench.activityBar": "Activity Bar",
       "workbench.workspaceToolbar": "Workspace toolbar",
       "workbench.workspaceTarget": "Workspace route or web address",
@@ -90,6 +99,15 @@ export const eidosAppHostLocalizationBundles: LocalizationBundleV010[] = [
       "shell.mobileChat": "对话",
       "shell.mobileWorkspace": "工作区",
       "shell.settingsSaved": "设置已保存。",
+      "shell.chatHistory": "对话历史",
+      "shell.chatNew": "新对话",
+      "shell.chatArchive": "归档",
+      "shell.chatUntitled": "新对话",
+      "shell.chatArchivedLabel": "【已归档】{title}",
+      "shell.locale.en": "English",
+      "shell.locale.zh-CN": "简体中文",
+      "shell.locale.ja": "日本語",
+      "shell.locale.zh-TW": "繁體中文",
       "workbench.activityBar": "活动栏",
       "workbench.workspaceToolbar": "工作区工具栏",
       "workbench.workspaceTarget": "工作区路径或网页地址",
@@ -119,6 +137,41 @@ export const eidosAppHostLocalizationBundles: LocalizationBundleV010[] = [
       "help.applies.packageVersion": "Package",
       "help.applies.eidosVersion": "Eidos",
       "help.applies.appPlatformVersion": "App Platform"
+    }
+  }
+  ,
+  {
+    contractVersion: "0.1.0",
+    namespace: "eidos.app-host",
+    locale: "ja",
+    messages: {
+      "shell.language": "言語",
+      "shell.chatHistory": "会話履歴",
+      "shell.chatNew": "新しいチャット",
+      "shell.chatArchive": "アーカイブ",
+      "shell.chatUntitled": "新しいチャット",
+      "shell.chatArchivedLabel": "【アーカイブ済み】{title}",
+      "shell.locale.en": "English",
+      "shell.locale.zh-CN": "简体中文",
+      "shell.locale.ja": "日本語",
+      "shell.locale.zh-TW": "繁體中文"
+    }
+  },
+  {
+    contractVersion: "0.1.0",
+    namespace: "eidos.app-host",
+    locale: "zh-TW",
+    messages: {
+      "shell.language": "語言",
+      "shell.chatHistory": "對話記錄",
+      "shell.chatNew": "新對話",
+      "shell.chatArchive": "封存",
+      "shell.chatUntitled": "新對話",
+      "shell.chatArchivedLabel": "【已封存】{title}",
+      "shell.locale.en": "English",
+      "shell.locale.zh-CN": "简体中文",
+      "shell.locale.ja": "日本語",
+      "shell.locale.zh-TW": "繁體中文"
     }
   }
 ];
