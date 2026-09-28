@@ -46,3 +46,15 @@ test("productive design language includes modern agent chat and grouped settings
   assert.match(eidosProductiveWorkbenchCss, /grid-template-columns:minmax\(180px/);
   assert.match(eidosProductiveWorkbenchCss, /details\[data-eidos-settings-group\]/);
 });
+
+
+test("productive design language includes a first-class Review / Decision pattern", () => {
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-review-queue/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-review-item/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-review-technical/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-review-actions/);
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /button\[data-eidos-primary="true"\][^{]*\{[\s\S]*margin-left:auto/
+  );
+});

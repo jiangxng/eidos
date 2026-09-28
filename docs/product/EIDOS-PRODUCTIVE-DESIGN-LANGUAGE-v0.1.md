@@ -239,6 +239,27 @@ Do not default to:
 - decorative gradients or motion without state meaning;
 - rebuilding the entire chat surface for background polling or recovery.
 
+
+## Review and decision surfaces
+
+Review is a judgment workspace, not a generic form.
+
+Default pattern:
+
+- Human-readable title, summary and status establish what decision is required;
+- evidence and confidence/context metrics support the decision without dominating it;
+- editable review fields are visually grouped from evidence;
+- deterministic review actions remain directly operable;
+- one forward/accept action is primary and occupies the trailing decision position;
+- reject/destructive alternatives remain visually separate from the primary forward action;
+- machine IDs, enum values, receipts, test names and diagnostics use collapsed **Technical details** unless they are themselves the subject of the review;
+- attention states may use a semantic warning edge/status, but avoid turning every review item into an alarm;
+- mobile preserves decision order and makes the primary action easy to reach.
+
+System-generated review copy is localizable. Business/user-authored evidence content is preserved as authored unless the product explicitly provides translation.
+
+A Review capability that exposes raw machine identifiers as its main Human explanation is not Design Language compliant.
+
 ## Settings information architecture
 
 New configuration surfaces should prefer the grouped Settings Editor capability when multiple concerns are present.
