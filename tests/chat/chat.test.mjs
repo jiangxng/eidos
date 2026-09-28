@@ -5,6 +5,7 @@ import {
   isChatExperienceV010,
   isChatExperienceV020,
   renderChatExperienceToHtml,
+  renderChatMarkdownToHtml,
   renderChatMessageToHtml
 } from "../../dist/chat/index.js";
 import {
@@ -219,4 +220,67 @@ test("Assistant Chat v0.2 context selector keeps machine values opaque to presen
   assert.match(html, /Acme/);
   assert.match(html, /enterprise:acme/);
   assert.match(html, /enterpriseId/);
+});
+
+
+test("Assistant Chat renders common Markdown as semantic rich text", () => {
+  const html = renderChatMessageToHtml({
+    id: "assistant-markdown",
+    contractVersion: "0.2.0",
+    role: "assistant",
+    parts: [{
+      type: "text",
+      text: [
+        "## 平台概览",
+        "",
+        "**已安装 Package（2 个）**",
+        "",
+        "- enterprise-agent",
+        "- openai-llm-provider",
+        "",
+        "| Package | 类型 |",
+        "|---|---|",
+        "| enterprise-agent | AGENT |",
+        "",
+        "\`inline-code\`",
+        "",
+        "\`\`\`json",
+        "{\"ok\":true}",
+        "\`\`\`"
+      ].join("\n")
+    }]
+  });
+
+  assert.match(html, /data-eidos-chat-markdown/);
+  assert.match(html, /<h3[^>]*>平台概览<\/h3>/);
+  assert.match(html, /<strong>已安装 Package（2 个）<\/strong>/);
+  assert.match(html, /<ul[^>]*>.*enterprise-agent.*openai-llm-provider.*<\/ul>/s);
+  assert.match(html, /<table[^>]*>.*Package.*AGENT.*<\/table>/s);
+  assert.match(html, /data-eidos-chat-markdown-inline-code/);
+  assert.match(html, /data-eidos-chat-markdown-code/);
+});
+
+test("Chat Markdown escapes raw HTML and keeps unsafe links inert", () => {
+  const html = renderChatMarkdownToHtml(
+    "<script>alert(1)</script> [run](javascript:alert(1)) [docs](https://example.com)"
+  );
+
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.doesNotMatch(html, /href="javascript:/);
+  assert.match(html, /data-eidos-chat-markdown-unsafe-link/);
+  assert.match(html, /href="https:\/\/example\.com"/);
+  assert.match(html, /rel="noopener noreferrer"/);
+});
+
+test("Human chat messages remain literal while assistant messages may render Markdown", () => {
+  const user = renderChatMessageToHtml({
+    id: "user-markdown",
+    contractVersion: "0.2.0",
+    role: "user",
+    parts: [{ type: "text", text: "**keep literal**\nsecond line" }]
+  });
+  assert.match(user, /\*\*keep literal\*\*/);
+  assert.match(user, /<br>/);
+  assert.doesNotMatch(user, /<strong>keep literal<\/strong>/);
 });
