@@ -221,6 +221,9 @@ Agent chat is a productive work surface, not a social-message imitation.
 Default pattern:
 
 - assistant output uses the reading surface directly instead of wrapping every answer in a heavy card or bubble;
+- assistant/system prose may use **safe Markdown** for headings, emphasis, lists, tables, quotes, links and code; Eidos owns the renderer and typography so every Agent does not invent its own rich-text stack;
+- raw HTML from model output is never interpreted as trusted UI; it is escaped, and unsafe link schemes remain inert;
+- Human-authored chat input is preserved literally by default rather than silently reinterpreted as formatted output;
 - Human messages may use a restrained, right-aligned surface so turn boundaries remain easy to scan;
 - execution activity, evidence and proposals remain semantically distinct from prose and visually subordinate to the main answer;
 - thread/history controls belong in the chat header and use quiet toolbar treatment;
