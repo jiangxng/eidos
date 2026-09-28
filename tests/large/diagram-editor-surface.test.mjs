@@ -21,6 +21,14 @@ const page = {
   operationCommand: {
     code: "graph.view.operation",
     inputVersion: "0.1.0"
+  },
+  requestValues: {
+    activeContext: {
+      contractVersion: "0.1.0",
+      kind: "ENTERPRISE",
+      contextId: "enterprise:demo",
+      enterpriseId: "enterprise:demo"
+    }
   }
 };
 
@@ -100,7 +108,15 @@ test("diagram editor READ and operation commands preserve Host authority", () =>
       code: "graph.view.get",
       inputVersion: "0.1.0"
     },
-    values: { resourceId: "eog:primary" },
+    values: {
+      activeContext: {
+        contractVersion: "0.1.0",
+        kind: "ENTERPRISE",
+        contextId: "enterprise:demo",
+        enterpriseId: "enterprise:demo"
+      },
+      resourceId: "eog:primary"
+    },
     sourceInteractionId: "operating-graph",
     actionId: "diagram.read",
     requiresConfirmation: false
@@ -118,6 +134,12 @@ test("diagram editor READ and operation commands preserve Host authority", () =>
     "diagram.node.move"
   );
 
+  assert.deepEqual(request.values.activeContext, {
+    contractVersion: "0.1.0",
+    kind: "ENTERPRISE",
+    contextId: "enterprise:demo",
+    enterpriseId: "enterprise:demo"
+  });
   assert.equal(request.values.expectedRevision, 4);
   assert.deepEqual(request.values.operation, {
     type: "MOVE_NODE",
