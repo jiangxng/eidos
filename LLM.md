@@ -6,6 +6,8 @@
 
 A fresh LLM must be able to work from a clean checkout without prior conversation.
 
+> **Experience architecture authority (2026-09-28):** Before creating or changing any Human-facing Experience, read `docs/product/EIDOS-EXPERIENCE-ARCHITECTURE-CONSTITUTION-v0.1.md` and use `src/experience-architecture`. A page that renders is not automatically a complete product Experience. Declare/verify archetype, Human goal, state-aware actions, journey completion, recovery, localization boundary and Agent authority. Frequent deterministic actions must not become chat-only. Treat `validateExperienceArchitectureV010` diagnostics as architectural failures for candidate/production work.
+
 > **Design authority (2026-09-25):** Before changing App Host, Workbench, standard Eidos capabilities, button hierarchy, spacing, toolbar placement, responsive layout or plugin-facing visual patterns, read `docs/product/EIDOS-PRODUCTIVE-DESIGN-LANGUAGE-v0.1.md` and use `src/design-language/tokens.ts`. For icons, also read `docs/product/EIDOS-ICON-SYSTEM-v0.1.md` and use the semantic registry in `src/design-language/icons`. Do not invent a parallel visual/icon language inside a host product or plugin.
 
 Before editing code, identify:
