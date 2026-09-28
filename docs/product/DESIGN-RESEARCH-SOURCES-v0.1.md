@@ -1,6 +1,6 @@
 # Eidos Design Research Sources v0.1
 
-**Date reviewed:** 2026-09-25
+**Date reviewed:** 2026-09-28
 
 This is the curated external research shelf for Eidos design evolution. It is intentionally small and authority-ranked.
 
@@ -16,25 +16,33 @@ This is the curated external research shelf for Eidos design evolution. It is in
 
 Use for: Workbench anatomy, View Containers, Views, Activity Bar, contextual actions, extension UI discipline.
 
-### Microsoft Fluent 2
+### Microsoft Fluent 2 / Windows app design
 - https://fluent2.microsoft.design/layout
+- https://fluent2.microsoft.design/content-engineering/design-interaction-behavior/
+- https://learn.microsoft.com/en-us/windows/apps/design/app-settings/guidelines-for-app-settings
 
-Use for: 4px spacing rhythm, alignment, responsive layout, visual grouping and hierarchy.
+Use for: 4px spacing rhythm, alignment, responsive layout, visual grouping and hierarchy; explicit trigger/response/stop contracts for Agent interactions; turn progression that advances or cleanly closes a task; smart defaults; minimizing settings; keeping common workflow commands in task context; progressive disclosure for advanced configuration.
 
 ### IBM Carbon Design System
 - https://carbondesignsystem.com/components/UI-shell-header/usage/
 - https://carbondesignsystem.com/components/UI-shell-left-panel/usage/
 - https://carbondesignsystem.com/components/UI-shell-right-panel/usage/
 - https://carbondesignsystem.com/components/button/usage/
+- https://carbondesignsystem.com/components/progress-indicator/usage/
+- https://preview.carbondesignsystem.com/building-blocks/core/patterns/common-actions
 
-Use for: enterprise shell semantics, productive density, primary/secondary/tertiary/ghost/danger action hierarchy.
+Use for: enterprise shell semantics, productive density, one-primary-action hierarchy, direct common actions, multi-step current/completed/future state, validation before progression and explicit repair guidance.
 
 ### Apple Human Interface Guidelines
+- https://developer.apple.com/design/human-interface-guidelines/design-principles
+- https://developer.apple.com/design/human-interface-guidelines/settings
+- https://developer.apple.com/design/human-interface-guidelines/layout
+- https://developer.apple.com/design/human-interface-guidelines/writing
 - https://developer.apple.com/design/human-interface-guidelines/toolbars
 - https://developer.apple.com/design/human-interface-guidelines/menus
 - https://developer.apple.com/design/human-interface-guidelines/context-menus
 
-Use for: toolbar grouping, leading/center/trailing placement, overflow and destructive-action separation.
+Use for: purpose, agency, simplicity, good defaults, minimizing settings, keeping task-specific options in task context, direct navigation to needed settings, progressive disclosure, clear inline repair text, toolbar grouping and destructive-action separation.
 
 ## Tier 1 — accessibility/interaction standards
 
@@ -44,7 +52,7 @@ Use for: toolbar grouping, leading/center/trailing placement, overflow and destr
 - https://www.w3.org/WAI/ARIA/apg/patterns/button/
 - https://www.w3.org/WAI/ARIA/apg/practices/keyboard-interface/
 
-Use for: focus, keyboard behavior, toolbar semantics and accessible controls.
+Use for: focus, keyboard behavior, toolbar semantics and accessible controls; predictable focus movement; focus persistence/restoration after dialogs or destructive/state-changing actions.
 
 ## Tier 2 — HCI research community
 
