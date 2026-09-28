@@ -15,7 +15,7 @@ function esc(value: unknown): string {
 }
 
 function attr(name: string, value: unknown): string {
-  return " " + name + "="" + esc(value) + """;
+  return ` ${name}="${esc(value)}"`;
 }
 
 function encodedValue(value: unknown): string {
@@ -26,7 +26,7 @@ function encodedValue(value: unknown): string {
 
 function renderAction(action: ReviewQueueActionV010, itemId: string): string {
   const enabled = action.enabled !== false;
-  return "<button type="button""
+  return `<button type="button"`
     + attr("data-eidos-review-action", action.id)
     + attr("data-eidos-item-id", itemId)
     + attr("data-eidos-action-type", action.type)
@@ -48,8 +48,8 @@ function renderField(field: ReviewQueueFieldV010): string {
     + (field.readOnly ? " disabled" : "");
 
   if (field.control === "textarea") {
-    return "<label data-eidos-review-field-wrap><span>" + esc(field.label) + "</span>"
-      + "<textarea rows="3"" + common + ">"
+    return `<label data-eidos-review-field-wrap><span>${esc(field.label)}</span>`
+      + `<textarea rows="3"${common}>`
       + esc(encodedValue(field.value)) + "</textarea></label>";
   }
 
@@ -63,12 +63,12 @@ function renderField(field: ReviewQueueFieldV010): string {
         + (value === current ? " selected" : "")
         + ">" + esc(option.label) + "</option>";
     }).join("");
-    return "<label data-eidos-review-field-wrap><span>" + esc(field.label) + "</span>"
+    return `<label data-eidos-review-field-wrap><span>${esc(field.label)}</span>`
       + "<select" + common + ">" + options + "</select></label>";
   }
 
-  return "<label data-eidos-review-field-wrap><span>" + esc(field.label) + "</span>"
-    + "<input type="text"" + common + attr("value", encodedValue(field.value)) + "></label>";
+  return `<label data-eidos-review-field-wrap><span>${esc(field.label)}</span>`
+    + `<input type="text"${common}${attr("value", encodedValue(field.value))}></label>`;
 }
 
 function renderItem(item: ReviewQueueItemV010, technicalDetailsLabel: string): string {
