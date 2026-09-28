@@ -264,3 +264,21 @@ Eidos capability/runtime/renderer
         ↓
 Human experience
 ```
+
+
+## Article XVII — Complete Experience Before Rendered Page
+
+A Human-facing page is not a complete product Experience merely because it renders, accepts input or invokes a command.
+
+For bounded productive work, Eidos requires an explicit relationship among Human goal, page archetype, subject/state, available actions, journey continuity, feedback, recovery and any Agent assistance.
+
+**Direct manipulation and Agent interaction are complementary.** A frequent, deterministic, low-ambiguity action must not become chat-only merely because an LLM is available. Agents may explain, recommend, prepare and—when policy permits—execute declared Host actions; they do not invent business authority.
+
+Candidate and production Experiences must not strand a Human after a successful step. Critical bounded goals should be protected by end-to-end Golden Journey validation in addition to page/render tests.
+
+Authority and executable policy:
+
+- `docs/product/EIDOS-EXPERIENCE-ARCHITECTURE-CONSTITUTION-v0.1.md`
+- `src/experience-architecture/`
+
+This article exists specifically so product completeness survives LLM context loss and model replacement.
