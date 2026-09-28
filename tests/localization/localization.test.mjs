@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   createLocalizationRuntime,
+  eidosAppHostLocalizationBundles,
   localizeAppHostPageDefinition
 } from "../../dist/localization/index.js";
 import { renderAppHostPageToHtml } from "../../dist/app-host/index.js";
@@ -168,4 +169,59 @@ test("catalog search chrome follows the active Eidos localization runtime", () =
   assert.equal(localized.search.placeholder, "搜索帮助…");
   assert.equal(localized.search.ariaLabel, "搜索帮助");
   assert.equal(localized.search.noResultsMessage, "没有匹配的帮助内容。");
+});
+
+
+test("App Host runtime chrome covers first-class chat controls and human locale names", () => {
+  const expected = {
+    en: {
+      newChat: "New chat",
+      archive: "Archive",
+      untitled: "New chat",
+      archived: "[Archived] Example"
+    },
+    "zh-CN": {
+      newChat: "新对话",
+      archive: "归档",
+      untitled: "新对话",
+      archived: "【已归档】Example"
+    },
+    ja: {
+      newChat: "新しいチャット",
+      archive: "アーカイブ",
+      untitled: "新しいチャット",
+      archived: "【アーカイブ済み】Example"
+    },
+    "zh-TW": {
+      newChat: "新對話",
+      archive: "封存",
+      untitled: "新對話",
+      archived: "【已封存】Example"
+    }
+  };
+
+  for (const [locale, labels] of Object.entries(expected)) {
+    const runtime = createLocalizationRuntime(eidosAppHostLocalizationBundles, {
+      locale,
+      fallbackLocales: ["en"]
+    });
+    assert.equal(runtime.resolve("eidos.app-host", "shell.chatNew", "fallback"), labels.newChat);
+    assert.equal(runtime.resolve("eidos.app-host", "shell.chatArchive", "fallback"), labels.archive);
+    assert.equal(runtime.resolve("eidos.app-host", "shell.chatUntitled", "fallback"), labels.untitled);
+    assert.equal(
+      runtime.resolve("eidos.app-host", "shell.chatArchivedLabel", "fallback", { title: "Example" }),
+      labels.archived
+    );
+    for (const [code, label] of Object.entries({
+      en: "English",
+      "zh-CN": "简体中文",
+      ja: "日本語",
+      "zh-TW": "繁體中文"
+    })) {
+      assert.equal(
+        runtime.resolve("eidos.app-host", `shell.locale.${code}`, code),
+        label
+      );
+    }
+  }
 });
