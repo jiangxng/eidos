@@ -25,7 +25,7 @@ function renderInline(input: string): string {
   const token = (html: string): string => {
     const id = tokens.length;
     tokens.push(html);
-    return `\u0000EIDOS_MD_${id}\u0000`;
+    return `\u0000EIDOSMD${id}X\u0000`;
   };
 
   let value = input.replace(/\`([^\`\n]+)\`/g, (_match, code: string) =>
@@ -48,7 +48,7 @@ function renderInline(input: string): string {
     .replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>")
     .replace(/(^|[^_])_([^_\n]+)_(?!_)/g, "$1<em>$2</em>");
 
-  return value.replace(/\u0000EIDOS_MD_(\d+)\u0000/g, (_match, index: string) =>
+  return value.replace(/\u0000EIDOSMD(\d+)X\u0000/g, (_match, index: string) =>
     tokens[Number(index)] ?? ""
   );
 }
