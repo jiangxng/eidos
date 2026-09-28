@@ -34,7 +34,7 @@ function renderInline(input: string): string {
 
   value = value.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (_match, label: string, rawHref: string) => {
     const href = safeHref(rawHref);
-    if (!href) return `${esc(label)} (${esc(rawHref)})`;
+    if (!href) return token(`<span data-eidos-chat-markdown-unsafe-link>${esc(label)} (${esc(rawHref)})</span>`);
     const external = href.startsWith("https://") || href.startsWith("http://");
     return token(
       `<a data-eidos-chat-markdown-link href="${esc(href)}"${external ? ' target="_blank" rel="noopener noreferrer"' : ""}>${esc(label)}</a>`
