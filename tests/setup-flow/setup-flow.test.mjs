@@ -28,7 +28,11 @@ const definition = {
         id: "choose-provider",
         label: "Choose provider",
         type: "navigate",
-        route: "/plugins"
+        route: "/plugins",
+        continuation: {
+          onActionId: "settings.save",
+          route: "/enterprise-agent/setup"
+        }
       }
     },
     {
@@ -62,6 +66,8 @@ test("Setup Flow contract and renderer express one current actionable step", () 
   assert.match(html, /aria-current="step"/);
   assert.match(html, /data-eidos-setup-action="choose-provider"/);
   assert.match(html, /data-eidos-setup-action="open-agent"/);
+  assert.match(html, /data-eidos-continuation-action-id="settings\.save"/);
+  assert.match(html, /data-eidos-continuation-route="\/enterprise-agent\/setup"/);
 });
 
 test("App Host renders Setup Flow as a first-class Eidos capability", () => {
@@ -99,6 +105,10 @@ test("Setup Flow localizes Japanese and Traditional Chinese without changing act
   const ja = localizeAppHostPageDefinition(page, createLocalizationRuntime(bundles, { locale: "ja" }));
   assert.equal(ja.title, "パーソナルエージェントのセットアップ");
   assert.equal(ja.steps[0].primaryAction.route, "/plugins");
+  assert.deepEqual(ja.steps[0].primaryAction.continuation, {
+    onActionId: "settings.save",
+    route: "/enterprise-agent/setup"
+  });
 
   const tw = localizeAppHostPageDefinition(page, createLocalizationRuntime(bundles, { locale: "zh-TW" }));
   assert.equal(tw.title, "個人 Agent 設定");
