@@ -205,6 +205,41 @@ After step action completion:
 - errors are associated with the relevant step;
 - no focus loss on rerender.
 
+### 4.5 Cross-page Journey Continuation
+
+A setup step may temporarily leave the Setup surface to complete a bounded subtask such as credentials, provider selection, storage connection or another settings page.
+
+The Human must not be required to remember how to return.
+
+A navigation action may therefore declare a continuation:
+
+```text
+navigate to target
+→ wait for one declared completion action
+→ on success, return to the declared Setup route
+```
+
+Rules:
+
+- the continuation names the exact destination action that represents completion;
+- unrelated successful actions do not consume the continuation;
+- failed actions keep the continuation available for retry;
+- continuation state is session-scoped and expires, so a stale setup cannot redirect a later unrelated task;
+- machine navigation context is not shown as normal Human copy;
+- the destination page does not need product-specific knowledge of the originating setup flow.
+
+This is the default pattern for avoiding the common discontinuity:
+
+```text
+Setup → Settings → Save → ???
+```
+
+The intended experience is:
+
+```text
+Setup → Settings → Save → next Setup step
+```
+
 ## 5. Extension Manager readiness and progressive disclosure
 
 Lifecycle state and readiness are separate concepts.
