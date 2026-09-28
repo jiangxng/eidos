@@ -612,10 +612,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
               ? consumeJourneyContinuationV010(page.route.path, "settings.save")
               : undefined;
             if (continuation) {
-              status.textContent = hostText(
-                "shell.settingsSavedContinuing",
-                "Settings saved. Continuing…"
-              );
+              status.textContent = hostText("shell.settingsSaved", "Settings saved.");
               await options.onNavigate?.(continuation.returnRoute);
             }
             await options.onActionResult?.(result, page);
