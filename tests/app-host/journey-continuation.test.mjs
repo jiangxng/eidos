@@ -87,3 +87,51 @@ test("journey continuation keys are target-route scoped", () => {
     "eidos.journey.continuation:/settings/provider"
   );
 });
+
+
+test("journey continuation can be scoped to one of several destination items", () => {
+  const state = storage();
+  persistJourneyContinuationV010(
+    "/store",
+    "install",
+    "/agent/setup",
+    state,
+    1_000,
+    ["deepseek-provider", "openai-provider"]
+  );
+
+  assert.equal(
+    consumeJourneyContinuationV010("/store", "install", state, 1_100, "unrelated-plugin"),
+    undefined
+  );
+  assert.equal(state.snapshot().size, 1);
+
+  assert.deepEqual(
+    consumeJourneyContinuationV010("/store", "install", state, 1_200, "openai-provider"),
+    {
+      targetRoute: "/store",
+      onActionId: "install",
+      returnRoute: "/agent/setup",
+      onItemIds: ["deepseek-provider", "openai-provider"],
+      createdAt: 1_000
+    }
+  );
+  assert.equal(state.snapshot().size, 0);
+});
+
+test("item-scoped continuation never consumes without a matching item id", () => {
+  const state = storage();
+  persistJourneyContinuationV010(
+    "/store",
+    "install",
+    "/agent/setup",
+    state,
+    1_000,
+    ["openai-provider"]
+  );
+  assert.equal(
+    consumeJourneyContinuationV010("/store", "install", state, 1_100),
+    undefined
+  );
+  assert.equal(state.snapshot().size, 1);
+});
