@@ -127,8 +127,10 @@ export function mountSurfaceHandoffV010(options: {
   }
 
   const listeners: Array<() => void> = [];
-  for (const button of surface.querySelectorAll<HTMLButtonElement>(
-    "[data-eidos-surface-handoff-target]"
+  for (const button of Array.from(
+    surface.querySelectorAll<HTMLButtonElement>(
+      "[data-eidos-surface-handoff-target]"
+    )
   )) {
     const handler = () => {
       const target = button.dataset.eidosSurfaceHandoffTarget as
