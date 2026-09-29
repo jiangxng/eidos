@@ -90,16 +90,26 @@ export interface AppHostLoadedPageV010 extends AppHostResolvedRouteV010 {
   definition: unknown;
 }
 
+export interface AppHostReadOptionsV010 {
+  signal?: AbortSignal;
+}
+
 export interface ExperienceSource {
-  listEffectiveExperienceManifests(): Promise<unknown[]>;
-  loadPage(page: AppHostPageReferenceV010): Promise<unknown>;
+  listEffectiveExperienceManifests(options?: AppHostReadOptionsV010): Promise<unknown[]>;
+  loadPage(
+    page: AppHostPageReferenceV010,
+    options?: AppHostReadOptionsV010
+  ): Promise<unknown>;
 }
 
 export interface AppHost {
   refresh(): Promise<AppHostSnapshotV010>;
   getSnapshot(): AppHostSnapshotV010;
   resolveRoute(path: string): AppHostResolvedRouteV010 | undefined;
-  loadRoute(path: string): Promise<AppHostLoadedPageV010 | undefined>;
+  loadRoute(
+    path: string,
+    options?: AppHostReadOptionsV010
+  ): Promise<AppHostLoadedPageV010 | undefined>;
   subscribe(listener: (snapshot: AppHostSnapshotV010) => void): () => void;
   dispose(): void;
 }
