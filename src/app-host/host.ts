@@ -9,9 +9,12 @@ import type {
   AppHostRouteV010,
   AppHostSnapshotV010,
   AppHostSurfaceDeclarationV010,
+  AppHostSurfaceResolutionRequestV010,
+  AppHostSurfaceResolutionV010,
   EffectiveExperienceManifestV010,
   ExperienceSource
 } from "./contracts.js";
+import { resolveExperienceSurfaceV010 } from "./surface.js";
 
 const diagnostic = (code: string, path: string, message: string, fix?: string): Diagnostic => ({
   code,
@@ -656,25 +659,120 @@ export function createAppHost(source: ExperienceSource): AppHost {
     };
   };
 
-  const loadRoute = async (
-    path: string,
-    options?: { signal?: AbortSignal }
-  ): Promise<AppHostLoadedPageV010 | undefined> => {
+  const loadRoute = async (path: string): Promise<AppHostLoadedPageV010 | undefined> => {
     if (disposed) throw new Error("EIDOS_APP_HOST_DISPOSED");
-    if (options?.signal?.aborted) {
-      throw new DOMException("Route load aborted", "AbortError");
-    }
     const resolved = resolveRoute(path);
     if (!resolved) return undefined;
-    const definition = await source.loadPage(
-      clonePage(resolved.page),
-      options
-    );
-    if (options?.signal?.aborted) {
-      throw new DOMException("Route load aborted", "AbortError");
-    }
+    const definition = await source.loadPage(clonePage(resolved.page));
     return { ...resolved, definition };
   };
+
+  const resolveSurface = (
+    request: AppHostSurfaceResolutionRequestV010
+  ): AppHostSurfaceResolutionV010 => {
+    const candidateManifests = request.experienceId
+      ? snapshot.manifests.filter(item => item.experienceId === request.experienceId)
+      : request.path
+        ? snapshot.manifests.filter(item =>
+            item.routes.some(route => route.path === request.path)
+          )
+        : snapshot.manifests;
+
+    if (candidateManifests.length === 0) {
+      const target = request.explicitTarget
+        ?? request.userTarget
+        ?? (request.profile
+          ? (
+              request.profile.viewportClass === "COMPACT"
+              || request.profile.primaryPointer === "COARSE"
+                ? "MOBILE_TASK"
+                : request.profile.viewportClass === "MEDIUM"
+                  && request.profile.touch
+                  ? "TABLET_WORKBENCH"
+                  : "DESKTOP_WORKBENCH"
+            )
+          : "DESKTOP_WORKBENCH");
+      return {
+        kind: "NOT_FOUND",
+        target,
+        selectedBy: request.explicitTarget
+          ? "EXPLICIT"
+          : request.userTarget
+            ? "USER"
+            : request.profile
+              ? "CAPABILITY"
+              : "DEFAULT",
+        ...(request.experienceId ? { experienceId: request.experienceId } : {}),
+        ...(request.path ? { requestedPath: request.path } : {}),
+        ...(request.semanticRouteId
+          ? { semanticRouteId: request.semanticRouteId }
+          : {})
+      };
+    }
+
+    const manifest = candidateManifests[0];
+    const result = resolveExperienceSurfaceV010(manifest, request);
+
+    if (result.kind === "ROUTE") {
+      const page = manifest.pages.find(item => item.id === result.route.pageId);
+      if (!page) {
+        return {
+          kind: "NOT_FOUND",
+          target: result.target,
+          selectedBy: result.selectedBy,
+          experienceId: manifest.experienceId,
+          ...(request.path ? { requestedPath: request.path } : {}),
+          semanticRouteId: result.semanticRouteId
+        };
+      }
+      return {
+        kind: "ROUTE",
+        resolved: {
+          route: cloneRoute(result.route),
+          page: clonePage(page),
+          experienceId: manifest.experienceId,
+          packageId: manifest.packageId,
+          featureId: manifest.featureId,
+          surfaceId: result.surfaceId,
+          surfaceTarget: result.target,
+          surfaceSupport: result.support,
+          semanticRouteId: result.semanticRouteId,
+          selectedBy: result.selectedBy
+        }
+      };
+    }
+
+    if (result.kind === "HANDOFF") {
+      return {
+        ...result,
+        experienceId: manifest.experienceId,
+        packageId: manifest.packageId,
+        featureId: manifest.featureId
+      };
+    }
+
+    return {
+      ...result,
+      experienceId: manifest.experienceId
+    };
+  };
+
+  const loadSurface = async (
+    request: AppHostSurfaceResolutionRequestV010
+  ) => {
+    if (disposed) throw new Error("EIDOS_APP_HOST_DISPOSED");
+    const resolution = resolveSurface(request);
+    if (resolution.kind !== "ROUTE") return resolution;
+    const definition = await source.loadPage(clonePage(resolution.resolved.page));
+    return {
+      kind: "ROUTE" as const,
+      page: {
+        ...resolution.resolved,
+        definition
+      }
+    };
+  };
+
 
   const subscribe = (listener: (snapshot: AppHostSnapshotV010) => void): (() => void) => {
     if (disposed) throw new Error("EIDOS_APP_HOST_DISPOSED");
@@ -687,5 +785,14 @@ export function createAppHost(source: ExperienceSource): AppHost {
     listeners.clear();
   };
 
-  return { refresh, getSnapshot, resolveRoute, loadRoute, subscribe, dispose };
+  return {
+    refresh,
+    getSnapshot,
+    resolveRoute,
+    loadRoute,
+    resolveSurface,
+    loadSurface,
+    subscribe,
+    dispose
+  };
 }
