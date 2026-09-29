@@ -51,10 +51,14 @@ export function resolveWorkbenchSurfaceRouteV010(
       )?.target
     : undefined;
 
+  const hasDirectRoute = manifest.routes.some(route =>
+    route.path === request.path
+  );
+
   return {
     manifest,
     resolution: resolveExperienceSurfaceV010(manifest, {
-      path: request.path,
+      ...(hasDirectRoute ? { path: request.path } : {}),
       ...(request.explicitTarget
         ? { explicitTarget: request.explicitTarget }
         : {}),
