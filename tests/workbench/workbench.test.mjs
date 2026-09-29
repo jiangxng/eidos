@@ -45,3 +45,34 @@ test("Workbench activity normalization validates, sorts and supports secondary p
     /EIDOS_WORKBENCH_ACTIVITY_ROUTE_REQUIRED/
   );
 });
+
+
+test("Workbench explicit URL/deep link wins over Host default and persisted layout", async () => {
+  const { resolveWorkbenchInitialTargetV010 } = await import(
+    "../../dist/workbench/index.js"
+  );
+
+  assert.equal(
+    resolveWorkbenchInitialTargetV010({
+      urlPath: "/m/enterprise-agent",
+      initialWorkspaceRoute: "/store",
+      persistedWorkspaceTarget: "/ledger-runtime-configurator"
+    }),
+    "/m/enterprise-agent"
+  );
+
+  assert.equal(
+    resolveWorkbenchInitialTargetV010({
+      initialWorkspaceRoute: "/store",
+      persistedWorkspaceTarget: "/ledger-runtime-configurator"
+    }),
+    "/store"
+  );
+
+  assert.equal(
+    resolveWorkbenchInitialTargetV010({
+      persistedWorkspaceTarget: "/ledger-runtime-configurator"
+    }),
+    "/ledger-runtime-configurator"
+  );
+});
