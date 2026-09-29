@@ -293,3 +293,73 @@ test("manifest validation rejects Surface fallback cycles and cross-Surface entr
     )
   );
 });
+
+
+test("target-specific semantic route wins over shared route regardless of declaration order", () => {
+  const value = surfaceManifest({
+    pages: [
+      { id: "shared", source: "memory://shared" },
+      { id: "mobile", source: "memory://mobile" }
+    ],
+    routes: [
+      {
+        id: "shared",
+        semanticId: "orders.home",
+        path: "/shared",
+        pageId: "shared"
+      },
+      {
+        id: "mobile",
+        semanticId: "orders.home",
+        surfaceId: "orders.mobile-surface",
+        path: "/m/orders",
+        pageId: "mobile"
+      }
+    ],
+    defaultRoute: "/shared",
+    navigation: []
+  });
+
+  const result = resolveExperienceSurfaceV010(value, {
+    path: "/shared",
+    explicitTarget: "MOBILE_TASK"
+  });
+
+  assert.equal(result.kind, "ROUTE");
+  assert.equal(result.route.path, "/m/orders");
+});
+
+test("manifest validation rejects duplicate semantic routes within one Surface scope", () => {
+  const value = surfaceManifest({
+    pages: [
+      { id: "a", source: "memory://a" },
+      { id: "b", source: "memory://b" }
+    ],
+    routes: [
+      {
+        id: "a",
+        semanticId: "orders.home",
+        surfaceId: "orders.desktop-surface",
+        path: "/a",
+        pageId: "a"
+      },
+      {
+        id: "b",
+        semanticId: "orders.home",
+        surfaceId: "orders.desktop-surface",
+        path: "/b",
+        pageId: "b"
+      }
+    ],
+    defaultRoute: "/a",
+    navigation: []
+  });
+
+  const result = validateEffectiveExperienceManifest(value);
+  assert.equal(result.ok, false);
+  assert.ok(
+    result.diagnostics.some(
+      item => item.code === "EIDOS_APP_HOST_ROUTE_SEMANTIC_DUPLICATE"
+    )
+  );
+});
