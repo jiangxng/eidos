@@ -93,6 +93,7 @@ export interface ExperienceSurfaceRouteResolutionV010 {
   target: AppHostSurfaceTargetV010;
   support: Exclude<AppHostSurfaceSupportV010, "UNSUPPORTED">;
   surfaceId: string;
+  structuralVersion: string;
   route: AppHostRouteV010;
   semanticRouteId: string;
   selectedBy: "EXPLICIT" | "USER" | "CAPABILITY" | "DEFAULT";
@@ -235,6 +236,7 @@ export function resolveExperienceSurfaceV010(
       target: "DESKTOP_WORKBENCH",
       support: "FULL",
       surfaceId: "legacy:desktop",
+      structuralVersion: "legacy:0",
       route,
       semanticRouteId: semanticId(route),
       selectedBy: choice.selectedBy
@@ -285,6 +287,7 @@ export function resolveExperienceSurfaceV010(
             target: fallback.target,
             support: fallback.support,
             surfaceId: fallback.id,
+            structuralVersion: fallback.structuralVersion ?? "0",
             route: fallbackRoute,
             semanticRouteId: semantic ?? semanticId(fallbackRoute),
             selectedBy: "CAPABILITY"
@@ -354,6 +357,7 @@ export function resolveExperienceSurfaceV010(
     target: choice.target,
     support: surface.support,
     surfaceId: surface.id,
+    structuralVersion: surface.structuralVersion ?? "0",
     route,
     semanticRouteId: resolvedSemantic,
     selectedBy: choice.selectedBy
