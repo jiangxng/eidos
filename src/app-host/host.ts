@@ -59,20 +59,6 @@ function cloneSurface(
   };
 }
 
-function cloneSurface(
-  surface: AppHostSurfaceDeclarationV010
-): AppHostSurfaceDeclarationV010 {
-  return {
-    id: surface.id,
-    target: surface.target,
-    support: surface.support,
-    ...(surface.entryRoute ? { entryRoute: surface.entryRoute } : {}),
-    ...(surface.fallbackSurfaceId
-      ? { fallbackSurfaceId: surface.fallbackSurfaceId }
-      : {})
-  };
-}
-
 function cloneManifest(manifest: EffectiveExperienceManifestV010): EffectiveExperienceManifestV010 {
   return {
     contractVersion: "0.1.0",
@@ -494,84 +480,6 @@ export function validateEffectiveExperienceManifest(
     ));
   }
 
-
-  const routeByPath = new Map<string, Record<string, unknown>>();
-  for (const route of routes) {
-    if (
-      isPlainObject(route)
-      && isNonEmptyString(route.path)
-      && route.path.startsWith("/")
-    ) {
-      routeByPath.set(route.path, route);
-    }
-  }
-
-  const fallbackBySurface = new Map<string, string>();
-  for (const surface of surfaces) {
-    if (!isPlainObject(surface)) continue;
-
-    if (
-      isNonEmptyString(surface.entryRoute)
-      && !routePaths.has(surface.entryRoute)
-    ) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_ENTRY_ROUTE",
-        root,
-        `Surface entryRoute '${surface.entryRoute}' does not reference a route in the same manifest`
-      ));
-    }
-
-    if (
-      isNonEmptyString(surface.entryRoute)
-      && isNonEmptyString(surface.id)
-    ) {
-      const entryRoute = routeByPath.get(surface.entryRoute);
-      if (
-        entryRoute
-        && isNonEmptyString(entryRoute.surfaceId)
-        && entryRoute.surfaceId !== surface.id
-      ) {
-        diagnostics.push(diagnostic(
-          "EIDOS_APP_HOST_SURFACE_ENTRY_ROUTE_SCOPE",
-          root,
-          `Surface '${surface.id}' entryRoute '${surface.entryRoute}' belongs to surface '${entryRoute.surfaceId}'`
-        ));
-      }
-    }
-
-    if (
-      isNonEmptyString(surface.fallbackSurfaceId)
-      && !surfaceIds.has(surface.fallbackSurfaceId)
-    ) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_FALLBACK",
-        root,
-        `Surface fallback '${surface.fallbackSurfaceId}' is not declared in the same manifest`
-      ));
-    } else if (
-      isNonEmptyString(surface.id)
-      && isNonEmptyString(surface.fallbackSurfaceId)
-    ) {
-      fallbackBySurface.set(surface.id, surface.fallbackSurfaceId);
-    }
-  }
-
-  for (const start of fallbackBySurface.keys()) {
-    const seen = new Set<string>();
-    let current: string | undefined = start;
-    while (current && fallbackBySurface.has(current)) {
-      if (seen.has(current)) {
-        diagnostics.push(diagnostic(
-          "EIDOS_APP_HOST_SURFACE_FALLBACK_CYCLE",
-          root,
-          `Surface fallback chain contains a cycle starting at '${start}'`
-        ));
-        break;
-      }
-      seen.add(current);
-      current = fallbackBySurface.get(current);
-    }
-  }
 
   for (const item of navigation) {
     if (isPlainObject(item) && isNonEmptyString(item.parentId) && !navigationIds.has(item.parentId)) {
