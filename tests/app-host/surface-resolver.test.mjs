@@ -363,3 +363,43 @@ test("manifest validation rejects duplicate semantic routes within one Surface s
     )
   );
 });
+
+
+test("App Host owns cross-Surface resolution and lazy page loading", async () => {
+  const definitions = new Map([
+    ["memory://orders/desktop", { id: "desktop-definition" }],
+    ["memory://orders/mobile", { id: "mobile-definition" }]
+  ]);
+  const host = createAppHost({
+    async listEffectiveExperienceManifests() {
+      return [surfaceManifest()];
+    },
+    async loadPage(page) {
+      return definitions.get(page.source);
+    }
+  });
+
+  await host.refresh();
+
+  const resolved = host.resolveSurface({
+    experienceId: "orders",
+    path: "/orders",
+    explicitTarget: "MOBILE_TASK"
+  });
+  assert.equal(resolved.kind, "ROUTE");
+  assert.equal(resolved.resolved.route.path, "/m/orders");
+  assert.equal(resolved.resolved.page.id, "orders.mobile");
+  assert.equal(resolved.resolved.semanticRouteId, "orders.home");
+  assert.equal(resolved.resolved.surfaceTarget, "MOBILE_TASK");
+
+  const loaded = await host.loadSurface({
+    experienceId: "orders",
+    semanticRouteId: "orders.home",
+    explicitTarget: "MOBILE_TASK"
+  });
+  assert.equal(loaded.kind, "ROUTE");
+  assert.equal(loaded.page.route.path, "/m/orders");
+  assert.deepEqual(loaded.page.definition, { id: "mobile-definition" });
+
+  host.dispose();
+});
