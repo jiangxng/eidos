@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import {
   isChatExperienceV010,
@@ -159,6 +160,7 @@ test("Assistant Chat v0.2 renders observable activity evidence and proposal part
       }
     ]
   });
+  assert.match(html, /data-eidos-chat-message-id="assistant-1"/);
   assert.match(html, /data-eidos-chat-part="activity"/);
   assert.match(html, /data-eidos-chat-part="evidence"/);
   assert.match(html, /data-eidos-chat-part="proposal"/);
@@ -283,4 +285,27 @@ test("Human chat messages remain literal while assistant messages may render Mar
   assert.match(user, /\*\*keep literal\*\*/);
   assert.match(user, /<br>/);
   assert.doesNotMatch(user, /<strong>keep literal<\/strong>/);
+});
+
+
+test("High-frequency App Host surfaces retain DOM instead of full replacement", async () => {
+  const pageController = await readFile(
+    new URL("../../dist/app-host/page-controller.js", import.meta.url),
+    "utf8"
+  );
+  const browserShell = await readFile(
+    new URL("../../dist/app-host/browser-shell.js", import.meta.url),
+    "utf8"
+  );
+  const spatial = await readFile(
+    new URL("../../dist/spatial/surface.js", import.meta.url),
+    "utf8"
+  );
+
+  assert.doesNotMatch(pageController, /transcript\.innerHTML\s*=/);
+  assert.match(pageController, /preserveMountedPage/);
+  assert.match(browserShell, /preserveMountedPage/);
+  assert.doesNotMatch(spatial, /objectLayer\.replaceChildren\(/);
+  assert.doesNotMatch(spatial, /svg\.replaceChildren\(/);
+  assert.match(spatial, /requestAnimationFrame/);
 });
