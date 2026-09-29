@@ -336,7 +336,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
   }
 
   const hostActionButtons = container.querySelectorAll<HTMLButtonElement>(
-    "[data-eidos-catalog-action],[data-eidos-extension-action],[data-eidos-setup-action],[data-eidos-chat-action],[data-eidos-review-action]"
+    "[data-eidos-catalog-action],[data-eidos-extension-action],[data-eidos-setup-action],[data-eidos-chat-action],[data-eidos-review-action],[data-eidos-task-action]"
   );
   if (hostActionButtons.length > 0) {
     const actionStatus = document.createElement("pre");
@@ -451,6 +451,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
                 ?? button.dataset.eidosSetupAction
                 ?? button.dataset.eidosChatAction
                 ?? button.dataset.eidosReviewAction
+                ?? button.dataset.eidosTaskAction
                 ?? command,
               requiresConfirmation: button.dataset.eidosConfirm === "true"
             };

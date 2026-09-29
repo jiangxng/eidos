@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
 import {
   isTaskInboxV010,
@@ -67,4 +68,46 @@ test("Task Inbox rejects duplicate item identity", () => {
     () => renderTaskInboxToHtml(duplicate),
     /EIDOS_TASK_INBOX_ITEM_DUPLICATE/
   );
+});
+
+
+test("Task Inbox renders explicit command/navigation authority metadata", () => {
+  const html = renderTaskInboxToHtml(inbox({
+    items: [{
+      id: "task:actionable",
+      title: "Review exception",
+      state: "EXCEPTION",
+      statusLabel: "Needs attention",
+      priority: 100,
+      primaryAction: {
+        id: "resolve",
+        label: "Resolve",
+        type: "command",
+        command: "task.resolve",
+        inputVersion: "0.1.0",
+        requiresConfirmation: true
+      },
+      secondaryActions: [{
+        id: "inspect",
+        label: "Inspect",
+        type: "navigate",
+        route: "/inspect/task:actionable"
+      }]
+    }]
+  }));
+
+  assert.match(html, /data-eidos-task-action="resolve"/);
+  assert.match(html, /data-eidos-command="task.resolve"/);
+  assert.match(html, /data-eidos-confirm="true"/);
+  assert.match(html, /data-eidos-task-action="inspect"/);
+  assert.match(html, /data-eidos-route="\/inspect\/task:actionable"/);
+});
+
+test("App Host delegates Task Inbox actions through the shared ActionHost path", async () => {
+  const controller = await readFile(
+    new URL("../../dist/app-host/page-controller.js", import.meta.url),
+    "utf8"
+  );
+  assert.match(controller, /data-eidos-task-action/);
+  assert.match(controller, /eidosTaskAction/);
 });
