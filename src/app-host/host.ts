@@ -9,6 +9,7 @@ import type {
   AppHostRouteV010,
   AppHostSnapshotV010,
   AppHostSurfaceDeclarationV010,
+  AppHostReadOptionsV010,
   EffectiveExperienceManifestV010,
   ExperienceSource
 } from "./contracts.js";
@@ -666,11 +667,23 @@ export function createAppHost(source: ExperienceSource): AppHost {
     };
   };
 
-  const loadRoute = async (path: string): Promise<AppHostLoadedPageV010 | undefined> => {
+  const loadRoute = async (
+    path: string,
+    options: AppHostReadOptionsV010 = {}
+  ): Promise<AppHostLoadedPageV010 | undefined> => {
     if (disposed) throw new Error("EIDOS_APP_HOST_DISPOSED");
+    if (options.signal?.aborted) {
+      throw options.signal.reason ?? new DOMException("Aborted", "AbortError");
+    }
     const resolved = resolveRoute(path);
     if (!resolved) return undefined;
-    const definition = await source.loadPage(clonePage(resolved.page));
+    const definition = await source.loadPage(
+      clonePage(resolved.page),
+      options
+    );
+    if (options.signal?.aborted) {
+      throw options.signal.reason ?? new DOMException("Aborted", "AbortError");
+    }
     return { ...resolved, definition };
   };
 
