@@ -94,12 +94,29 @@ export function runtimeActivityDeltaV010(
   before: RuntimeActivitySnapshotV010,
   after: RuntimeActivitySnapshotV010
 ): RuntimeActivitySnapshotV010 {
-  const next = zeroSnapshot();
-  for (const key of Object.keys(next) as Array<keyof RuntimeActivitySnapshotV010>) {
-    if (key === "contractVersion") continue;
-    next[key] = Math.max(0, (after[key] as number) - (before[key] as number)) as never;
-  }
-  return next;
+  return {
+    contractVersion: "0.1.0",
+    surfaceMounts: Math.max(0, after.surfaceMounts - before.surfaceMounts),
+    surfaceUnmounts: Math.max(0, after.surfaceUnmounts - before.surfaceUnmounts),
+    surfaceReuses: Math.max(0, after.surfaceReuses - before.surfaceReuses),
+    surfacePatches: Math.max(0, after.surfacePatches - before.surfacePatches),
+    resourceInvalidations: Math.max(
+      0,
+      after.resourceInvalidations - before.resourceInvalidations
+    ),
+    resourceRefreshes: Math.max(0, after.resourceRefreshes - before.resourceRefreshes),
+    httpRequests: Math.max(0, after.httpRequests - before.httpRequests),
+    conditionalRequests: Math.max(
+      0,
+      after.conditionalRequests - before.conditionalRequests
+    ),
+    sseMessages: Math.max(0, after.sseMessages - before.sseMessages),
+    sseReconnects: Math.max(0, after.sseReconnects - before.sseReconnects),
+    structuralDomMutations: Math.max(
+      0,
+      after.structuralDomMutations - before.structuralDomMutations
+    )
+  };
 }
 
 export function evaluateIdleRuntimeBudgetV010(
