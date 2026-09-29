@@ -149,3 +149,59 @@ test("diagram editor READ and operation commands preserve Host authority", () =>
   });
   assert.equal(request.command.code, "graph.view.operation");
 });
+
+
+test("diagram editor carries renderer-independent observation badges and read presets", () => {
+  const observatoryPage = {
+    ...page,
+    readPresets: [
+      {
+        id: "4h",
+        label: "4 hours",
+        values: {
+          timeLens: {
+            contractVersion: "0.2.0",
+            primary: {
+              startAt: "2026-09-28T08:00:00.000Z",
+              endAt: "2026-09-28T12:00:00.000Z"
+            }
+          }
+        }
+      }
+    ]
+  };
+  assert.equal(isDiagramEditorPageV010(observatoryPage), true);
+
+  const request = diagramEditorReadRequestV010(
+    observatoryPage,
+    observatoryPage.readPresets[0].values
+  );
+  assert.deepEqual(request.values.timeLens, {
+    contractVersion: "0.2.0",
+    primary: {
+      startAt: "2026-09-28T08:00:00.000Z",
+      endAt: "2026-09-28T12:00:00.000Z"
+    }
+  });
+
+  const observed = structuredClone(state);
+  observed.nodes[1].observations = [
+    {
+      id: "frequency",
+      label: "Frequency",
+      value: "12.5/h"
+    },
+    {
+      id: "balance",
+      label: "Balance",
+      value: "180"
+    }
+  ];
+  assert.deepEqual(validateDiagramEditorStateV010(observed), {
+    ok: true,
+    issues: []
+  });
+
+  observed.nodes[1].observations[0].value = "";
+  assert.equal(validateDiagramEditorStateV010(observed).ok, false);
+});
