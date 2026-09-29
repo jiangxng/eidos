@@ -259,3 +259,37 @@ test("browser capability profile and URL Surface selector are deterministic", ()
     undefined
   );
 });
+
+
+test("manifest validation rejects Surface fallback cycles and cross-Surface entry routes", () => {
+  const result = validateEffectiveExperienceManifest(surfaceManifest({
+    surfaces: [
+      {
+        id: "orders.desktop-surface",
+        target: "DESKTOP_WORKBENCH",
+        support: "FULL",
+        entryRoute: "/m/orders",
+        fallbackSurfaceId: "orders.mobile-surface"
+      },
+      {
+        id: "orders.mobile-surface",
+        target: "MOBILE_TASK",
+        support: "TASK_FOCUSED",
+        entryRoute: "/m/orders",
+        fallbackSurfaceId: "orders.desktop-surface"
+      }
+    ]
+  }));
+
+  assert.equal(result.ok, false);
+  assert.ok(
+    result.diagnostics.some(
+      item => item.code === "EIDOS_APP_HOST_SURFACE_ENTRY_ROUTE_SCOPE"
+    )
+  );
+  assert.ok(
+    result.diagnostics.some(
+      item => item.code === "EIDOS_APP_HOST_SURFACE_FALLBACK_CYCLE"
+    )
+  );
+});
