@@ -90,9 +90,18 @@ export interface AppHostLoadedPageV010 extends AppHostResolvedRouteV010 {
   definition: unknown;
 }
 
+export interface ExperienceReadOptionsV010 {
+  signal?: AbortSignal;
+}
+
 export interface ExperienceSource {
-  listEffectiveExperienceManifests(): Promise<unknown[]>;
-  loadPage(page: AppHostPageReferenceV010): Promise<unknown>;
+  listEffectiveExperienceManifests(
+    options?: ExperienceReadOptionsV010
+  ): Promise<unknown[]>;
+  loadPage(
+    page: AppHostPageReferenceV010,
+    options?: ExperienceReadOptionsV010
+  ): Promise<unknown>;
 }
 
 export interface AppHost {
