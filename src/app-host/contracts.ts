@@ -108,7 +108,10 @@ export interface AppHost {
   refresh(): Promise<AppHostSnapshotV010>;
   getSnapshot(): AppHostSnapshotV010;
   resolveRoute(path: string): AppHostResolvedRouteV010 | undefined;
-  loadRoute(path: string): Promise<AppHostLoadedPageV010 | undefined>;
+  loadRoute(
+    path: string,
+    options?: ExperienceReadOptionsV010
+  ): Promise<AppHostLoadedPageV010 | undefined>;
   subscribe(listener: (snapshot: AppHostSnapshotV010) => void): () => void;
   dispose(): void;
 }
