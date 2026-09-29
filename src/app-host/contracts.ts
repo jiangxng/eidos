@@ -90,28 +90,79 @@ export interface AppHostLoadedPageV010 extends AppHostResolvedRouteV010 {
   definition: unknown;
 }
 
-export interface ExperienceReadOptionsV010 {
-  signal?: AbortSignal;
+export interface ExperienceSource {
+  listEffectiveExperienceManifests(): Promise<unknown[]>;
+  loadPage(page: AppHostPageReferenceV010): Promise<unknown>;
 }
 
-export interface ExperienceSource {
-  listEffectiveExperienceManifests(
-    options?: ExperienceReadOptionsV010
-  ): Promise<unknown[]>;
-  loadPage(
-    page: AppHostPageReferenceV010,
-    options?: ExperienceReadOptionsV010
-  ): Promise<unknown>;
+export interface AppHostSurfaceResolutionRequestV010 {
+  experienceId?: string;
+  path?: string;
+  semanticRouteId?: string;
+  explicitTarget?: AppHostSurfaceTargetV010;
+  userTarget?: AppHostSurfaceTargetV010;
+  profile?: ClientSurfaceProfileV010;
+}
+
+export interface AppHostSurfaceResolvedRouteV010
+  extends AppHostResolvedRouteV010 {
+  surfaceId: string;
+  surfaceTarget: AppHostSurfaceTargetV010;
+  surfaceSupport: Exclude<AppHostSurfaceSupportV010, "UNSUPPORTED">;
+  semanticRouteId: string;
+  selectedBy: "EXPLICIT" | "USER" | "CAPABILITY" | "DEFAULT";
+}
+
+export interface AppHostSurfaceHandoffV010 {
+  kind: "HANDOFF";
+  experienceId: string;
+  packageId: string;
+  featureId: string;
+  target: AppHostSurfaceTargetV010;
+  reason:
+    | "LEGACY_DESKTOP_ONLY"
+    | "TARGET_NOT_DECLARED"
+    | "TARGET_UNSUPPORTED"
+    | "SEMANTIC_ROUTE_UNAVAILABLE";
+  selectedBy: "EXPLICIT" | "USER" | "CAPABILITY" | "DEFAULT";
+  semanticRouteId?: string;
+  requestedPath?: string;
+  availableTargets: AppHostSurfaceTargetV010[];
+  fallbackSurfaceId?: string;
+}
+
+export type AppHostSurfaceResolutionV010 =
+  | { kind: "ROUTE"; resolved: AppHostSurfaceResolvedRouteV010 }
+  | AppHostSurfaceHandoffV010
+  | {
+      kind: "NOT_FOUND";
+      target: AppHostSurfaceTargetV010;
+      selectedBy: "EXPLICIT" | "USER" | "CAPABILITY" | "DEFAULT";
+      experienceId?: string;
+      requestedPath?: string;
+      semanticRouteId?: string;
+    };
+
+export interface AppHostLoadedSurfacePageV010
+  extends AppHostSurfaceResolvedRouteV010 {
+  definition: unknown;
 }
 
 export interface AppHost {
   refresh(): Promise<AppHostSnapshotV010>;
   getSnapshot(): AppHostSnapshotV010;
   resolveRoute(path: string): AppHostResolvedRouteV010 | undefined;
-  loadRoute(
-    path: string,
-    options?: ExperienceReadOptionsV010
-  ): Promise<AppHostLoadedPageV010 | undefined>;
+  loadRoute(path: string): Promise<AppHostLoadedPageV010 | undefined>;
+  resolveSurface(
+    request: AppHostSurfaceResolutionRequestV010
+  ): AppHostSurfaceResolutionV010;
+  loadSurface(
+    request: AppHostSurfaceResolutionRequestV010
+  ): Promise<
+    | { kind: "ROUTE"; page: AppHostLoadedSurfacePageV010 }
+    | AppHostSurfaceHandoffV010
+    | Extract<AppHostSurfaceResolutionV010, { kind: "NOT_FOUND" }>
+  >;
   subscribe(listener: (snapshot: AppHostSnapshotV010) => void): () => void;
   dispose(): void;
 }
