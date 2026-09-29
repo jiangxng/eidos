@@ -363,3 +363,99 @@ test("manifest validation rejects duplicate semantic routes within one Surface s
     )
   );
 });
+
+
+test("capability-selected unsupported mobile task target may fall back to declared MOBILE_READ surface", () => {
+  const value = surfaceManifest({
+    pages: [
+      { id: "orders.desktop", source: "memory://orders/desktop" },
+      { id: "orders.read", source: "memory://orders/read" }
+    ],
+    routes: [
+      {
+        id: "orders.desktop",
+        semanticId: "orders.home",
+        surfaceId: "orders.desktop-surface",
+        path: "/orders",
+        pageId: "orders.desktop"
+      },
+      {
+        id: "orders.read",
+        semanticId: "orders.home",
+        surfaceId: "orders.mobile-read",
+        path: "/m/orders/read",
+        pageId: "orders.read"
+      }
+    ],
+    navigation: [],
+    surfaces: [
+      {
+        id: "orders.desktop-surface",
+        target: "DESKTOP_WORKBENCH",
+        support: "FULL",
+        entryRoute: "/orders"
+      },
+      {
+        id: "orders.mobile-task",
+        target: "MOBILE_TASK",
+        support: "UNSUPPORTED",
+        fallbackSurfaceId: "orders.mobile-read"
+      },
+      {
+        id: "orders.mobile-read",
+        target: "MOBILE_READ",
+        support: "READ_ONLY",
+        entryRoute: "/m/orders/read"
+      }
+    ]
+  });
+
+  const result = resolveExperienceSurfaceV010(value, {
+    path: "/orders",
+    profile: {
+      contractVersion: "0.1.0",
+      viewportClass: "COMPACT",
+      primaryPointer: "COARSE",
+      hover: false,
+      touch: true,
+      reducedMotion: false,
+      standalone: false
+    }
+  });
+
+  assert.equal(result.kind, "ROUTE");
+  assert.equal(result.selectedBy, "CAPABILITY");
+  assert.equal(result.target, "MOBILE_READ");
+  assert.equal(result.support, "READ_ONLY");
+  assert.equal(result.surfaceId, "orders.mobile-read");
+  assert.equal(result.route.path, "/m/orders/read");
+});
+
+test("explicit unsupported target still hands off instead of silently using fallback", () => {
+  const value = surfaceManifest({
+    surfaces: [
+      {
+        id: "orders.desktop-surface",
+        target: "DESKTOP_WORKBENCH",
+        support: "FULL",
+        entryRoute: "/orders"
+      },
+      {
+        id: "orders.mobile-surface",
+        target: "MOBILE_TASK",
+        support: "UNSUPPORTED",
+        fallbackSurfaceId: "orders.desktop-surface"
+      }
+    ]
+  });
+
+  const result = resolveExperienceSurfaceV010(value, {
+    path: "/orders",
+    explicitTarget: "MOBILE_TASK"
+  });
+
+  assert.equal(result.kind, "HANDOFF");
+  assert.equal(result.reason, "TARGET_UNSUPPORTED");
+  assert.equal(result.target, "MOBILE_TASK");
+  assert.equal(result.fallbackSurfaceId, "orders.desktop-surface");
+});
