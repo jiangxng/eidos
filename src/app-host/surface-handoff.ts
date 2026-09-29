@@ -131,8 +131,8 @@ export function mountSurfaceHandoffV010(options: {
     "[data-eidos-surface-handoff-target]"
   )) {
     const handler = () => {
-      const target = button.dataset.eidosSurfaceHandoffTarget
-        as AppHostSurfaceTargetV010 | undefined;
+      const target = button.dataset.eidosSurfaceHandoffTarget as
+        AppHostSurfaceTargetV010 | undefined;
       const route = button.dataset.route;
       if (target && route) options.onNavigate?.(route, target);
     };
