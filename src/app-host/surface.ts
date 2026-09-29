@@ -6,6 +6,80 @@ import type {
   EffectiveExperienceManifestV010
 } from "./contracts.js";
 
+export interface ClientSurfaceEnvironmentV010 {
+  viewportWidth: number;
+  coarsePointer: boolean;
+  finePointer: boolean;
+  hover: boolean;
+  touchPoints: number;
+  reducedMotion: boolean;
+  standalone: boolean;
+}
+
+export function createClientSurfaceProfileV010(
+  environment: ClientSurfaceEnvironmentV010
+): ClientSurfaceProfileV010 {
+  const viewportClass = environment.viewportWidth < 768
+    ? "COMPACT"
+    : environment.viewportWidth < 1200
+      ? "MEDIUM"
+      : "EXPANDED";
+  const primaryPointer = environment.coarsePointer
+    ? "COARSE"
+    : environment.finePointer
+      ? "FINE"
+      : "NONE";
+
+  return {
+    contractVersion: "0.1.0",
+    viewportClass,
+    primaryPointer,
+    hover: environment.hover,
+    touch: environment.touchPoints > 0,
+    reducedMotion: environment.reducedMotion,
+    standalone: environment.standalone
+  };
+}
+
+export function readBrowserSurfaceProfileV010(): ClientSurfaceProfileV010 {
+  const media = (query: string): boolean =>
+    typeof window.matchMedia === "function" && window.matchMedia(query).matches;
+
+  return createClientSurfaceProfileV010({
+    viewportWidth: window.innerWidth,
+    coarsePointer: media("(pointer: coarse)"),
+    finePointer: media("(pointer: fine)"),
+    hover: media("(hover: hover)"),
+    touchPoints: navigator.maxTouchPoints ?? 0,
+    reducedMotion: media("(prefers-reduced-motion: reduce)"),
+    standalone: media("(display-mode: standalone)")
+  });
+}
+
+const SURFACE_QUERY_VALUES: Record<
+  string,
+  AppHostSurfaceTargetV010
+> = {
+  desktop: "DESKTOP_WORKBENCH",
+  "mobile-task": "MOBILE_TASK",
+  "mobile-read": "MOBILE_READ",
+  tablet: "TABLET_WORKBENCH"
+};
+
+export function surfaceTargetFromUrlV010(
+  url: URL
+): AppHostSurfaceTargetV010 | undefined {
+  const raw = url.searchParams.get("surface")?.trim().toLowerCase();
+  return raw ? SURFACE_QUERY_VALUES[raw] : undefined;
+}
+
+export function surfaceQueryValueV010(
+  target: AppHostSurfaceTargetV010
+): string {
+  return Object.entries(SURFACE_QUERY_VALUES)
+    .find(([, value]) => value === target)?.[0] ?? "desktop";
+}
+
 export interface ExperienceSurfaceResolutionRequestV010 {
   path?: string;
   semanticRouteId?: string;
