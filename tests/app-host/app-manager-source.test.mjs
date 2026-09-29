@@ -80,3 +80,64 @@ test("AppManagerExperienceSource connects effective manifests and page loading",
       && requestUrl.searchParams.get("locale") === "en-US";
   }));
 });
+
+
+test("App Host route reads propagate AbortSignal to App Manager page fetches", async () => {
+  const manifest = {
+    contractVersion: "0.1.0",
+    experienceId: "cancel-test",
+    packageId: "cancel-test",
+    featureId: "cancel-test.default",
+    defaultRoute: "/cancel",
+    pages: [{
+      id: "cancel.home",
+      source: "app://cancel/home"
+    }],
+    routes: [{
+      id: "cancel.home",
+      path: "/cancel",
+      pageId: "cancel.home"
+    }]
+  };
+
+  let pageFetchStarted = false;
+  const fetchImpl = async (input, init = {}) => {
+    const url = input instanceof URL ? input : new URL(String(input));
+    if (url.pathname === "/v1/experiences/effective") {
+      return Response.json([manifest]);
+    }
+    if (url.pathname === "/v1/experience-pages") {
+      pageFetchStarted = true;
+      return new Promise((resolve, reject) => {
+        if (init.signal?.aborted) {
+          reject(init.signal.reason ?? new DOMException("Aborted", "AbortError"));
+          return;
+        }
+        init.signal?.addEventListener("abort", () => {
+          reject(init.signal.reason ?? new DOMException("Aborted", "AbortError"));
+        }, { once: true });
+      });
+    }
+    return new Response("not found", { status: 404 });
+  };
+
+  const source = createAppManagerExperienceSource({
+    baseUrl: "http://app-manager.test/",
+    fetchImpl
+  });
+  const host = createAppHost(source);
+  await host.refresh();
+
+  const controller = new AbortController();
+  const pending = host.loadRoute("/cancel", {
+    signal: controller.signal
+  });
+  await Promise.resolve();
+  assert.equal(pageFetchStarted, true);
+  controller.abort();
+
+  await assert.rejects(
+    pending,
+    error => error?.name === "AbortError"
+  );
+});
