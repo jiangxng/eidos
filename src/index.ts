@@ -29,6 +29,7 @@ export * from "./chat/index.js";
 export * from "./settings/index.js";
 export * from "./setup-flow/index.js";
 export * from "./review-queue/index.js";
+export * from "./task-inbox/index.js";
 export * from "./workbench/contracts.js";
 export * from "./workbench/index.js";
 export * from "./realtime/index.js";
