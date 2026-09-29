@@ -171,6 +171,85 @@ export async function mountWorkbenchShell(
     params?: Record<string, string | number | boolean | null>
   ) => localization?.resolve("eidos.app-host", key, fallback, params) ?? fallback;
 
+  function resolveSurface(path: string) {
+    return resolveWorkbenchSurfaceRouteV010(host.getSnapshot(), {
+      path,
+      explicitTarget: surfaceTargetFromUrlV010(new URL(window.location.href)),
+      userTarget: options.surfaceTarget,
+      configuredSurfaceId: options.surfaceId,
+      profile: configuredSurfaceProfile(options)
+    });
+  }
+
+  function surfaceUrl(
+    target: AppHostSurfaceTargetV010,
+    routePath: string
+  ): string {
+    const url = new URL(window.location.href);
+    url.searchParams.set("surface", surfaceQueryValueV010(target));
+    url.hash = routePath;
+    return url.toString();
+  }
+
+  function renderSurfaceHandoff(
+    target: HTMLElement,
+    manifest: EffectiveExperienceManifestV010,
+    handoff: ExperienceSurfaceHandoffResolutionV010
+  ): void {
+    target.replaceChildren();
+    target.setAttribute("data-eidos-surface-handoff", handoff.reason);
+
+    const article = document.createElement("article");
+    const title = document.createElement("h2");
+    title.textContent = hostText(
+      "surface.handoff.title",
+      "This experience is not available on this surface."
+    );
+    const detail = document.createElement("p");
+    detail.textContent = hostText(
+      "surface.handoff.detail",
+      "Choose an available experience surface to continue."
+    );
+    article.append(title, detail);
+
+    for (const targetSurface of handoff.availableTargets) {
+      const mapped = resolveExperienceSurfaceV010(manifest, {
+        ...(handoff.semanticRouteId
+          ? { semanticRouteId: handoff.semanticRouteId }
+          : handoff.requestedPath
+            ? { path: handoff.requestedPath }
+            : {}),
+        explicitTarget: targetSurface
+      });
+      if (mapped.kind !== "ROUTE") continue;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = hostText(
+        "surface.handoff.openTarget",
+        "Open {target}",
+        { target: targetSurface }
+      );
+      button.setAttribute("data-eidos-surface-target", targetSurface);
+      button.addEventListener("click", () => {
+        window.location.href = surfaceUrl(targetSurface, mapped.route.path);
+      });
+      article.appendChild(button);
+    }
+
+    target.appendChild(article);
+  }
+
+  function applyActiveSurface(
+    surfaceId: string,
+    target: AppHostSurfaceTargetV010
+  ): void {
+    activeSurfaceId = surfaceId;
+    activeSurfaceTarget = target;
+    root.setAttribute("data-eidos-surface-id", surfaceId);
+    root.setAttribute("data-eidos-surface-target", target);
+  }
+
   function setIconContent(
     element: HTMLElement,
     iconName: string,
@@ -300,6 +379,12 @@ export async function mountWorkbenchShell(
       : hostText("workbench.showSidePanel", "Show side panel");
     setIconButton(sideToggle, "sidebar", toggleLabel, 18);
     root.style.setProperty("--eidos-side-panel-width", `${state.sidePanelWidth}px`);
+    root.setAttribute("data-eidos-surface-target", activeSurfaceTarget);
+    if (activeSurfaceId) {
+      root.setAttribute("data-eidos-surface-id", activeSurfaceId);
+    } else {
+      root.removeAttribute("data-eidos-surface-id");
+    }
     splitter.setAttribute("aria-valuenow", String(state.sidePanelWidth));
     splitter.setAttribute("aria-valuemin", String(minWidth));
     splitter.setAttribute("aria-valuemax", String(maxWidth));
@@ -326,11 +411,12 @@ export async function mountWorkbenchShell(
     list.setAttribute("aria-label", hostText("shell.applications", "Applications"));
 
     for (const item of snapshot.navigation) {
+      const surfaceFilter = activeSurfaceId ?? options.surfaceId;
       if (
         item.surfaceIds
         && (
-          !options.surfaceId
-          || !item.surfaceIds.includes(options.surfaceId)
+          !surfaceFilter
+          || !item.surfaceIds.includes(surfaceFilter)
         )
       ) {
         continue;
