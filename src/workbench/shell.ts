@@ -244,10 +244,20 @@ export async function mountWorkbenchShell(
     surfaceId: string,
     target: AppHostSurfaceTargetV010
   ): void {
+    const changed =
+      activeSurfaceId !== surfaceId
+      || activeSurfaceTarget !== target;
     activeSurfaceId = surfaceId;
     activeSurfaceTarget = target;
     root.setAttribute("data-eidos-surface-id", surfaceId);
     root.setAttribute("data-eidos-surface-target", target);
+
+    if (changed) {
+      const current = activityById(state.activeActivityId);
+      if (current?.kind === "navigation" && state.sidePanelVisible) {
+        renderNavigationList(host.getSnapshot());
+      }
+    }
   }
 
   function setIconContent(
@@ -897,19 +907,44 @@ export async function mountWorkbenchShell(
     const snapshot = await host.refresh();
     renderActivities();
 
-    if (
-      workspaceMode === "app"
-      && (!state.workspaceTarget.startsWith("/") || !host.resolveRoute(state.workspaceTarget))
-    ) {
-      const fallback = snapshot.routes[0]?.path ?? "/";
-      state.workspaceTarget = fallback;
-      persist();
+    if (workspaceMode === "app") {
+      const routed = resolveSurface(state.workspaceTarget);
+      if (routed?.resolution.kind === "ROUTE") {
+        const resolvedPath = routed.resolution.route.path;
+        applyActiveSurface(
+          routed.resolution.surfaceId,
+          routed.resolution.target
+        );
+        if (state.workspaceTarget !== resolvedPath) {
+          state.workspaceTarget = resolvedPath;
+          if (currentHashPath() !== resolvedPath) {
+            window.location.hash = resolvedPath;
+          }
+          persist();
+        }
+      } else if (
+        routed?.resolution.kind !== "HANDOFF"
+        && (
+          !state.workspaceTarget.startsWith("/")
+          || !host.resolveRoute(state.workspaceTarget)
+        )
+      ) {
+        const fallback =
+          snapshot.manifests.find(item => item.defaultRoute)?.defaultRoute
+          ?? snapshot.routes[0]?.path
+          ?? "/";
+        state.workspaceTarget = fallback;
+        persist();
+      }
     }
 
     browserAddress.value = state.workspaceTarget;
     await renderSidePanel();
-    if (workspaceMode === "app") await renderInternalWorkspace(state.workspaceTarget);
-    else if (isExternalUrl(state.workspaceTarget)) renderWeb(state.workspaceTarget);
+    if (workspaceMode === "app") {
+      await renderInternalWorkspace(state.workspaceTarget);
+    } else if (isExternalUrl(state.workspaceTarget)) {
+      renderWeb(state.workspaceTarget);
+    }
 
     return snapshot;
   }
