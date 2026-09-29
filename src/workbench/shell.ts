@@ -157,6 +157,10 @@ export async function mountWorkbenchShell(
   let disposed = false;
   let sideMount: MountedAppHostPage | undefined;
   let workspaceMount: MountedAppHostPage | undefined;
+  let sideReadController: AbortController | undefined;
+  let workspaceReadController: AbortController | undefined;
+  let sideReadGeneration = 0;
+  let workspaceReadGeneration = 0;
   let activeSurfaceId: string | undefined = options.surfaceId;
   let activeSurfaceTarget: AppHostSurfaceTargetV010 = "DESKTOP_WORKBENCH";
   let workspaceMode: "app" | "web" = state.workspaceTarget.startsWith("/") ? "app" : "web";
@@ -453,9 +457,10 @@ export async function mountWorkbenchShell(
   }
 
   async function renderSidePanel(): Promise<void> {
-    sideMount?.dispose();
-    sideMount = undefined;
-    sideContent.replaceChildren();
+    const generation = ++sideReadGeneration;
+    sideReadController?.abort();
+    const controller = new AbortController();
+    sideReadController = controller;
 
     const activity = activityById(state.activeActivityId) ?? fallbackActivity();
     sideTitle.textContent = activity.localization && localization
@@ -466,9 +471,16 @@ export async function mountWorkbenchShell(
         )
       : activity.title;
 
-    if (!state.sidePanelVisible || !sideKind(activity)) return;
+    if (!state.sidePanelVisible || !sideKind(activity)) {
+      sideMount?.dispose();
+      sideMount = undefined;
+      sideContent.replaceChildren();
+      return;
+    }
 
     if (activity.kind === "navigation") {
+      sideMount?.dispose();
+      sideMount = undefined;
       renderNavigationList(host.getSnapshot());
       return;
     }
@@ -479,6 +491,8 @@ export async function mountWorkbenchShell(
     const surface = resolveSurface(route);
     let resolvedRoute = route;
     if (surface?.resolution.kind === "HANDOFF") {
+      sideMount?.dispose();
+      sideMount = undefined;
       renderSurfaceHandoff(sideContent, surface.manifest, surface.resolution);
       return;
     }
@@ -490,7 +504,25 @@ export async function mountWorkbenchShell(
       );
     }
 
-    const loaded = await host.loadRoute(resolvedRoute);
+    let loaded;
+    try {
+      loaded = await host.loadRoute(resolvedRoute, {
+        signal: controller.signal
+      });
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      throw error;
+    }
+    if (
+      disposed
+      || controller.signal.aborted
+      || generation !== sideReadGeneration
+    ) return;
+
+    sideMount?.dispose();
+    sideMount = undefined;
+    sideContent.replaceChildren();
+
     if (!loaded) {
       const empty = document.createElement("p");
       empty.textContent = hostText(
@@ -531,6 +563,9 @@ export async function mountWorkbenchShell(
   }
 
   function renderWeb(url: string): void {
+    workspaceReadGeneration += 1;
+    workspaceReadController?.abort();
+    workspaceReadController = undefined;
     workspaceMount?.dispose();
     workspaceMount = undefined;
     workspaceContent.replaceChildren();
@@ -549,13 +584,17 @@ export async function mountWorkbenchShell(
   }
 
   async function renderInternalWorkspace(path: string): Promise<void> {
-    workspaceMount?.dispose();
-    workspaceMount = undefined;
-    workspaceContent.replaceChildren();
+    const generation = ++workspaceReadGeneration;
+    workspaceReadController?.abort();
+    const controller = new AbortController();
+    workspaceReadController = controller;
 
     const surface = resolveSurface(path);
     let resolvedPath = path;
     if (surface?.resolution.kind === "HANDOFF") {
+      workspaceMount?.dispose();
+      workspaceMount = undefined;
+      workspaceContent.replaceChildren();
       renderSurfaceHandoff(
         workspaceContent,
         surface.manifest,
@@ -572,7 +611,25 @@ export async function mountWorkbenchShell(
       );
     }
 
-    const loaded = await host.loadRoute(resolvedPath);
+    let loaded;
+    try {
+      loaded = await host.loadRoute(resolvedPath, {
+        signal: controller.signal
+      });
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      throw error;
+    }
+    if (
+      disposed
+      || controller.signal.aborted
+      || generation !== workspaceReadGeneration
+    ) return;
+
+    workspaceMount?.dispose();
+    workspaceMount = undefined;
+    workspaceContent.replaceChildren();
+
     if (!loaded) {
       const empty = document.createElement("p");
       empty.textContent = hostText(
@@ -1012,6 +1069,10 @@ export async function mountWorkbenchShell(
 
   function dispose(): void {
     disposed = true;
+    sideReadController?.abort();
+    sideReadController = undefined;
+    workspaceReadController?.abort();
+    workspaceReadController = undefined;
     if (resourceRefreshTimer !== undefined) {
       clearTimeout(resourceRefreshTimer);
       resourceRefreshTimer = undefined;
