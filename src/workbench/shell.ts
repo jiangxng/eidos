@@ -411,22 +411,25 @@ export async function mountWorkbenchShell(
     list.setAttribute("aria-label", hostText("shell.applications", "Applications"));
 
     for (const item of snapshot.navigation) {
-      const surfaceFilter = activeSurfaceId ?? options.surfaceId;
-      if (
-        item.surfaceIds
-        && (
-          !surfaceFilter
-          || !item.surfaceIds.includes(surfaceFilter)
-        )
-      ) {
-        continue;
+      const owner = snapshot.manifests.find(manifest =>
+        (manifest.navigation ?? []).some(candidate => candidate.id === item.id)
+      );
+      if (item.surfaceIds) {
+        const ownerSurfaceId = owner?.surfaces?.find(surface =>
+          surface.target === activeSurfaceTarget
+          && surface.support !== "UNSUPPORTED"
+        )?.id ?? (
+          owner?.surfaces?.some(surface => surface.id === options.surfaceId)
+            ? options.surfaceId
+            : undefined
+        );
+        if (!ownerSurfaceId || !item.surfaceIds.includes(ownerSurfaceId)) {
+          continue;
+        }
       }
 
       const button = document.createElement("button");
       button.type = "button";
-      const owner = snapshot.manifests.find(manifest =>
-        (manifest.navigation ?? []).some(candidate => candidate.id === item.id)
-      );
       button.textContent = owner && localization
         ? localization.resolve(owner.packageId, `navigation.${item.id}.label`, item.label)
         : item.label;
@@ -462,18 +465,37 @@ export async function mountWorkbenchShell(
 
     const route = activity.route;
     if (!route) return;
-    const loaded = await host.loadRoute(route);
+
+    const surface = resolveSurface(route);
+    let resolvedRoute = route;
+    if (surface?.resolution.kind === "HANDOFF") {
+      renderSurfaceHandoff(sideContent, surface.manifest, surface.resolution);
+      return;
+    }
+    if (surface?.resolution.kind === "ROUTE") {
+      resolvedRoute = surface.resolution.route.path;
+      applyActiveSurface(
+        surface.resolution.surfaceId,
+        surface.resolution.target
+      );
+    }
+
+    const loaded = await host.loadRoute(resolvedRoute);
     if (!loaded) {
       const empty = document.createElement("p");
-      empty.textContent = hostText("shell.noRoute", "No active route for '{path}'.", { path: route });
+      empty.textContent = hostText(
+        "shell.noRoute",
+        "No active route for '{path}'.",
+        { path: resolvedRoute }
+      );
       sideContent.appendChild(empty);
       return;
     }
 
-    let chatState = chatStates.get(route);
+    let chatState = chatStates.get(resolvedRoute);
     if (!chatState) {
       chatState = { messages: [] };
-      chatStates.set(route, chatState);
+      chatStates.set(resolvedRoute, chatState);
     }
 
     sideMount = mountAppHostLoadedPage({
@@ -521,12 +543,35 @@ export async function mountWorkbenchShell(
     workspaceMount = undefined;
     workspaceContent.replaceChildren();
 
-    const loaded = await host.loadRoute(path);
+    const surface = resolveSurface(path);
+    let resolvedPath = path;
+    if (surface?.resolution.kind === "HANDOFF") {
+      renderSurfaceHandoff(
+        workspaceContent,
+        surface.manifest,
+        surface.resolution
+      );
+      statusRight.textContent = surface.resolution.reason;
+      return;
+    }
+    if (surface?.resolution.kind === "ROUTE") {
+      resolvedPath = surface.resolution.route.path;
+      applyActiveSurface(
+        surface.resolution.surfaceId,
+        surface.resolution.target
+      );
+    }
+
+    const loaded = await host.loadRoute(resolvedPath);
     if (!loaded) {
       const empty = document.createElement("p");
-      empty.textContent = hostText("shell.noRoute", "No active route for '{path}'.", { path });
+      empty.textContent = hostText(
+        "shell.noRoute",
+        "No active route for '{path}'.",
+        { path: resolvedPath }
+      );
       workspaceContent.appendChild(empty);
-      statusRight.textContent = path;
+      statusRight.textContent = resolvedPath;
       return;
     }
 
@@ -553,7 +598,7 @@ export async function mountWorkbenchShell(
         }
       }
     });
-    statusRight.textContent = loaded.page.title ?? path;
+    statusRight.textContent = loaded.page.title ?? resolvedPath;
   }
 
   async function navigateWorkspace(target: string): Promise<void> {
@@ -563,11 +608,37 @@ export async function mountWorkbenchShell(
 
     if (normalized.startsWith("/")) {
       workspaceMode = "app";
-      state.workspaceTarget = normalized;
-      browserAddress.value = normalized;
-      if (currentHashPath() !== normalized) window.location.hash = normalized;
+      const surface = resolveSurface(normalized);
+      let resolvedTarget = normalized;
+
+      if (surface?.resolution.kind === "ROUTE") {
+        resolvedTarget = surface.resolution.route.path;
+        applyActiveSurface(
+          surface.resolution.surfaceId,
+          surface.resolution.target
+        );
+      }
+
+      state.workspaceTarget = resolvedTarget;
+      browserAddress.value = resolvedTarget;
+      if (
+        surface?.resolution.kind !== "HANDOFF"
+        && currentHashPath() !== resolvedTarget
+      ) {
+        window.location.hash = resolvedTarget;
+      }
       persist();
-      await renderInternalWorkspace(normalized);
+
+      if (surface?.resolution.kind === "HANDOFF") {
+        renderSurfaceHandoff(
+          workspaceContent,
+          surface.manifest,
+          surface.resolution
+        );
+        statusRight.textContent = surface.resolution.reason;
+      } else {
+        await renderInternalWorkspace(resolvedTarget);
+      }
       root.setAttribute("data-mobile-surface", "workspace");
       return;
     }
