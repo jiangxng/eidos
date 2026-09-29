@@ -1,37 +1,10 @@
 import type {
   AppHostRouteV010,
+  AppHostSurfaceSupportV010,
+  AppHostSurfaceTargetV010,
+  ClientSurfaceProfileV010,
   EffectiveExperienceManifestV010
 } from "./contracts.js";
-
-export type AppHostSurfaceTargetV010 =
-  | "DESKTOP_WORKBENCH"
-  | "MOBILE_TASK"
-  | "MOBILE_READ"
-  | "TABLET_WORKBENCH";
-
-export type AppHostSurfaceSupportV010 =
-  | "FULL"
-  | "TASK_FOCUSED"
-  | "READ_ONLY"
-  | "UNSUPPORTED";
-
-export interface AppHostSurfaceDeclarationV010 {
-  id: string;
-  target: AppHostSurfaceTargetV010;
-  support: AppHostSurfaceSupportV010;
-  entryRoute?: string;
-  fallbackSurfaceId?: string;
-}
-
-export interface ClientSurfaceProfileV010 {
-  contractVersion: "0.1.0";
-  viewportClass: "COMPACT" | "MEDIUM" | "EXPANDED";
-  primaryPointer: "COARSE" | "FINE" | "NONE";
-  hover: boolean;
-  touch: boolean;
-  reducedMotion: boolean;
-  standalone: boolean;
-}
 
 export interface ExperienceSurfaceResolutionRequestV010 {
   path?: string;
