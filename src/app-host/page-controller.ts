@@ -55,6 +55,8 @@ export interface MountAppHostPageOptions {
 }
 
 export interface MountedAppHostPage {
+  resourceIds?: readonly string[];
+  refresh?(): Promise<void>;
   dispose(): void;
 }
 
@@ -271,6 +273,10 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
       }
     });
     return {
+      resourceIds: [page.definition.resourceId],
+      refresh() {
+        return mountedDiagram.refresh();
+      },
       dispose() {
         mountedDiagram.dispose();
         for (const dispose of listeners) dispose();
@@ -295,6 +301,10 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
       }
     });
     return {
+      resourceIds: [page.definition.resourceId],
+      refresh() {
+        return mountedSpatial.refresh();
+      },
       dispose() {
         mountedSpatial.dispose();
         for (const dispose of listeners) dispose();

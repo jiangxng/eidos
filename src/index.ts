@@ -31,5 +31,6 @@ export * from "./setup-flow/index.js";
 export * from "./review-queue/index.js";
 export * from "./workbench/contracts.js";
 export * from "./workbench/index.js";
+export * from "./realtime/index.js";
 
 export * from "./help/index.js";
