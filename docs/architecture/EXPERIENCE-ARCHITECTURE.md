@@ -85,3 +85,16 @@ Experience = Archetype + Goal + Subject + State + Journey + Actions + Feedback +
 LLM/AGI assistance is an interaction channel inside this architecture, not a replacement for deterministic direct manipulation. Frequent low-ambiguity actions remain directly operable; Agents recommend or execute only Host-declared actions under policy.
 
 Critical product goals are certified with Golden Journeys so a page-render test cannot falsely certify a broken end-to-end task.
+
+
+## Web delivery and Surface Targets
+
+Cross-device delivery follows `docs/architecture/WEB-DELIVERY-AND-SURFACE-ARCHITECTURE-v0.1.md`.
+
+The architectural rule is:
+
+> **Same truth and actions; surface-specific experience.**
+
+Desktop and mobile Experiences may be independently composed and versioned. Eidos does not require one responsive page implementation to serve every device class. Mobile support is explicit per Experience, and unsupported operations resolve to a deterministic handoff rather than a broken compressed desktop page.
+
+Browser caching, immutable build assets, shell revalidation, bfcache compatibility, weak-network behavior and Surface-specific performance budgets are part of the Experience architecture, not deployment afterthoughts.
