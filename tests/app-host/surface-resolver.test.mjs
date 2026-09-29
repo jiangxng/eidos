@@ -3,8 +3,11 @@ import assert from "node:assert/strict";
 
 import {
   createAppHost,
+  createClientSurfaceProfileV010,
   inferSurfaceTargetV010,
   resolveExperienceSurfaceV010,
+  surfaceQueryValueV010,
+  surfaceTargetFromUrlV010,
   validateEffectiveExperienceManifest
 } from "../../dist/app-host/index.js";
 
@@ -224,5 +227,35 @@ test("manifest validation rejects invalid Surface references", () => {
   assert.equal(result.ok, false);
   assert.ok(
     result.diagnostics.some(item => item.code === "EIDOS_APP_HOST_ROUTE_SURFACE")
+  );
+});
+
+
+test("browser capability profile and URL Surface selector are deterministic", () => {
+  const profile = createClientSurfaceProfileV010({
+    viewportWidth: 390,
+    coarsePointer: true,
+    finePointer: false,
+    hover: false,
+    touchPoints: 5,
+    reducedMotion: true,
+    standalone: true
+  });
+  assert.deepEqual(profile, {
+    contractVersion: "0.1.0",
+    viewportClass: "COMPACT",
+    primaryPointer: "COARSE",
+    hover: false,
+    touch: true,
+    reducedMotion: true,
+    standalone: true
+  });
+
+  const url = new URL("https://example.test/orders?surface=mobile-read#details");
+  assert.equal(surfaceTargetFromUrlV010(url), "MOBILE_READ");
+  assert.equal(surfaceQueryValueV010("TABLET_WORKBENCH"), "tablet");
+  assert.equal(
+    surfaceTargetFromUrlV010(new URL("https://example.test/?surface=unknown")),
+    undefined
   );
 });
