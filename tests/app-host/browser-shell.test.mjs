@@ -41,3 +41,32 @@ test("default App Host page renderer renders UIDL through Eidos renderer", () =>
   assert.match(html, /company-notes\.save-note/);
   assert.match(html, /data-eidos-action="save"/);
 });
+
+
+test("App Host renders Task Inbox definitions through the semantic renderer", () => {
+  const html = renderAppHostPageToHtml({
+    experienceId: "my-work",
+    packageId: "host-my-work",
+    featureId: "host-my-work.default",
+    route: { id: "my-work.desktop", path: "/work", pageId: "my-work.home" },
+    page: { id: "my-work.home", source: "host://my-work" },
+    definition: {
+      contractVersion: "0.1.0",
+      kind: "task-inbox",
+      id: "my-work",
+      title: "My Work",
+      items: [{
+        id: "work:1",
+        title: "Ship order",
+        state: "READY",
+        statusLabel: "Ready",
+        priority: 20,
+        workType: "SHIP"
+      }]
+    }
+  });
+
+  assert.match(html, /data-eidos-task-inbox/);
+  assert.match(html, /Ship order/);
+  assert.match(html, /data-work-type="SHIP"/);
+});
