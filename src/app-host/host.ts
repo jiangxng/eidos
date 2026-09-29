@@ -59,6 +59,20 @@ function cloneSurface(
   };
 }
 
+function cloneSurface(
+  surface: AppHostSurfaceDeclarationV010
+): AppHostSurfaceDeclarationV010 {
+  return {
+    id: surface.id,
+    target: surface.target,
+    support: surface.support,
+    ...(surface.entryRoute ? { entryRoute: surface.entryRoute } : {}),
+    ...(surface.fallbackSurfaceId
+      ? { fallbackSurfaceId: surface.fallbackSurfaceId }
+      : {})
+  };
+}
+
 function cloneManifest(manifest: EffectiveExperienceManifestV010): EffectiveExperienceManifestV010 {
   return {
     contractVersion: "0.1.0",
@@ -146,20 +160,11 @@ export function validateEffectiveExperienceManifest(
     ));
   }
 
-  if (value.surfaces !== undefined && !Array.isArray(value.surfaces)) {
-    diagnostics.push(diagnostic(
-      "EIDOS_APP_HOST_SURFACES",
-      `${root}.surfaces`,
-      "surfaces must be an array when provided"
-    ));
-  }
-
   if (diagnostics.length) return { ok: false, diagnostics };
 
   const pages = value.pages as unknown[];
   const routes = value.routes as unknown[];
   const navigation = (value.navigation ?? []) as unknown[];
-  const surfaces = (value.surfaces ?? []) as unknown[];
   const surfaces = (value.surfaces ?? []) as unknown[];
 
   const surfaceIds = new Set<string>();
@@ -315,20 +320,6 @@ export function validateEffectiveExperienceManifest(
       diagnostics.push(diagnostic(
         "EIDOS_APP_HOST_ROUTE_SEMANTIC_ID",
         `${path}.semanticId`,
-        "route semanticId must be a non-empty string when provided"
-      ));
-    }
-    if (route.surfaceId !== undefined && !isNonEmptyString(route.surfaceId)) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_ROUTE_SURFACE_ID",
-        `${path}.surfaceId`,
-        "route surfaceId must be a non-empty string when provided"
-      ));
-    }
-    if (route.semanticId !== undefined && !isNonEmptyString(route.semanticId)) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_ROUTE_SEMANTIC_ID",
-        `${path}.semanticId`,
         "semanticId must be a non-empty string when provided"
       ));
     }
@@ -393,19 +384,6 @@ export function validateEffectiveExperienceManifest(
     if (item.parentId !== undefined && !isNonEmptyString(item.parentId)) {
       diagnostics.push(diagnostic("EIDOS_APP_HOST_NAV_PARENT", `${path}.parentId`, "parentId must be a non-empty string"));
     }
-    if (
-      item.surfaceIds !== undefined
-      && (
-        !Array.isArray(item.surfaceIds)
-        || item.surfaceIds.some(candidate => !isNonEmptyString(candidate))
-      )
-    ) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_NAV_SURFACE_IDS",
-        `${path}.surfaceIds`,
-        "surfaceIds must be an array of non-empty strings when provided"
-      ));
-    }
     if (item.surfaceIds !== undefined) {
       if (!Array.isArray(item.surfaceIds) || item.surfaceIds.length === 0) {
         diagnostics.push(diagnostic(
@@ -434,127 +412,42 @@ export function validateEffectiveExperienceManifest(
     }
   });
 
-
-  const surfaceIds = new Set<string>();
-  const surfaceTargets = new Set<string>();
-  const validTargets = new Set([
-    "DESKTOP_WORKBENCH",
-    "MOBILE_TASK",
-    "MOBILE_READ",
-    "TABLET_WORKBENCH"
-  ]);
-  const validSupport = new Set([
-    "FULL",
-    "TASK_FOCUSED",
-    "READ_ONLY",
-    "UNSUPPORTED"
-  ]);
-
-  surfaces.forEach((surface, surfaceIndex) => {
-    const path = `${root}.surfaces[${surfaceIndex}]`;
-    if (!isPlainObject(surface)) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_TYPE",
-        path,
-        "surface must be an object"
-      ));
-      return;
+  const routeByPath = new Map<string, Record<string, unknown>>();
+  for (const route of routes) {
+    if (isPlainObject(route) && isNonEmptyString(route.path)) {
+      routeByPath.set(route.path, route);
     }
+  }
 
-    if (!isNonEmptyString(surface.id)) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_ID",
-        `${path}.id`,
-        "surface id is required"
-      ));
-    } else if (surfaceIds.has(surface.id)) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_ID_DUPLICATE",
-        `${path}.id`,
-        `Duplicate surface id '${surface.id}'`
-      ));
-    } else {
-      surfaceIds.add(surface.id);
-    }
-
-    if (!isNonEmptyString(surface.target) || !validTargets.has(surface.target)) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_TARGET",
-        `${path}.target`,
-        "surface target is not supported"
-      ));
-    } else if (surfaceTargets.has(surface.target)) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_TARGET_DUPLICATE",
-        `${path}.target`,
-        `Duplicate surface target '${surface.target}'`
-      ));
-    } else {
-      surfaceTargets.add(surface.target);
-    }
-
-    if (!isNonEmptyString(surface.support) || !validSupport.has(surface.support)) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_SUPPORT",
-        `${path}.support`,
-        "surface support is not supported"
-      ));
-    }
-
+  const fallbackBySurface = new Map<string, string>();
+  for (const surface of surfaces) {
+    if (!isPlainObject(surface)) continue;
     if (
-      surface.entryRoute !== undefined
-      && (!isNonEmptyString(surface.entryRoute) || !routePaths.has(surface.entryRoute))
+      isNonEmptyString(surface.entryRoute)
+      && !routePaths.has(surface.entryRoute)
     ) {
       diagnostics.push(diagnostic(
         "EIDOS_APP_HOST_SURFACE_ENTRY_ROUTE",
-        `${path}.entryRoute`,
-        "surface entryRoute must reference a route in the same manifest"
-      ));
-    }
-
-    if (
-      surface.fallbackSurfaceId !== undefined
-      && !isNonEmptyString(surface.fallbackSurfaceId)
-    ) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_SURFACE_FALLBACK",
-        `${path}.fallbackSurfaceId`,
-        "fallbackSurfaceId must be a non-empty string when provided"
-      ));
-    }
-  });
-
-  for (const route of routes) {
-    if (
-      isPlainObject(route)
-      && isNonEmptyString(route.surfaceId)
-      && !surfaceIds.has(route.surfaceId)
-    ) {
-      diagnostics.push(diagnostic(
-        "EIDOS_APP_HOST_ROUTE_SURFACE_MISSING",
         root,
-        `Route surface '${route.surfaceId}' is not declared in the same manifest`
+        `Surface entryRoute '${surface.entryRoute}' does not reference a route in the same manifest`
       ));
     }
-  }
-
-  for (const item of navigation) {
-    if (!isPlainObject(item) || !Array.isArray(item.surfaceIds)) continue;
-    for (const surfaceId of item.surfaceIds) {
-      if (isNonEmptyString(surfaceId) && !surfaceIds.has(surfaceId)) {
+    if (isNonEmptyString(surface.entryRoute) && isNonEmptyString(surface.id)) {
+      const entryRoute = routeByPath.get(surface.entryRoute);
+      if (
+        entryRoute
+        && isNonEmptyString(entryRoute.surfaceId)
+        && entryRoute.surfaceId !== surface.id
+      ) {
         diagnostics.push(diagnostic(
-          "EIDOS_APP_HOST_NAV_SURFACE_MISSING",
+          "EIDOS_APP_HOST_SURFACE_ENTRY_ROUTE_SCOPE",
           root,
-          `Navigation surface '${surfaceId}' is not declared in the same manifest`
+          `Surface '${surface.id}' entryRoute '${surface.entryRoute}' belongs to surface '${entryRoute.surfaceId}'`
         ));
       }
     }
-  }
-
-  for (const surface of surfaces) {
     if (
-      isPlainObject(surface)
-      && isNonEmptyString(surface.fallbackSurfaceId)
+      isNonEmptyString(surface.fallbackSurfaceId)
       && !surfaceIds.has(surface.fallbackSurfaceId)
     ) {
       diagnostics.push(diagnostic(
@@ -562,6 +455,28 @@ export function validateEffectiveExperienceManifest(
         root,
         `Fallback surface '${surface.fallbackSurfaceId}' is not declared in the same manifest`
       ));
+    } else if (
+      isNonEmptyString(surface.id)
+      && isNonEmptyString(surface.fallbackSurfaceId)
+    ) {
+      fallbackBySurface.set(surface.id, surface.fallbackSurfaceId);
+    }
+  }
+
+  for (const start of fallbackBySurface.keys()) {
+    const seen = new Set<string>();
+    let current: string | undefined = start;
+    while (current && fallbackBySurface.has(current)) {
+      if (seen.has(current)) {
+        diagnostics.push(diagnostic(
+          "EIDOS_APP_HOST_SURFACE_FALLBACK_CYCLE",
+          root,
+          `Surface fallback chain contains a cycle starting at '${start}'`
+        ));
+        break;
+      }
+      seen.add(current);
+      current = fallbackBySurface.get(current);
     }
   }
 
