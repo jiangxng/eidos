@@ -1,7 +1,20 @@
 import type { ActionHost } from "../adapters/ports.js";
 import { createEidosIconElement } from "../design-language/icons/index.js";
 import type { LocalizationRuntime } from "../localization/contracts.js";
-import type { AppHost, AppHostSnapshotV010 } from "../app-host/contracts.js";
+import type {
+  AppHost,
+  AppHostSnapshotV010,
+  AppHostSurfaceTargetV010,
+  ClientSurfaceProfileV010,
+  EffectiveExperienceManifestV010
+} from "../app-host/contracts.js";
+import {
+  readBrowserSurfaceProfileV010,
+  resolveExperienceSurfaceV010,
+  surfaceQueryValueV010,
+  surfaceTargetFromUrlV010,
+  type ExperienceSurfaceHandoffResolutionV010
+} from "../app-host/surface.js";
 import type { RealtimeEventV010 } from "../realtime/contracts.js";
 import {
   mountAppHostLoadedPage,
@@ -16,6 +29,7 @@ import {
   type WorkbenchLayoutStateStore,
   type WorkbenchLayoutStateV010
 } from "./contracts.js";
+import { resolveWorkbenchSurfaceRouteV010 } from "./surface-routing.js";
 
 export interface WorkbenchShellOptions {
   host: AppHost;
@@ -26,7 +40,21 @@ export interface WorkbenchShellOptions {
   actionHost?: ActionHost;
   localization?: LocalizationRuntime;
   initialWorkspaceRoute?: string;
+  /**
+   * Legacy explicit Surface id used by existing Workbench embedders.
+   * When declared by the owning Experience it is resolved to that Surface target.
+   */
   surfaceId?: string;
+  /**
+   * Explicit user Surface preference. URL ?surface=... has higher precedence.
+   */
+  surfaceTarget?: AppHostSurfaceTargetV010;
+  /**
+   * Optional capability profile. Omit to retain desktop-compatible behavior.
+   * Set autoSurfaceProfile=true to derive it from browser capabilities.
+   */
+  surfaceProfile?: ClientSurfaceProfileV010 | (() => ClientSurfaceProfileV010);
+  autoSurfaceProfile?: boolean;
   layoutStateStore?: WorkbenchLayoutStateStore;
   minSidePanelWidth?: number;
   maxSidePanelWidth?: number;
@@ -67,6 +95,18 @@ function isExternalUrl(value: string): boolean {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
+}
+
+function configuredSurfaceProfile(
+  options: WorkbenchShellOptions
+): ClientSurfaceProfileV010 | undefined {
+  if (typeof options.surfaceProfile === "function") {
+    return options.surfaceProfile();
+  }
+  if (options.surfaceProfile) return options.surfaceProfile;
+  return options.autoSurfaceProfile
+    ? readBrowserSurfaceProfileV010()
+    : undefined;
 }
 
 export function resolveWorkbenchInitialTargetV010(input: {
@@ -117,6 +157,8 @@ export async function mountWorkbenchShell(
   let disposed = false;
   let sideMount: MountedAppHostPage | undefined;
   let workspaceMount: MountedAppHostPage | undefined;
+  let activeSurfaceId: string | undefined = options.surfaceId;
+  let activeSurfaceTarget: AppHostSurfaceTargetV010 = "DESKTOP_WORKBENCH";
   let workspaceMode: "app" | "web" = state.workspaceTarget.startsWith("/") ? "app" : "web";
   const chatStates = new Map<string, AppHostChatState>();
   const pendingResourceRefreshes = new Set<string>();
