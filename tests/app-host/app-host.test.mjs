@@ -822,3 +822,227 @@ test("surface manifest validation rejects ambiguous or cyclic declarations", () 
     x => x.code === "EIDOS_APP_HOST_SURFACE_FALLBACK_CYCLE"
   ));
 });
+
+
+test("Surface resolver preserves semantic route identity across desktop and mobile implementations", async () => {
+  const surfaceManifest = manifest({
+    experienceId: "orders",
+    packageId: "orders",
+    featureId: "orders.experience",
+    defaultRoute: "/orders",
+    pages: [
+      { id: "orders.desktop", source: "memory://orders/desktop" },
+      { id: "orders.mobile", source: "memory://orders/mobile" }
+    ],
+    surfaces: [
+      {
+        id: "orders.desktop-surface",
+        target: "DESKTOP_WORKBENCH",
+        support: "FULL",
+        entryRoute: "/orders"
+      },
+      {
+        id: "orders.mobile-surface",
+        target: "MOBILE_TASK",
+        support: "TASK_FOCUSED",
+        entryRoute: "/m/orders"
+      }
+    ],
+    routes: [
+      {
+        id: "orders.desktop",
+        path: "/orders",
+        pageId: "orders.desktop",
+        semanticId: "orders.home",
+        surfaceId: "orders.desktop-surface"
+      },
+      {
+        id: "orders.mobile",
+        path: "/m/orders",
+        pageId: "orders.mobile",
+        semanticId: "orders.home",
+        surfaceId: "orders.mobile-surface"
+      }
+    ],
+    navigation: [
+      {
+        id: "orders.desktop.nav",
+        label: "Orders",
+        route: "/orders",
+        surfaceIds: ["orders.desktop-surface"]
+      },
+      {
+        id: "orders.mobile.nav",
+        label: "Orders",
+        route: "/m/orders",
+        surfaceIds: ["orders.mobile-surface"]
+      }
+    ]
+  });
+
+  const source = {
+    async listEffectiveExperienceManifests() {
+      return [surfaceManifest];
+    },
+    async loadPage(page) {
+      return { id: page.id };
+    }
+  };
+
+  const host = createAppHost(source);
+  const snapshot = await host.refresh();
+  assert.equal(snapshot.status, "ready");
+
+  const desktop = host.resolveSurface({
+    experienceId: "orders",
+    path: "/orders",
+    explicitTarget: "DESKTOP_WORKBENCH"
+  });
+  assert.equal(desktop.kind, "ROUTE");
+  assert.equal(desktop.resolved.route.path, "/orders");
+  assert.equal(desktop.resolved.semanticRouteId, "orders.home");
+  assert.equal(desktop.resolved.surfaceId, "orders.desktop-surface");
+
+  const mobile = host.resolveSurface({
+    experienceId: "orders",
+    semanticRouteId: desktop.resolved.semanticRouteId,
+    explicitTarget: "MOBILE_TASK"
+  });
+  assert.equal(mobile.kind, "ROUTE");
+  assert.equal(mobile.resolved.route.path, "/m/orders");
+  assert.equal(mobile.resolved.semanticRouteId, "orders.home");
+  assert.equal(mobile.resolved.surfaceSupport, "TASK_FOCUSED");
+});
+
+test("Surface resolver returns deterministic handoff for explicitly unsupported mobile target", async () => {
+  const source = {
+    async listEffectiveExperienceManifests() {
+      return [manifest({
+        experienceId: "eog",
+        packageId: "eog",
+        featureId: "eog.experience",
+        defaultRoute: "/eog",
+        pages: [
+          { id: "eog.desktop", source: "memory://eog/desktop" }
+        ],
+        surfaces: [
+          {
+            id: "eog.desktop-surface",
+            target: "DESKTOP_WORKBENCH",
+            support: "FULL",
+            entryRoute: "/eog"
+          },
+          {
+            id: "eog.mobile-surface",
+            target: "MOBILE_TASK",
+            support: "UNSUPPORTED",
+            fallbackSurfaceId: "eog.desktop-surface"
+          }
+        ],
+        routes: [
+          {
+            id: "eog.desktop",
+            path: "/eog",
+            pageId: "eog.desktop",
+            semanticId: "eog.primary",
+            surfaceId: "eog.desktop-surface"
+          }
+        ],
+        navigation: []
+      })];
+    },
+    async loadPage() {
+      return {};
+    }
+  };
+
+  const host = createAppHost(source);
+  await host.refresh();
+
+  const result = host.resolveSurface({
+    experienceId: "eog",
+    semanticRouteId: "eog.primary",
+    explicitTarget: "MOBILE_TASK"
+  });
+
+  assert.deepEqual(result, {
+    kind: "HANDOFF",
+    experienceId: "eog",
+    packageId: "eog",
+    featureId: "eog.experience",
+    target: "MOBILE_TASK",
+    reason: "TARGET_UNSUPPORTED",
+    selectedBy: "EXPLICIT",
+    semanticRouteId: "eog.primary",
+    availableTargets: ["DESKTOP_WORKBENCH"],
+    fallbackSurfaceId: "eog.desktop-surface"
+  });
+});
+
+test("legacy manifest remains desktop-compatible and fails closed to handoff on mobile", async () => {
+  const source = {
+    async listEffectiveExperienceManifests() {
+      return [manifest()];
+    },
+    async loadPage() {
+      return {};
+    }
+  };
+  const host = createAppHost(source);
+  await host.refresh();
+
+  const desktop = host.resolveSurface({
+    experienceId: "company-notes",
+    path: "/notes",
+    explicitTarget: "DESKTOP_WORKBENCH"
+  });
+  assert.equal(desktop.kind, "ROUTE");
+  assert.equal(desktop.resolved.surfaceId, "legacy:desktop");
+
+  const mobile = host.resolveSurface({
+    experienceId: "company-notes",
+    path: "/notes",
+    explicitTarget: "MOBILE_TASK"
+  });
+  assert.equal(mobile.kind, "HANDOFF");
+  assert.equal(mobile.reason, "LEGACY_DESKTOP_ONLY");
+  assert.deepEqual(mobile.availableTargets, ["DESKTOP_WORKBENCH"]);
+});
+
+test("manifest validation rejects invalid Surface references and fallback cycles", () => {
+  const result = validateEffectiveExperienceManifest(manifest({
+    pages: [
+      { id: "page.a", source: "memory://a" }
+    ],
+    routes: [
+      {
+        id: "route.a",
+        path: "/a",
+        pageId: "page.a",
+        surfaceId: "missing"
+      }
+    ],
+    navigation: [],
+    surfaces: [
+      {
+        id: "surface.a",
+        target: "DESKTOP_WORKBENCH",
+        support: "FULL",
+        entryRoute: "/a",
+        fallbackSurfaceId: "surface.b"
+      },
+      {
+        id: "surface.b",
+        target: "MOBILE_TASK",
+        support: "TASK_FOCUSED",
+        entryRoute: "/a",
+        fallbackSurfaceId: "surface.a"
+      }
+    ]
+  }));
+
+  assert.equal(result.ok, false);
+  const codes = new Set(result.diagnostics.map(item => item.code));
+  assert.ok(codes.has("EIDOS_APP_HOST_ROUTE_SURFACE"));
+  assert.ok(codes.has("EIDOS_APP_HOST_SURFACE_FALLBACK_CYCLE"));
+});
