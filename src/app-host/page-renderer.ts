@@ -58,7 +58,7 @@ export function renderAppHostPageToHtml(
   }
 
   if (isSpatialObservatoryPageV010(localizedDefinition)) {
-    return renderSpatialObservatoryPageShellToHtmlV010(localizedDefinition);
+    return renderSpatialObservatoryPageShellToHtmlV010(localizedDefinition, localization);
   }
 
   if (isHelpDocumentV010(localizedDefinition)) {
