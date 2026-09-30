@@ -10,11 +10,32 @@ export interface LocaleContextV010 {
   fallbackLocales: string[];
 }
 
+export interface LocalizationMessageRefV010 {
+  namespace: string;
+  key: string;
+  fallback?: string;
+  params?: Record<string, string | number | boolean | null>;
+}
+
+export interface LiteralTextV010 {
+  kind: "literal";
+  value: string;
+}
+
+export interface LocalizedTextV010 {
+  kind: "localized";
+  message: LocalizationMessageRefV010;
+}
+
+export type PresentableTextV010 = LiteralTextV010 | LocalizedTextV010;
+
 export interface LocalizationRuntime {
   getContext(): LocaleContextV010;
   setLocale(locale: string): void;
   replaceBundles(bundles: readonly LocalizationBundleV010[]): void;
   availableLocales(): string[];
+  hasMessage(namespace: string, key: string, locale?: string): boolean;
+  resolveText(text: PresentableTextV010): string;
   resolve(
     namespace: string,
     key: string,

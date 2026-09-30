@@ -243,3 +243,48 @@ test("App Host first-class locale bundles keep exact key parity", () => {
     );
   }
 });
+
+
+test("presentation text contract keeps literal and localized ownership explicit", () => {
+  const runtime = createLocalizationRuntime([{
+    contractVersion: "0.1.0",
+    namespace: "sample",
+    locale: "zh-CN",
+    messages: { "toolbar.reset": "重置" }
+  }], { locale: "zh-CN", fallbackLocales: ["en"] });
+
+  assert.equal(runtime.resolveText({ kind: "literal", value: "ACME Ltd." }), "ACME Ltd.");
+  assert.equal(runtime.resolveText({
+    kind: "localized",
+    message: {
+      namespace: "sample",
+      key: "toolbar.reset",
+      fallback: "Reset"
+    }
+  }), "重置");
+  assert.equal(runtime.hasMessage("sample", "toolbar.reset"), true);
+  assert.equal(runtime.hasMessage("sample", "missing"), false);
+});
+
+test("Eidos spatial platform chrome is complete in every first-class locale", () => {
+  const keys = [
+    "spatial.selection",
+    "spatial.selectPrompt",
+    "spatial.instructions",
+    "spatial.resetView",
+    "spatial.viewRevision",
+    "spatial.loading",
+    "spatial.ready",
+    "spatial.loadFailed",
+    "spatial.sceneAria"
+  ];
+  for (const locale of ["en", "zh-CN", "ja", "zh-TW"]) {
+    const runtime = createLocalizationRuntime(eidosAppHostLocalizationBundles, {
+      locale,
+      fallbackLocales: ["en"]
+    });
+    for (const key of keys) {
+      assert.equal(runtime.hasMessage("eidos.app-host", key, locale), true, `${locale} missing ${key}`);
+    }
+  }
+});
