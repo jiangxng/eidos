@@ -26,6 +26,11 @@ export interface AppHostSurfaceDeclarationV010 {
   support: AppHostSurfaceSupportV010;
   entryRoute?: string;
   fallbackSurfaceId?: string;
+  /**
+   * Changes only when the mounted UI contract is structurally incompatible.
+   * Data/version refreshes must not increment this value.
+   */
+  structuralVersion?: string;
 }
 
 export interface ClientSurfaceProfileV010 {

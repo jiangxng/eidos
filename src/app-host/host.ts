@@ -55,6 +55,9 @@ function cloneSurface(
     ...(surface.entryRoute ? { entryRoute: surface.entryRoute } : {}),
     ...(surface.fallbackSurfaceId
       ? { fallbackSurfaceId: surface.fallbackSurfaceId }
+      : {}),
+    ...(surface.structuralVersion
+      ? { structuralVersion: surface.structuralVersion }
       : {})
   };
 }
@@ -247,6 +250,16 @@ export function validateEffectiveExperienceManifest(
         "EIDOS_APP_HOST_SURFACE_FALLBACK",
         `${path}.fallbackSurfaceId`,
         "fallbackSurfaceId must be a non-empty string"
+      ));
+    }
+    if (
+      surface.structuralVersion !== undefined
+      && !isNonEmptyString(surface.structuralVersion)
+    ) {
+      diagnostics.push(diagnostic(
+        "EIDOS_APP_HOST_SURFACE_STRUCTURAL_VERSION",
+        `${path}.structuralVersion`,
+        "structuralVersion must be a non-empty string when provided"
       ));
     }
   });

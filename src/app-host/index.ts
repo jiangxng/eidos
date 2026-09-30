@@ -11,3 +11,4 @@ export * from "./page-renderer.js";
 
 export * from "./surface.js";
 export * from "./surface-handoff.js";
+export * from "./surface-lifecycle.js";

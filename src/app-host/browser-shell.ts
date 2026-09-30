@@ -16,11 +16,20 @@ import {
   type ExperienceSurfaceRouteResolutionV010
 } from "./surface.js";
 import {
+  createSurfaceInstanceIdentityV010,
+  sameSurfaceInstanceV010,
+  type SurfaceInstanceIdentityV010
+} from "./surface-lifecycle.js";
+import {
   mountAppHostLoadedPage,
   type MountedAppHostPage
 } from "./page-controller.js";
 import { renderAppHostPageToHtml } from "./page-renderer.js";
 import { createSupersedingRequestGateV010 } from "../realtime/browser-lifecycle.js";
+import {
+  createRuntimeActivityMonitorV010,
+  type RuntimeActivitySnapshotV010
+} from "../realtime/runtime-performance.js";
 
 export interface BrowserAppHostShellOptions {
   host: AppHost;
@@ -41,6 +50,7 @@ export interface BrowserAppHostShellOptions {
 export interface BrowserAppHostShell {
   refresh(): Promise<AppHostSnapshotV010>;
   navigate(path: string): Promise<void>;
+  runtimeSnapshot(): RuntimeActivitySnapshotV010;
   dispose(): void;
 }
 
@@ -94,7 +104,9 @@ export async function mountBrowserAppHostShell(
   let disposed = false;
   let activePath = currentPath();
   let mountedPage: MountedAppHostPage | undefined;
+  let mountedIdentity: SurfaceInstanceIdentityV010 | undefined;
   const routeReadGate = createSupersedingRequestGateV010();
+  const runtimeActivity = createRuntimeActivityMonitorV010();
   let activeSurfaceId: string | undefined;
 
   const root = document.createElement("div");
@@ -223,16 +235,29 @@ export async function mountBrowserAppHostShell(
     pageContainer.appendChild(article);
   }
 
-  async function renderRoute(path: string): Promise<void> {
-    if (disposed) return;
-    mountedPage?.dispose();
+  function disposeMountedPage(): void {
+    if (!mountedPage) return;
+    mountedPage.dispose();
     mountedPage = undefined;
-    pageContainer.replaceChildren();
+    mountedIdentity = undefined;
+    runtimeActivity.mark("surfaceUnmounts");
+  }
+
+  async function renderRoute(
+    path: string,
+    forceRemount = false
+  ): Promise<void> {
+    if (disposed) return;
 
     const surface = surfaceRequest(path);
     let resolvedPath = path;
+    let nextIdentity: SurfaceInstanceIdentityV010 | undefined;
+
     if (surface) {
       if (surface.resolution.kind === "HANDOFF") {
+        disposeMountedPage();
+        pageContainer.replaceChildren();
+        runtimeActivity.mark("structuralDomMutations");
         activePath = path;
         activeSurfaceId = undefined;
         renderSurfaceHandoff(surface.manifest, surface.resolution);
@@ -244,11 +269,42 @@ export async function mountBrowserAppHostShell(
         const routeResolution = surface.resolution as ExperienceSurfaceRouteResolutionV010;
         activeSurfaceId = routeResolution.surfaceId;
         resolvedPath = routeResolution.route.path;
+        nextIdentity = createSurfaceInstanceIdentityV010({
+          surfaceId: routeResolution.surfaceId,
+          semanticId: routeResolution.semanticRouteId,
+          routePath: resolvedPath,
+          structuralVersion: routeResolution.structuralVersion
+        });
       }
     }
 
     activePath = resolvedPath;
-    const loaded = await host.loadRoute(resolvedPath);
+
+    if (
+      !forceRemount
+      && mountedPage
+      && nextIdentity
+      && sameSurfaceInstanceV010(mountedIdentity, nextIdentity)
+    ) {
+      runtimeActivity.mark("surfaceReuses");
+      return;
+    }
+
+    const read = routeReadGate.begin();
+    let loaded;
+    try {
+      loaded = await host.loadRoute(resolvedPath, { signal: read.signal });
+    } catch (error) {
+      if (!read.isCurrent() || (error instanceof DOMException && error.name === "AbortError")) {
+        return;
+      }
+      throw error;
+    }
+    if (!read.isCurrent()) return;
+
+    disposeMountedPage();
+    pageContainer.replaceChildren();
+    runtimeActivity.mark("structuralDomMutations");
     pageContainer.setAttribute("data-eidos-page", loaded?.page.id ?? "not-found");
 
     if (!loaded) {
@@ -281,12 +337,20 @@ export async function mountBrowserAppHostShell(
             if (renderHint?.preserveMountedPage === true) {
               await refreshChrome();
             } else {
-              await refresh();
+              await refresh(true);
             }
           }
         }
       });
+      mountedIdentity = nextIdentity ?? createSurfaceInstanceIdentityV010({
+        surfaceId: "legacy:desktop",
+        semanticId: loaded.route.semanticId ?? loaded.route.id,
+        routePath: resolvedPath,
+        structuralVersion: "legacy:0"
+      });
+      runtimeActivity.mark("surfaceMounts");
     } catch (error) {
+      mountedIdentity = undefined;
       const pre = document.createElement("pre");
       pre.textContent = error instanceof Error ? error.message : String(error);
       pageContainer.appendChild(pre);
@@ -361,7 +425,7 @@ export async function mountBrowserAppHostShell(
     if (disposed) return;
     refreshLocaleOptions();
     renderNavigation(host.getSnapshot());
-    void renderRoute(activePath);
+    void renderRoute(activePath, true);
   });
 
   const onHashChange = () => { void renderRoute(currentPath()); };
@@ -373,7 +437,7 @@ export async function mountBrowserAppHostShell(
     return snapshot;
   }
 
-  async function refresh(): Promise<AppHostSnapshotV010> {
+  async function refresh(forceRemount = false): Promise<AppHostSnapshotV010> {
     const snapshot = await host.refresh();
     renderNavigation(snapshot);
 
@@ -384,7 +448,7 @@ export async function mountBrowserAppHostShell(
       if (path !== "/" && currentPath() !== path) window.location.hash = path;
     }
 
-    await renderRoute(path);
+    await renderRoute(path, forceRemount);
     return snapshot;
   }
 
@@ -411,7 +475,7 @@ export async function mountBrowserAppHostShell(
   function dispose(): void {
     disposed = true;
     routeReadGate.dispose();
-    mountedPage?.dispose();
+    disposeMountedPage();
     unsubscribe();
     unsubscribeLocale?.();
     window.removeEventListener("hashchange", onHashChange);
@@ -419,7 +483,12 @@ export async function mountBrowserAppHostShell(
   }
 
   await refresh();
-  return { refresh, navigate, dispose };
+  return {
+    refresh: () => refresh(false),
+    navigate,
+    runtimeSnapshot: () => runtimeActivity.snapshot(),
+    dispose
+  };
 }
 
 export { renderAppHostPageToHtml } from "./page-renderer.js";
