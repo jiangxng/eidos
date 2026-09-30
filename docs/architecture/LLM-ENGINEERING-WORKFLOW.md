@@ -31,3 +31,16 @@ Before continuing after an interrupted turn:
 Prefer batched reads, deterministic edits and durable commits over repeated fine-grained remote operations.
 
 Timeout resilience MUST NOT reduce architecture depth, test coverage or repository authority.
+
+## Branch hygiene
+
+`main` is the repository authority.
+
+Feature/fix/documentation branches are temporary checkpoints. After a same-repository pull request is merged into `main`, its head branch should be deleted automatically.
+
+Branch cleanup must fail safe:
+
+- delete only branches backed by a merged PR whose base is `main`;
+- never delete `main`;
+- never infer deletion from branch naming alone;
+- preserve branches with uncertain or unmerged status for explicit review.
