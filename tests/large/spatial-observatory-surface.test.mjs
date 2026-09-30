@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { createLocalizationRuntime, eidosAppHostLocalizationBundles } from "../../dist/localization/index.js";
 import {
   isSpatialObservatoryPageV010,
   renderSpatialObservatoryPageShellToHtmlV010,
@@ -115,4 +116,16 @@ test("Spatial Observatory read presets remain Host query values, not Eidos seman
       endAt: "2026-09-29T00:00:00.000Z"
     }
   });
+});
+
+
+test("Spatial Observatory localizes platform chrome without translating plugin or runtime text", () => {
+  const runtime = createLocalizationRuntime(eidosAppHostLocalizationBundles, {
+    locale: "zh-CN",
+    fallbackLocales: ["en"]
+  });
+  const html = renderSpatialObservatoryPageShellToHtmlV010(page, runtime);
+  assert.match(html, />选择</);
+  assert.match(html, /拖动画布可旋转视角/);
+  assert.match(html, /Enterprise Observatory 3D/);
 });
