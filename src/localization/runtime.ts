@@ -64,6 +64,30 @@ export function createLocalizationRuntime(
     for (const listener of listeners) listener(context);
   }
 
+  function resolveMessage(
+    namespace: string,
+    key: string,
+    fallback: string,
+    params?: Record<string, string | number | boolean | null>
+  ): string {
+    const language = languageFallback(locale);
+    const candidates = unique([
+      locale,
+      ...(language ? [language] : []),
+      ...fallbackLocales.flatMap(item => {
+        const base = languageFallback(item);
+        return base ? [item, base] : [item];
+      })
+    ]);
+
+    for (const candidate of candidates) {
+      const bundle = bundles.get(`${namespace}\u0000${candidate}`);
+      const value = bundle?.messages[key];
+      if (typeof value === "string") return renderParams(value, params);
+    }
+    return renderParams(fallback, params);
+  }
+
   replaceBundles(initialBundles);
 
   return {
@@ -85,13 +109,13 @@ export function createLocalizationRuntime(
     hasMessage(namespace: string, key: string, requestedLocale = locale) {
       const language = languageFallback(requestedLocale);
       return [requestedLocale, ...(language ? [language] : [])].some(candidate =>
-        typeof bundles.get(`${namespace}\\u0000${candidate}`)?.messages[key] === "string"
+        typeof bundles.get(`${namespace}\u0000${candidate}`)?.messages[key] === "string"
       );
     },
 
     resolveText(text: PresentableTextV010) {
       if (text.kind === "literal") return text.value;
-      return this.resolve(
+      return resolveMessage(
         text.message.namespace,
         text.message.key,
         text.message.fallback ?? text.message.key,
@@ -99,24 +123,7 @@ export function createLocalizationRuntime(
       );
     },
 
-    resolve(namespace, key, fallback, params) {
-      const language = languageFallback(locale);
-      const candidates = unique([
-        locale,
-        ...(language ? [language] : []),
-        ...fallbackLocales.flatMap(item => {
-          const base = languageFallback(item);
-          return base ? [item, base] : [item];
-        })
-      ]);
-
-      for (const candidate of candidates) {
-        const bundle = bundles.get(`${namespace}\u0000${candidate}`);
-        const value = bundle?.messages[key];
-        if (typeof value === "string") return renderParams(value, params);
-      }
-      return renderParams(fallback, params);
-    },
+    resolve: resolveMessage,
 
     subscribe(listener) {
       listeners.add(listener);
