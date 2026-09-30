@@ -1,7 +1,8 @@
 import type {
   LocaleContextV010,
   LocalizationBundleV010,
-  LocalizationRuntime
+  LocalizationRuntime,
+  PresentableTextV010
 } from "./contracts.js";
 
 function unique(values: readonly string[]): string[] {
@@ -79,6 +80,23 @@ export function createLocalizationRuntime(
 
     availableLocales() {
       return unique([locale, ...[...bundles.values()].map(bundle => bundle.locale)]).sort();
+    },
+
+    hasMessage(namespace: string, key: string, requestedLocale = locale) {
+      const language = languageFallback(requestedLocale);
+      return [requestedLocale, ...(language ? [language] : [])].some(candidate =>
+        typeof bundles.get(`${namespace}\\u0000${candidate}`)?.messages[key] === "string"
+      );
+    },
+
+    resolveText(text: PresentableTextV010) {
+      if (text.kind === "literal") return text.value;
+      return this.resolve(
+        text.message.namespace,
+        text.message.key,
+        text.message.fallback ?? text.message.key,
+        text.message.params
+      );
     },
 
     resolve(namespace, key, fallback, params) {
