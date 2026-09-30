@@ -264,6 +264,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
       definition: page.definition,
       container,
       actionHost: options.actionHost,
+      localization,
       onActionResult(result) {
         return options.onActionResult?.(
           result,
