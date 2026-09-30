@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "authority": "docs/governance/RESIDUAL-BRANCH-RECONCILIATION-20260930.md",
+  "retiredBranches": [
+    {
+      "name": "app-host/browser-lifecycle-resilience-v0.1",
+      "reason": "superseded by PR #59 and PR #70"
+    },
+    {
+      "name": "app-host/context-header-from-active-context",
+      "reason": "rejected old product-specific transport coupling"
+    },
+    {
+      "name": "app-host/surface-contract-resolver-v0.1-mainline",
+      "reason": "PR #66 explicitly closed as redundant"
+    },
+    {
+      "name": "app-host/surface-contract-resolver-v0.1-rebase",
+      "reason": "strictly behind main with no unique commits"
+    },
+    {
+      "name": "assistant-four-locale-chrome",
+      "reason": "strictly behind main with no unique commits"
+    },
+    {
+      "name": "chat-action-locale-context",
+      "reason": "PR #30 superseded; current main already propagates locale"
+    },
+    {
+      "name": "components/task-inbox-availability-v0.1",
+      "reason": "old implementation retired; unavailable-vs-empty intent retained for redesign"
+    },
+    {
+      "name": "convergence/upstream-readiness-v0.2.1",
+      "reason": "stale pre-mainline convergence harness; PR #1 closed"
+    },
+    {
+      "name": "eidos/app-host-action-executor-v0.1",
+      "reason": "historical implementation absorbed by later App Host convergence"
+    },
+    {
+      "name": "eidos/pure-frontend-positioning-v0.1",
+      "reason": "historical intermediate mainline absorbed by current architecture"
+    },
+    {
+      "name": "performance/surface-scoped-loading-v0.1",
+      "reason": "partial old optimization retired; intent retained under current runtime performance architecture"
+    },
+    {
+      "name": "workbench/surface-observability-v0.1",
+      "reason": "surface identity observability already absorbed by current Workbench"
+    }
+  ]
+}
