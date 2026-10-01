@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "principle": "historical-evidence-preserved-current-authority-evolves",
+  "classes": {
+    "CURRENT_AUTHORITY": "editable",
+    "ADR": "semantic-history-preserved",
+    "VERSIONED_CONTRACT": "new-version-for-incompatible-semantics",
+    "HISTORICAL_SNAPSHOT": "frozen",
+    "LIVING_RUNBOOK": "editable",
+    "GENERATED_CURRENT_VIEW": "regeneratable"
+  },
+  "keyDocuments": {
+    "LLM.md": "CURRENT_AUTHORITY",
+    "INVARIANTS.md": "CURRENT_AUTHORITY",
+    "docs/architecture/EIDOS-CURRENT-AUTHORITY-BOUNDARY-v0.1.md": "CURRENT_AUTHORITY",
+    "docs/architecture/decisions/*": "ADR"
+  }
+}
