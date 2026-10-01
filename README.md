@@ -1,5 +1,7 @@
 # Eidos
 
+> **Current ecosystem:** Eidos is one of four current owner projects: **EVO-App-Platform / EVO / Eidos / Experience-Compiler**. This repository owns deterministic Human Experience capabilities/runtime; see `docs/architecture/EIDOS-CURRENT-AUTHORITY-BOUNDARY-v0.1.md` and `docs/architecture/EVO-ECOSYSTEM-PROJECT-BOUNDARIES-v0.1.md`. The old `EVO-EC-Eidos-Convergence` repository is historical evidence only.
+
 **Eidos is deterministic for machines, adaptive for humans, and stable where shared understanding and familiarity matter.**
 
 Eidos is an LLM-first Experience runtime and capability system. It is designed so that LLMs compose verified capabilities instead of repeatedly generating large amounts of unverified UI code.
