@@ -13,6 +13,7 @@
     "LLM.md": "CURRENT_AUTHORITY",
     "INVARIANTS.md": "CURRENT_AUTHORITY",
     "docs/architecture/EIDOS-CURRENT-AUTHORITY-BOUNDARY-v0.1.md": "CURRENT_AUTHORITY",
-    "docs/architecture/decisions/*": "ADR"
+    "docs/architecture/decisions/*": "ADR",
+    "docs/architecture/EVO-ECOSYSTEM-PROJECT-BOUNDARIES-v0.1.md": "CURRENT_AUTHORITY"
   }
 }
