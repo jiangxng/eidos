@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "authority": "docs/architecture/EIDOS-CURRENT-AUTHORITY-BOUNDARY-v0.1.md",
+  "repositoryRole": "deterministic-human-experience-framework",
+  "coreAdmissionQuestion": "reusable-deterministic-human-experience-capability-or-runtime-rule",
+  "defaults": {
+    "productSpecificUI": "owning-plugin/Experience",
+    "businessTruth": "owning-application-or-provider",
+    "platformGovernance": "EVO-App-Platform",
+    "deterministicLedger": "EVO-Ledger-Runtime",
+    "persistentIntelligence": "Experience-Compiler",
+    "externalCompatibility": "Integration-Adapter"
+  },
+  "historyLoading": "ADR-on-demand"
+}
