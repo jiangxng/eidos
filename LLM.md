@@ -1,5 +1,9 @@
 # LLM Context Determinism Contract
 
+> **Current ecosystem/ownership boundary (2026-10-01):** Read `docs/architecture/EVO-ECOSYSTEM-PROJECT-BOUNDARIES-v0.1.md` and `docs/architecture/EIDOS-CURRENT-AUTHORITY-BOUNDARY-v0.1.md` before accepting product/domain responsibility into Eidos. The active owner projects are EVO-App-Platform, EVO, Eidos and Experience-Compiler. `EVO-EC-Eidos-Convergence` is historical evidence only. Eidos owns reusable deterministic Human Experience contracts/runtime; product-specific UI stays in the owning Experience, and business truth/authorization/provider semantics stay outside Eidos.
+
+> **Documentation lifecycle (2026-10-01):** `documentation.policy.json` classifies current authority vs historical evidence. Current architecture/instruction documents may evolve in place. ADR semantics and historical snapshots are preserved and superseded rather than rewritten. Load ADR/history only when rationale, compatibility or archaeology is relevant.
+
 > **Mandatory proactive-engineering instinct:** Read `docs/architecture/LLM-PROACTIVE-ENGINEERING-INSTINCTS-v0.1.md` and `llm.foundation-map.json`. Do not wait for the human to name ordinary framework/product foundations such as design-system governance, accessibility, interaction consistency, performance budgets, diagnostics, compatibility or responsive behavior. Detect and classify missing foundations as NOW / SOON / WATCH.
 
 > **Plugin-platform boundary (2026-09-25):** Eidos is the UI/runtime side of the native EVO plugin/mini-app platform. Native plugins are not MCP applications by default. MCP/OAuth are external-integration concerns and must not leak into generic Eidos plugin contracts unless the task explicitly concerns an external integration.
