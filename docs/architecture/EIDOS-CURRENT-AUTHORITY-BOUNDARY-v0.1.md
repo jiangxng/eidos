@@ -15,6 +15,7 @@ If **no**, it probably belongs to the consuming product, App Platform, EVO or Ex
 
 - Experience/UIDL contracts and deterministic validation;
 - reusable Human interaction capabilities;
+- reusable 2D Core and 3D Core visual-interaction contracts and renderer seams;
 - rendering/runtime/resolution across supported Surfaces;
 - App Host / Workbench framework behavior;
 - Productive Design Language and semantic UI primitives;
@@ -91,3 +92,12 @@ Stop and reassess when Eidos code starts to know:
 - EC knowledge internals.
 
 Those are ownership leaks, not UI conveniences.
+
+
+## 2D / 3D ownership rule
+
+Reusable graph/canvas/spatial interaction belongs in Eidos 2D Core or 3D Core.
+
+Product/domain semantics belong to the consuming product. A product may project domain state into Eidos and translate generic interactions into declared ActionRequests, but Eidos must not learn the product's semantic vocabulary merely to render it.
+
+Authority: `docs/architecture/EIDOS-2D-3D-CORE-v0.1.md`.
