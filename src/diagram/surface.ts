@@ -705,13 +705,89 @@ export function mountDiagramEditorPageV010(
       term.style.fontWeight = "600";
 
       const value = document.createElement("dd");
-      value.textContent = property.value === null
-        ? "—"
-        : String(property.value);
       value.style.margin = "0";
       value.style.overflowWrap = "anywhere";
       if (property.detail) value.title = property.detail;
 
+      if (!property.editor) {
+        value.textContent = property.value === null
+          ? "—"
+          : String(property.value);
+        list.append(term, value);
+        continue;
+      }
+
+      const editor = property.editor;
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.gap = "6px";
+      row.style.alignItems = "center";
+
+      let readValue: () => DiagramInspectorPropertyValueV010;
+
+      if (editor.kind === "BOOLEAN") {
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.checked = property.value === true;
+        input.setAttribute("aria-label", property.label);
+        input.setAttribute("data-eidos-diagram-property-editor", property.key);
+        readValue = () => input.checked;
+        row.appendChild(input);
+      } else if (editor.kind === "SELECT") {
+        const select = document.createElement("select");
+        select.setAttribute("aria-label", property.label);
+        select.setAttribute("data-eidos-diagram-property-editor", property.key);
+        for (const [index, option] of (editor.options ?? []).entries()) {
+          const item = document.createElement("option");
+          item.value = String(index);
+          item.textContent = option.label;
+          item.selected = Object.is(option.value, property.value);
+          select.appendChild(item);
+        }
+        readValue = () => {
+          const index = Number(select.value);
+          return editor.options?.[index]?.value ?? null;
+        };
+        row.appendChild(select);
+      } else {
+        const input = document.createElement("input");
+        input.type = editor.kind === "NUMBER" ? "number" : "text";
+        input.value = property.value === null ? "" : String(property.value);
+        input.setAttribute("aria-label", property.label);
+        input.setAttribute("data-eidos-diagram-property-editor", property.key);
+        readValue = () => {
+          if (editor.kind === "NUMBER") {
+            if (!input.value.trim()) return null;
+            const parsed = Number(input.value);
+            if (!Number.isFinite(parsed)) {
+              throw new Error("EIDOS_DIAGRAM_PROPERTY_NUMBER_INVALID");
+            }
+            return parsed;
+          }
+          return input.value;
+        };
+        row.appendChild(input);
+      }
+
+      const save = document.createElement("button");
+      save.type = "button";
+      save.textContent = "Save";
+      save.setAttribute("data-eidos-diagram-property-save", property.key);
+      save.onclick = () => {
+        try {
+          const operation = jsonClone(editor.operation);
+          operation[editor.valueField] = readValue();
+          void executeOperation(
+            operation,
+            editor.actionId,
+            editor.requiresConfirmation === true
+          );
+        } catch (error) {
+          report(error instanceof Error ? error.message : String(error));
+        }
+      };
+      row.appendChild(save);
+      value.appendChild(row);
       list.append(term, value);
     }
     selectionProperties.appendChild(list);
