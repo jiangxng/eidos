@@ -24,7 +24,9 @@
     "diagnosticsObservability": "SOON",
     "compatibilityDeprecation": "SOON",
     "llmContextArchitecture": "NOW",
-    "platformHelpRendering": "NOW"
+    "platformHelpRendering": "NOW",
+    "visual2dCore": "NOW",
+    "visual3dCore": "NOW"
   },
   "platformHelp": {
     "status": "HELP_DOCUMENT_P0_IMPLEMENTED",
@@ -34,5 +36,21 @@
     "arbitraryHtml": "PROHIBITED",
     "navigator": "REUSE_EXISTING_EIDOS_CAPABILITIES",
     "hostOwnership": "CONTENT_INDEX_SEARCH_CONTEXT_AUTHORIZATION"
+  },
+  "visualCores": {
+    "status": "RESPONSIBILITY_BASELINE_ACTIVE",
+    "authority": "docs/architecture/EIDOS-2D-3D-CORE-v0.1.md",
+    "twoD": {
+      "compatibilityAssets": [
+        "src/diagram/**"
+      ],
+      "businessSemantics": "PROHIBITED"
+    },
+    "threeD": {
+      "compatibilityAssets": [
+        "src/spatial/**"
+      ],
+      "businessSemantics": "PROHIBITED"
+    }
   }
 }
