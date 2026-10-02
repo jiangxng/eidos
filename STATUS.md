@@ -34,6 +34,13 @@
 - deterministic standard fallback
 - Runtime/Host business-truth boundary
 
+## Current visual-core convergence
+
+- 2D Core: responsibility baseline ACTIVE; existing `src/diagram/**` is the protected compatibility implementation asset.
+- 3D Core: responsibility baseline ACTIVE; existing `src/spatial/**` is the protected compatibility implementation asset.
+- Domain/business semantics remain outside both cores.
+- Authority: `docs/architecture/EIDOS-2D-3D-CORE-v0.1.md`.
+
 ## Candidate capabilities
 
 - hierarchical-selection
