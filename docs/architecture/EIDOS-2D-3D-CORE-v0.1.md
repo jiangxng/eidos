@@ -234,3 +234,21 @@ while the product layer decides whether semantic edit actions are available.
 Structured selection properties are therefore part of the generic 2D Core contract. They contain displayable key/label/value data only and do not encode business semantics.
 
 Editing remains an optional higher capability. Eidos must never infer that a selected property is writable merely because it is visible.
+
+
+## Field-level Inspector editing seam
+
+Inspector visibility and Inspector writability are separate capabilities.
+
+A property may always provide:
+
+- key;
+- label;
+- current primitive value;
+- optional detail.
+
+It may additionally provide an `editor` descriptor containing a generic control kind and ActionHost operation template.
+
+Eidos renders the editor only when that descriptor exists. Eidos does not infer writability from the property value and does not know why a field is writable.
+
+Therefore two applications can consume the same Inspector data while one omits edit descriptors and another supplies governed write descriptors. The domain/application layer remains responsible for authorization, validation and mutation semantics.
