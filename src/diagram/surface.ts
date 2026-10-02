@@ -130,6 +130,39 @@ function finite(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+function validInspectorProperties(
+  value: DiagramInspectorPropertyV010[] | undefined
+): boolean {
+  if (value === undefined) return true;
+  if (!Array.isArray(value)) return false;
+  const keys = new Set<string>();
+  for (const property of value) {
+    if (
+      !nonEmpty(property?.key)
+      || !nonEmpty(property?.label)
+      || !(
+        property.value === null
+        || typeof property.value === "string"
+        || typeof property.value === "number"
+        || typeof property.value === "boolean"
+      )
+      || (
+        typeof property.value === "number"
+        && !Number.isFinite(property.value)
+      )
+      || (
+        property.detail !== undefined
+        && typeof property.detail !== "string"
+      )
+      || keys.has(property.key)
+    ) {
+      return false;
+    }
+    keys.add(property.key);
+  }
+  return true;
+}
+
 function jsonClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
@@ -224,6 +257,9 @@ export function validateDiagramEditorStateV010(
     if (nodeIds.has(node.id)) {
       issues.push(`Duplicate node id '${node.id}'.`);
     }
+    if (!validInspectorProperties(node.properties)) {
+      issues.push(`nodes[${index}].properties is invalid.`);
+    }
     if (
       node.observations !== undefined
       && (
@@ -258,6 +294,9 @@ export function validateDiagramEditorStateV010(
     }
     if (edgeIds.has(edge.id)) {
       issues.push(`Duplicate edge id '${edge.id}'.`);
+    }
+    if (!validInspectorProperties(edge.properties)) {
+      issues.push(`edges[${index}].properties is invalid.`);
     }
     if (
       edge.observations !== undefined
