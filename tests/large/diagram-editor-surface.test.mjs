@@ -275,3 +275,44 @@ test("Inspector property editors are optional field-level capabilities", () => {
     true
   );
 });
+
+
+test("Inspector property editors may route writes directly to the owning ActionHost command", () => {
+  const editable = structuredClone(state);
+  editable.nodes[0].properties[0].editor = {
+    kind: "TEXT",
+    actionId: "application.owner.set",
+    command: {
+      code: "application.definition.property.set",
+      inputVersion: "0.1.0"
+    },
+    valueField: "value",
+    operation: {
+      type: "PROPERTY_SET",
+      definitionId: "application:sales",
+      propertyKey: "owner"
+    }
+  };
+
+  assert.equal(validateDiagramEditorStateV010(editable).ok, true);
+
+  const request = diagramEditorOperationRequestV010(
+    page,
+    editable,
+    {
+      type: "PROPERTY_SET",
+      definitionId: "application:sales",
+      propertyKey: "owner",
+      value: "Sales Ops"
+    },
+    "application.owner.set",
+    false,
+    editable.nodes[0].properties[0].editor.command
+  );
+  assert.equal(request.command.code, "application.definition.property.set");
+  assert.equal(request.command.inputVersion, "0.1.0");
+
+  const invalid = structuredClone(editable);
+  invalid.nodes[0].properties[0].editor.command.code = "";
+  assert.equal(validateDiagramEditorStateV010(invalid).ok, false);
+});
