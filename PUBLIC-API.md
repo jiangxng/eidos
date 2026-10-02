@@ -68,3 +68,12 @@ The root `@eidos/reference` exports remain available for compatibility.
 
 Neither public core owns product/domain truth. Application, Ledger, SOP,
 Enterprise Relation and publication semantics remain outside Eidos.
+
+
+### Neutral 2D Workspace naming
+
+The 2D Core also exports neutral `DiagramWorkspace*V010` names for the shared interactive surface.
+
+These are compatibility aliases over the established `DiagramEditor*V010` contract in v0.1. They do not fork the runtime or serialized contract.
+
+Use the Workspace names for new Viewer/Designer-neutral code. Editing remains optional and is expressed through actions and field-level Inspector editor descriptors.

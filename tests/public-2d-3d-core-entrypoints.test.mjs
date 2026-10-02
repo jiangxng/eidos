@@ -9,10 +9,20 @@ test("2D Core public subpath preserves existing diagram implementation identity"
   assert.equal(typeof twoD.validateDiagram, "function");
   assert.equal(typeof twoD.applyDiagramCommand, "function");
   assert.equal(typeof twoD.mountDiagramEditorPageV010, "function");
+  assert.equal(typeof twoD.mountDiagramWorkspacePageV010, "function");
+  assert.equal(typeof twoD.validateDiagramWorkspaceStateV010, "function");
 
   assert.equal(twoD.validateDiagram, root.validateDiagram);
   assert.equal(twoD.applyDiagramCommand, root.applyDiagramCommand);
   assert.equal(twoD.mountDiagramEditorPageV010, root.mountDiagramEditorPageV010);
+  assert.equal(
+    twoD.mountDiagramWorkspacePageV010,
+    twoD.mountDiagramEditorPageV010
+  );
+  assert.equal(
+    twoD.validateDiagramWorkspaceStateV010,
+    twoD.validateDiagramEditorStateV010
+  );
 });
 
 test("3D Core public subpath preserves existing spatial implementation identity", () => {
