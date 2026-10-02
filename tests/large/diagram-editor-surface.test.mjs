@@ -46,7 +46,11 @@ const state = {
       x: 80,
       y: 80,
       width: 140,
-      height: 64
+      height: 64,
+      properties: [
+        { key: "owner", label: "Owner", value: "Sales Ops" },
+        { key: "active", label: "Active", value: true }
+      ]
     },
     {
       id: "ledger",
@@ -65,7 +69,10 @@ const state = {
       source: "app",
       target: "ledger",
       kind: "guidance",
-      style: "dashed"
+      style: "dashed",
+      properties: [
+        { key: "authority", label: "Authority", value: "GUIDANCE" }
+      ]
     }
   ],
   actions: [
@@ -87,6 +94,7 @@ test("diagram editor page is a renderer-independent App Host definition", () => 
   const html = renderDiagramEditorPageShellToHtmlV010(page);
   assert.match(html, /data-eidos-diagram-canvas/);
   assert.match(html, /data-eidos-diagram-inspector/);
+  assert.match(html, /data-eidos-diagram-selection-properties/);
 });
 
 test("diagram editor validates positioned nodes and semantic edge references", () => {
@@ -204,4 +212,24 @@ test("diagram editor carries renderer-independent observation badges and read pr
 
   observed.nodes[1].observations[0].value = "";
   assert.equal(validateDiagramEditorStateV010(observed).ok, false);
+});
+
+
+test("diagram editor accepts structured node and edge inspector properties", () => {
+  assert.deepEqual(validateDiagramEditorStateV010(state), {
+    ok: true,
+    issues: []
+  });
+
+  const duplicate = structuredClone(state);
+  duplicate.nodes[0].properties.push({
+    key: "owner",
+    label: "Duplicate owner",
+    value: "Other"
+  });
+  assert.equal(validateDiagramEditorStateV010(duplicate).ok, false);
+
+  const invalid = structuredClone(state);
+  invalid.edges[0].properties[0].value = Number.NaN;
+  assert.equal(validateDiagramEditorStateV010(invalid).ok, false);
 });

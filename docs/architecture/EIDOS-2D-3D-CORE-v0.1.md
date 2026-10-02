@@ -216,3 +216,21 @@ This is an API-boundary convergence, not a renderer rewrite or source-tree renam
 The root `@eidos/reference` entry point remains backward compatible. Tests lock
 the public subpaths to the same implementation identities as the existing root
 exports so the convergence cannot silently create a second 2D/3D runtime.
+
+
+## Interactive workspace / Inspector convergence
+
+2D Core is not only an editor rendering primitive. It is the reusable interaction foundation for both read-oriented and edit-oriented graph applications.
+
+The same surface may support:
+
+- node and edge selection;
+- node and edge property inspection;
+- navigation, focus, pan and zoom;
+- overlays and generic actions;
+
+while the product layer decides whether semantic edit actions are available.
+
+Structured selection properties are therefore part of the generic 2D Core contract. They contain displayable key/label/value data only and do not encode business semantics.
+
+Editing remains an optional higher capability. Eidos must never infer that a selected property is writable merely because it is visible.
