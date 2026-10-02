@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   diagramEditorOperationRequestV010,
   diagramEditorReadRequestV010,
+  diagramEditorSelectionReadRequestV010,
   isDiagramEditorPageV010,
   renderDiagramEditorPageShellToHtmlV010,
   validateDiagramEditorStateV010
@@ -20,6 +21,10 @@ const page = {
   },
   operationCommand: {
     code: "graph.view.operation",
+    inputVersion: "0.1.0"
+  },
+  selectionReadCommand: {
+    code: "graph.selection.inspect",
     inputVersion: "0.1.0"
   },
   requestValues: {
@@ -315,4 +320,38 @@ test("Inspector property editors may route writes directly to the owning ActionH
   const invalid = structuredClone(editable);
   invalid.nodes[0].properties[0].editor.command.code = "";
   assert.equal(validateDiagramEditorStateV010(invalid).ok, false);
+});
+
+
+test("diagram workspace creates lazy selection inspection requests", () => {
+  assert.deepEqual(
+    diagramEditorSelectionReadRequestV010(page, {
+      kind: "node",
+      id: "app"
+    }),
+    {
+      contractVersion: "0.1.0",
+      type: "command",
+      command: {
+        code: "graph.selection.inspect",
+        inputVersion: "0.1.0"
+      },
+      values: {
+        activeContext: {
+          contractVersion: "0.1.0",
+          kind: "ENTERPRISE",
+          contextId: "enterprise:demo",
+          enterpriseId: "enterprise:demo"
+        },
+        resourceId: "eog:primary",
+        target: {
+          kind: "node",
+          id: "app"
+        }
+      },
+      sourceInteractionId: "operating-graph",
+      actionId: "diagram.selection.read",
+      requiresConfirmation: false
+    }
+  );
 });
