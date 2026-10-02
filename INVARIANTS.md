@@ -45,3 +45,8 @@
 
 - **EIDOS-39** Eidos-owned human-visible platform chrome MUST resolve through the Eidos localization runtime. Framework renderers and mounted runtimes MUST NOT introduce unlocalizable platform-owned display strings; literal plugin/business/runtime content remains owned by its source.
 - **EIDOS-40** Localization ownership is explicit: Eidos owns localization infrastructure and Eidos platform resources; each plugin/package owns its own resources; enterprise/runtime business data is not implicitly translated by Eidos. Machine identifiers, status codes and business truth remain independent from presentation locale.
+
+- **EIDOS-41** Eidos 2D Core and 3D Core MUST remain product/domain-semantic-free. Business concepts such as Application, Ledger, SOP, Enterprise Relation or publication authority belong to consuming products and MUST NOT become framework primitives.
+- **EIDOS-42** 2D/3D presentation state (layout, viewport, pose, camera, selection) is not authoritative business/domain truth. Presentation changes MUST NOT manufacture domain revisions unless an owning product explicitly defines and executes such a business operation outside Eidos.
+- **EIDOS-43** Renderer implementations are replaceable behind stable 2D/3D contracts. SVG/DOM, Three.js, WebGL, WebGPU or future renderer objects MUST NOT become public product-state authority.
+- **EIDOS-44** Existing `src/diagram/**` and `src/spatial/**` APIs are compatibility assets during 2D/3D convergence; migration MUST prefer public aliases/adapters and regression proof over unnecessary rewrites.
