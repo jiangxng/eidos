@@ -275,3 +275,12 @@ shared 2D Workspace
 ```
 
 The Workspace is not a business write router. It only renders the declared editor and transports the command request.
+
+
+## Lazy selection inspection
+
+Large interactive workspaces must not prefetch every external property contribution for every visible node/edge.
+
+2D Workspace therefore supports an optional selection-read command. When a node or edge is selected, the Workspace may request additional structured Inspector properties for that target only.
+
+Selection reads are race-safe: results for stale selections are ignored. The Workspace remains domain-neutral; provider discovery and property ownership stay outside Eidos.
