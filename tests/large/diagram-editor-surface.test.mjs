@@ -233,3 +233,45 @@ test("diagram editor accepts structured node and edge inspector properties", () 
   invalid.edges[0].properties[0].value = Number.NaN;
   assert.equal(validateDiagramEditorStateV010(invalid).ok, false);
 });
+
+
+test("Inspector property editors are optional field-level capabilities", () => {
+  const editable = structuredClone(state);
+  editable.nodes[0].properties[0].editor = {
+    kind: "TEXT",
+    actionId: "node.owner.set",
+    valueField: "value",
+    operation: {
+      type: "PROPERTY_SET",
+      targetKind: "NODE",
+      targetId: "app",
+      propertyKey: "owner"
+    }
+  };
+  editable.edges[0].properties[0].editor = {
+    kind: "SELECT",
+    actionId: "relation.authority.set",
+    valueField: "value",
+    operation: {
+      type: "PROPERTY_SET",
+      targetKind: "EDGE",
+      targetId: "guidance",
+      propertyKey: "authority"
+    },
+    options: [
+      { label: "Guidance", value: "GUIDANCE" },
+      { label: "Enterprise", value: "ENTERPRISE" }
+    ]
+  };
+  assert.equal(validateDiagramEditorStateV010(editable).ok, true);
+
+  const invalid = structuredClone(editable);
+  invalid.edges[0].properties[0].editor.options = [];
+  assert.equal(validateDiagramEditorStateV010(invalid).ok, false);
+
+  const readOnly = structuredClone(state);
+  assert.equal(
+    readOnly.nodes[0].properties.every(property => property.editor === undefined),
+    true
+  );
+});
