@@ -38,19 +38,22 @@
     "hostOwnership": "CONTENT_INDEX_SEARCH_CONTEXT_AUTHORIZATION"
   },
   "visualCores": {
-    "status": "RESPONSIBILITY_BASELINE_ACTIVE",
+    "status": "PUBLIC_API_ACTIVE",
     "authority": "docs/architecture/EIDOS-2D-3D-CORE-v0.1.md",
     "twoD": {
       "compatibilityAssets": [
         "src/diagram/**"
       ],
-      "businessSemantics": "PROHIBITED"
+      "businessSemantics": "PROHIBITED",
+      "publicEntryPoint": "@eidos/reference/2d"
     },
     "threeD": {
       "compatibilityAssets": [
         "src/spatial/**"
       ],
-      "businessSemantics": "PROHIBITED"
+      "businessSemantics": "PROHIBITED",
+      "publicEntryPoint": "@eidos/reference/3d",
+      "rendererImplementationAuthority": "REPLACEABLE_ADAPTER"
     }
   }
 }

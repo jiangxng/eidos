@@ -36,8 +36,8 @@
 
 ## Current visual-core convergence
 
-- 2D Core: responsibility baseline ACTIVE; existing `src/diagram/**` is the protected compatibility implementation asset.
-- 3D Core: responsibility baseline ACTIVE; existing `src/spatial/**` is the protected compatibility implementation asset.
+- 2D Core: public API ACTIVE at `@eidos/reference/2d`; existing `src/diagram/**` remains the protected compatibility implementation asset.
+- 3D Core: public API ACTIVE at `@eidos/reference/3d`; existing `src/spatial/**` remains the protected compatibility implementation asset.
 - Domain/business semantics remain outside both cores.
 - Authority: `docs/architecture/EIDOS-2D-3D-CORE-v0.1.md`.
 

@@ -1,6 +1,6 @@
 # Eidos 2D Core / 3D Core Boundary v0.1
 
-**Status:** CURRENT ARCHITECTURE  
+**Status:** CURRENT ARCHITECTURE — PUBLIC ENTRYPOINTS IMPLEMENTED  
 **Date:** 2026-10-02
 
 ## 1. Decision
@@ -125,7 +125,9 @@ Current assets map as follows:
 
 - `src/diagram/surface.ts` is the current primary convergence asset.
 - Existing Diagram Editor public contracts remain supported during migration.
-- Future public naming may introduce explicit `2d` entry points without breaking existing `diagram` consumers.
+- Public package entry point: `@eidos/reference/2d`.
+- It re-exports the protected `src/diagram/**` implementation assets without duplicating them.
+- Existing root-package diagram exports remain compatibility-supported.
 
 ### 3D
 
@@ -136,7 +138,9 @@ Current assets map as follows:
 
 remain the primary convergence assets.
 
-Future public naming may introduce explicit `3d` entry points while preserving `spatial` compatibility.
+Public package entry point: `@eidos/reference/3d`.
+
+It re-exports the protected `src/spatial/**` implementation assets without duplicating them. Existing root-package spatial exports remain compatibility-supported.
 
 ## 7. Consumer examples
 
@@ -192,3 +196,23 @@ Prefer compatibility-preserving extraction over renaming churn.
 ## 10. Canonical statement
 
 > Eidos 2D Core and 3D Core are reusable deterministic visual-interaction foundations. Products own semantics and truth; Eidos owns generic interaction and rendering contracts.
+
+
+## 11. Public API convergence result
+
+The explicit Core boundaries are now addressable without importing implementation
+folders:
+
+```text
+@eidos/reference/2d
+→ compatibility facade over src/diagram/**
+
+@eidos/reference/3d
+→ compatibility facade over src/spatial/**
+```
+
+This is an API-boundary convergence, not a renderer rewrite or source-tree rename.
+
+The root `@eidos/reference` entry point remains backward compatible. Tests lock
+the public subpaths to the same implementation identities as the existing root
+exports so the convergence cannot silently create a second 2D/3D runtime.
