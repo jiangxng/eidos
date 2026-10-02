@@ -35,3 +35,36 @@ The repository package exports the converged public API from `@eidos/reference`.
 
 ### `renderCatalogBrowserToHtml(model)`
 Reference HTML renderer for the generic `catalog-browser` capability. The host supplies catalog truth/status/actions and remains responsible for executing requested actions.
+
+
+## 2D Core public entry point
+
+```ts
+import * as eidos2d from "@eidos/reference/2d";
+```
+
+`@eidos/reference/2d` is the stable public boundary for reusable 2D graph/diagram
+contracts and interaction capabilities.
+
+It is currently a compatibility-preserving facade over `src/diagram/**`.
+Consumers must not depend on that private source path.
+
+The root `@eidos/reference` exports remain available for compatibility.
+
+## 3D Core public entry point
+
+```ts
+import * as eidos3d from "@eidos/reference/3d";
+```
+
+`@eidos/reference/3d` is the stable public boundary for reusable spatial
+contracts, deterministic spatial interaction, renderer-adapter seams and the
+generic 3D surface.
+
+It is currently a compatibility-preserving facade over `src/spatial/**`.
+Consumers must not depend on that private source path.
+
+The root `@eidos/reference` exports remain available for compatibility.
+
+Neither public core owns product/domain truth. Application, Ledger, SOP,
+Enterprise Relation and publication semantics remain outside Eidos.
