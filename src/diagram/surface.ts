@@ -30,11 +30,26 @@ export type DiagramInspectorPropertyValueV010 =
   | boolean
   | null;
 
+export interface DiagramInspectorSelectOptionV010 {
+  label: string;
+  value: Exclude<DiagramInspectorPropertyValueV010, null>;
+}
+
+export interface DiagramInspectorPropertyEditorV010 {
+  kind: "TEXT" | "NUMBER" | "BOOLEAN" | "SELECT";
+  actionId: string;
+  valueField: string;
+  operation: Record<string, JsonValue>;
+  requiresConfirmation?: boolean;
+  options?: DiagramInspectorSelectOptionV010[];
+}
+
 export interface DiagramInspectorPropertyV010 {
   key: string;
   label: string;
   value: DiagramInspectorPropertyValueV010;
   detail?: string;
+  editor?: DiagramInspectorPropertyEditorV010;
 }
 
 export interface DiagramEditorReadPresetV010 {
@@ -130,6 +145,45 @@ function finite(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+function validInspectorEditor(
+  value: DiagramInspectorPropertyEditorV010 | undefined
+): boolean {
+  if (value === undefined) return true;
+  if (
+    !["TEXT", "NUMBER", "BOOLEAN", "SELECT"].includes(value.kind)
+    || !nonEmpty(value.actionId)
+    || !nonEmpty(value.valueField)
+    || value.operation === null
+    || typeof value.operation !== "object"
+    || Array.isArray(value.operation)
+  ) {
+    return false;
+  }
+  if (value.options !== undefined) {
+    if (
+      value.kind !== "SELECT"
+      || !Array.isArray(value.options)
+      || value.options.length === 0
+      || value.options.some(option =>
+        !nonEmpty(option?.label)
+        || option.value === null
+        || !(
+          typeof option.value === "string"
+          || typeof option.value === "number"
+          || typeof option.value === "boolean"
+        )
+        || (
+          typeof option.value === "number"
+          && !Number.isFinite(option.value)
+        )
+      )
+    ) {
+      return false;
+    }
+  }
+  return value.kind !== "SELECT" || value.options !== undefined;
+}
+
 function validInspectorProperties(
   value: DiagramInspectorPropertyV010[] | undefined
 ): boolean {
@@ -154,6 +208,7 @@ function validInspectorProperties(
         property.detail !== undefined
         && typeof property.detail !== "string"
       )
+      || !validInspectorEditor(property.editor)
       || keys.has(property.key)
     ) {
       return false;
