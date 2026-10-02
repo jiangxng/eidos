@@ -24,6 +24,19 @@ export interface DiagramObservationBadgeV010 {
   detail?: string;
 }
 
+export type DiagramInspectorPropertyValueV010 =
+  | string
+  | number
+  | boolean
+  | null;
+
+export interface DiagramInspectorPropertyV010 {
+  key: string;
+  label: string;
+  value: DiagramInspectorPropertyValueV010;
+  detail?: string;
+}
+
 export interface DiagramEditorReadPresetV010 {
   id: string;
   label: string;
@@ -54,6 +67,7 @@ export interface DiagramEditorNodeV010 {
   height: number;
   readOnly?: boolean;
   detail?: string;
+  properties?: DiagramInspectorPropertyV010[];
   observations?: DiagramObservationBadgeV010[];
 }
 
@@ -65,6 +79,7 @@ export interface DiagramEditorEdgeV010 {
   label?: string;
   style?: DiagramEditorEdgeStyleV010;
   detail?: string;
+  properties?: DiagramInspectorPropertyV010[];
   observations?: DiagramObservationBadgeV010[];
 }
 
@@ -360,6 +375,7 @@ export function renderDiagramEditorPageShellToHtmlV010(
 <aside data-eidos-diagram-inspector style="border:1px solid color-mix(in srgb,CanvasText 18%,transparent);border-radius:8px;padding:12px;overflow:auto">
 <strong>Selection</strong>
 <p data-eidos-diagram-selection>${escapeHtml(page.emptyMessage ?? "Select a node or relation.")}</p>
+<div data-eidos-diagram-selection-properties style="display:grid;gap:6px;margin:10px 0"></div>
 <div data-eidos-diagram-selection-actions style="display:grid;gap:8px"></div>
 </aside>
 </div>
@@ -414,6 +430,9 @@ export function mountDiagramEditorPageV010(
   const revision = root.querySelector<HTMLElement>("[data-eidos-diagram-revision]");
   const status = root.querySelector<HTMLElement>("[data-eidos-diagram-status]");
   const selectionText = root.querySelector<HTMLElement>("[data-eidos-diagram-selection]");
+  const selectionProperties = root.querySelector<HTMLElement>(
+    "[data-eidos-diagram-selection-properties]"
+  );
   const selectionActions = root.querySelector<HTMLElement>(
     "[data-eidos-diagram-selection-actions]"
   );
@@ -425,6 +444,7 @@ export function mountDiagramEditorPageV010(
     || !revision
     || !status
     || !selectionText
+    || !selectionProperties
     || !selectionActions
   ) {
     throw new Error("EIDOS_DIAGRAM_EDITOR_SHELL_INCOMPLETE");
@@ -573,9 +593,40 @@ export function mountDiagramEditorPageV010(
     }
   };
 
+  const renderSelectionProperties = (
+    properties: DiagramInspectorPropertyV010[] | undefined
+  ): void => {
+    selectionProperties.replaceChildren();
+    if (!properties?.length) return;
+
+    const list = document.createElement("dl");
+    list.style.display = "grid";
+    list.style.gridTemplateColumns = "minmax(90px,auto) minmax(0,1fr)";
+    list.style.gap = "6px 10px";
+    list.style.margin = "0";
+
+    for (const property of properties) {
+      const term = document.createElement("dt");
+      term.textContent = property.label;
+      term.style.fontWeight = "600";
+
+      const value = document.createElement("dd");
+      value.textContent = property.value === null
+        ? "—"
+        : String(property.value);
+      value.style.margin = "0";
+      value.style.overflowWrap = "anywhere";
+      if (property.detail) value.title = property.detail;
+
+      list.append(term, value);
+    }
+    selectionProperties.appendChild(list);
+  };
+
   const renderSelection = (): void => {
     if (!state || !selected) {
       selectionText.textContent = page.emptyMessage ?? "Select a node or relation.";
+      renderSelectionProperties(undefined);
       renderActions();
       return;
     }
@@ -590,6 +641,7 @@ export function mountDiagramEditorPageV010(
           ...observationText(item.observations)
         ].filter(Boolean).join("\n")
       : page.emptyMessage ?? "Select a node or relation.";
+    renderSelectionProperties(item?.properties);
     renderActions();
   };
 
