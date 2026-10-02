@@ -252,3 +252,26 @@ It may additionally provide an `editor` descriptor containing a generic control 
 Eidos renders the editor only when that descriptor exists. Eidos does not infer writability from the property value and does not know why a field is writable.
 
 Therefore two applications can consume the same Inspector data while one omits edit descriptors and another supplies governed write descriptors. The domain/application layer remains responsible for authorization, validation and mutation semantics.
+
+
+## Property-owner command routing
+
+A field-level Inspector editor may optionally declare its own ActionHost command.
+
+When present, Eidos sends the edit directly to that command rather than forcing the request through the page's default operation command.
+
+This supports component ownership:
+
+```text
+shared 2D Workspace
+  property from Component A
+      ↓ edit
+  Component A ActionHost command
+
+shared 2D Workspace
+  property from Component B
+      ↓ edit
+  Component B ActionHost command
+```
+
+The Workspace is not a business write router. It only renders the declared editor and transports the command request.
