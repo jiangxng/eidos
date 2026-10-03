@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import {
   executeAppHostPageAction,
   formatAppHostActionResultV010
@@ -93,4 +94,18 @@ test("App Host formats successful form action payloads without business-specific
       }
     }, null, 2)
   );
+});
+
+
+test("locally rendered form results are preserved across Workbench chrome refresh", async () => {
+  const source = await readFile("src/app-host/page-controller.ts", "utf8");
+  const formResult = source.indexOf(
+    "formatAppHostActionResultV010(execution.result.result)"
+  );
+  const preserve = source.indexOf(
+    "{ preserveMountedPage: true }",
+    formResult
+  );
+  assert.notEqual(formResult, -1);
+  assert.ok(preserve > formResult);
 });
