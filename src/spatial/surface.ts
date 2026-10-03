@@ -21,7 +21,7 @@ export interface SpatialObservatoryReadPresetV010 {
 
 export interface SpatialObservatoryPageV010 {
   contractVersion: "0.1.0";
-  kind: "spatial-observatory";
+  kind: "spatial-observatory" | "spatial-workspace";
   id: string;
   title: string;
   resourceId: string;
@@ -125,7 +125,7 @@ export function isSpatialObservatoryPageV010(
   }
   const page = value as Partial<SpatialObservatoryPageV010>;
   return page.contractVersion === "0.1.0"
-    && page.kind === "spatial-observatory"
+    && (page.kind === "spatial-observatory" || page.kind === "spatial-workspace")
     && nonEmpty(page.id)
     && nonEmpty(page.title)
     && nonEmpty(page.resourceId)
