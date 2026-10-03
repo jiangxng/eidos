@@ -680,7 +680,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
                 id: resultId,
                 role: result.ok ? "assistant" : "error",
                 text: result.ok
-                  ? resultMessage(result.result)
+                  ? formatAppHostActionResultV010(result.result)
                   : result.error?.message ?? "Unknown action error"
               });
           renderTranscript();
