@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { executeAppHostPageAction } from "../../dist/app-host/index.js";
+import {
+  executeAppHostPageAction,
+  formatAppHostActionResultV010
+} from "../../dist/app-host/index.js";
 
 test("App Host action execution uses existing ActionHost port", async () => {
   let captured;
@@ -64,4 +67,30 @@ test("App Host action execution uses existing ActionHost port", async () => {
   assert.deepEqual(captured.values, { customer: "ACME", quantity: 3 });
   assert.equal(execution.result.ok, true);
   assert.deepEqual(execution.result.result, { businessDataId: "bd-1" });
+});
+
+
+test("App Host formats successful form action payloads without business-specific knowledge", () => {
+  assert.equal(
+    formatAppHostActionResultV010({ message: "Saved." }),
+    "Saved."
+  );
+  assert.equal(
+    formatAppHostActionResultV010({
+      businessDataId: "bd-1",
+      runtimeObservation: {
+        status: "OBSERVED",
+        metricCode: "event.count",
+        value: 1
+      }
+    }),
+    JSON.stringify({
+      businessDataId: "bd-1",
+      runtimeObservation: {
+        status: "OBSERVED",
+        metricCode: "event.count",
+        value: 1
+      }
+    }, null, 2)
+  );
 });
