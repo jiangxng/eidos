@@ -1,5 +1,6 @@
 import { renderToHtml } from "../renderers/html/index.js";
 import { renderCatalogBrowserToHtml } from "../catalog-browser/render.js";
+import { renderCatalogDetailToHtml } from "../catalog-detail/render.js";
 import { isChatExperienceV010, isChatExperienceV020, renderChatExperienceToHtml } from "../chat/index.js";
 import { isSettingsEditorV010, isSettingsEditorV020, renderSettingsEditorToHtml } from "../settings/index.js";
 import { isExtensionManagerV010, renderExtensionManagerToHtml } from "../extension-manager/index.js";
@@ -26,6 +27,12 @@ export function renderAppHostPageToHtml(
   if (definition?.kind === "catalog-browser") {
     return renderCatalogBrowserToHtml(
       localizedDefinition as import("../catalog-browser/contracts.js").CatalogBrowserV010
+    );
+  }
+
+  if (definition?.kind === "catalog-detail") {
+    return renderCatalogDetailToHtml(
+      localizedDefinition as import("../catalog-detail/contracts.js").CatalogDetailV010
     );
   }
 
