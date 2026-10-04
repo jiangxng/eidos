@@ -355,3 +355,32 @@ test("diagram workspace creates lazy selection inspection requests", () => {
     }
   );
 });
+
+
+test("Viewer-safe view interaction and directed edge metadata stay renderer-neutral", () => {
+  const viewerPage = {
+    contractVersion: "0.1.0",
+    kind: "diagram-workspace",
+    id: "viewer",
+    title: "Viewer",
+    resourceId: "graph:viewer",
+    readCommand: { code: "graph.read", inputVersion: "0.1.0" },
+    viewInteraction: {
+      zoom: true,
+      localNodeDrag: true
+    }
+  };
+  assert.equal(isDiagramEditorPageV010(viewerPage), true);
+
+  const directed = structuredClone(state);
+  directed.nodes[0].typeLabel = "Type A";
+  directed.nodes[1].typeLabel = "Type B";
+  directed.edges[0].arrow = "end";
+  assert.deepEqual(validateDiagramEditorStateV010(directed), {
+    ok: true,
+    issues: []
+  });
+
+  directed.edges[0].arrow = "sideways";
+  assert.equal(validateDiagramEditorStateV010(directed).ok, false);
+});
