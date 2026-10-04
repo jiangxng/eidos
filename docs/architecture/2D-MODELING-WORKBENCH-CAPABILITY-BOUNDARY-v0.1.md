@@ -41,12 +41,14 @@ Eidos 不内置具体企业对象。
 ```text
 Eidos Toolbox mechanism
         ↓
-EOG contributes:
+EOG contributes projection items for:
 - Application
 - Ledger
 - Organization
 - Product
 - ...
+
+For EOG specifically, these are references to already-authoritative enterprise/runtime objects. Eidos must not assume that dropping such an item creates the underlying domain object.
 ```
 
 ## 3. 第一阶段必须进入 Eidos Core 的能力
@@ -56,8 +58,12 @@ EOG contributes:
 - 从 Toolbox 拖拽图元到 Canvas；
 - 支持 drop preview；
 - 支持 drop 坐标；
-- Eidos 只生成 generic create intent；
-- 上层产品负责把 create intent 转成领域 mutation。
+- Eidos 只生成 generic create/projection intent；
+- 上层产品决定该 intent 的语义。
+
+For EOG:
+- drop intent → add an existing authoritative object reference to the current Graph projection;
+- it must **not** imply create Application / Ledger / PostingRule.
 
 ### 3.2 框选
 
@@ -258,3 +264,24 @@ EOG -> Eidos Icon/Visual seam
 6. Batch move / generic batch operation；
 7. guides/grid/distribution；
 8. undo/redo、copy/paste 等后续成熟能力。
+
+
+## 10. EOG consumer clarification
+
+This document defines a generic Eidos modeling workbench capability and does not make EOG an enterprise designer.
+
+For the EOG consumer:
+
+```text
+Eidos 2D Core
+= generic interaction/editing mechanics
+
+EOG 2D Designer
+= Projection Designer
+= edits Enterprise Graph Definition / View State
+
+EVO Runtime / Host authorities
+= own the underlying enterprise/runtime objects
+```
+
+Therefore a generic Eidos “create node” capability may mean “create a visual/projection node” when consumed by EOG. It does not prescribe creation of the referenced business object.
