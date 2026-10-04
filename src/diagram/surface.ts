@@ -765,7 +765,7 @@ export function mountDiagramEditorPageV010(
   const applyCameraTransform = (): void => {
     if (!stageElement) return;
     stageElement.style.transform =
-      `translate(${camera.translateX}px,${camera.translateY}px) scale(${camera.scale})`;
+      `matrix(${camera.scale},0,0,${camera.scale},${camera.translateX},${camera.translateY})`;
   };
 
   const graphBounds = (): {
@@ -1170,6 +1170,7 @@ export function mountDiagramEditorPageV010(
     svg.setAttribute("height", String(maxY));
     svg.style.position = "absolute";
     svg.style.inset = "0";
+    svg.style.overflow = "visible";
     svg.style.pointerEvents = "none";
 
     const defs = svgElement("defs");
@@ -1591,7 +1592,7 @@ export function mountDiagramEditorPageV010(
         };
       })();
       const factor = event.deltaY < 0 ? 1.12 : 1 / 1.12;
-      applyZoomAt(zoom * factor, anchor);
+      applyZoomAt(camera.scale * factor, anchor);
     };
     canvas.addEventListener("wheel", wheel, { passive: false });
     listeners.push(() => canvas.removeEventListener("wheel", wheel));
