@@ -705,7 +705,6 @@ export function mountDiagramEditorPageV010(
   const navigationPointers = new Map<number, { x: number; y: number }>();
   let panLast: { x: number; y: number } | undefined;
   let pinchStartDistance: number | undefined;
-  let pinchStartZoom = 1;
   let pinchLastDistance: number | undefined;
   let pinchLastMidpoint: { x: number; y: number } | undefined;
   const touchDragThresholdPx = 8;
@@ -1451,7 +1450,6 @@ export function mountDiagramEditorPageV010(
         canvas.style.cursor = page.viewInteraction?.pan ? "grabbing" : "";
       } else if (points.length >= 2 && page.viewInteraction?.zoom) {
         pinchStartDistance = Math.max(1, distance(points[0]!, points[1]!));
-        pinchStartZoom = zoom;
         pinchLastDistance = pinchStartDistance;
         pinchLastMidpoint = {
           x: (points[0]!.x + points[1]!.x) / 2,
@@ -1539,7 +1537,6 @@ export function mountDiagramEditorPageV010(
       const points = [...navigationPointers.values()];
       if (points.length < 2) {
         pinchStartDistance = undefined;
-        pinchStartZoom = zoom;
         pinchLastDistance = undefined;
         pinchLastMidpoint = undefined;
       }
