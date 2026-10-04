@@ -17,6 +17,7 @@ test("catalog browser renderer exposes semantic Eidos item/action markers", () =
     items: [{
       id: "demo",
       title: "Demo",
+      thumbnail: { src: "/assets/demo.png", alt: "Demo preview" },
       version: "1.0.0",
       status: { label: "Not installed", tone: "neutral" },
       primaryAction: { id: "install", label: "Install", requiresConfirmation: true }
@@ -24,6 +25,9 @@ test("catalog browser renderer exposes semantic Eidos item/action markers", () =
   });
   assert.match(html, /data-eidos-capability="catalog-browser"/);
   assert.match(html, /data-eidos-catalog-item="demo"/);
+  assert.match(html, /data-eidos-catalog-thumbnail/);
+  assert.match(html, /src="\/assets\/demo\.png"/);
+  assert.match(html, /alt="Demo preview"/);
   assert.match(html, /data-eidos-catalog-action="install"/);
 });
 
@@ -84,4 +88,19 @@ test("catalog browser may expose deterministic local search metadata", () => {
   assert.match(html, /data-eidos-catalog-search-text="[^"]*provider binding/);
   assert.match(html, /provider_resolution_ambiguous/i);
   assert.match(html, /data-eidos-catalog-search-empty/);
+});
+
+
+test("catalog browser rejects incomplete thumbnail metadata", () => {
+  assert.throws(() => renderCatalogBrowserToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-browser",
+    id: "thumbnail-invalid",
+    title: "Templates",
+    items: [{
+      id: "demo",
+      title: "Demo",
+      thumbnail: { src: "", alt: "Demo preview" }
+    }]
+  }), /EIDOS_CATALOG_ITEM_THUMBNAIL_INVALID/);
 });
