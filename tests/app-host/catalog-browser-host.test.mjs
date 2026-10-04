@@ -74,3 +74,43 @@ test("Catalog Browser renders secondary actions before the single trailing prima
   assert.match(html, /data-eidos-disabled-reason="Viewer required"/);
   assert.match(html, /data-eidos-action-help/);
 });
+
+
+test("App Host renders catalog-detail through the Eidos detail capability", () => {
+  const html = renderAppHostPageToHtml({
+    experienceId: "templates",
+    packageId: "templates",
+    featureId: "templates.default",
+    route: { id: "templates.detail", path: "/templates/detail", pageId: "templates.detail" },
+    page: { id: "templates.detail", source: "app://templates/detail" },
+    definition: {
+      contractVersion: "0.1.0",
+      kind: "catalog-detail",
+      id: "templates.detail",
+      itemId: "template:ledger",
+      title: "Ledger Runtime",
+      gallery: {
+        primaryItemId: "projection:main",
+        items: [{
+          id: "projection:main",
+          title: "Main projection",
+          thumbnail: { src: "/main.svg", alt: "Main" },
+          action: {
+            id: "preview",
+            label: "Preview",
+            type: "command",
+            command: "template.preview",
+            values: {
+              templateVersion: 3,
+              projectionId: "projection:main"
+            }
+          }
+        }]
+      }
+    }
+  });
+
+  assert.match(html, /data-eidos-capability="catalog-detail"/);
+  assert.match(html, /data-eidos-command="template\.preview"/);
+  assert.match(html, /data-eidos-action-values=/);
+});
