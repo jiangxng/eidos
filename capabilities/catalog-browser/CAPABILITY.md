@@ -20,6 +20,7 @@ Typical uses include:
 ## Inputs
 
 - catalog items;
+- optional item thumbnail image + accessible alt text;
 - item status;
 - human-readable metadata;
 - declared item actions;
@@ -43,6 +44,12 @@ It does **not** own:
 - dependency resolution.
 
 Those remain in the Host / App Platform / authoritative backend.
+
+## Thumbnail semantics
+
+A catalog item may provide an optional thumbnail for visual recognition. The thumbnail is presentation metadata only: it does not become catalog truth, template content, package content, or lifecycle state. The Host/owning application remains responsible for supplying the resolved thumbnail source.
+
+The renderer requires non-empty `src` and `alt` values and emits semantic `data-eidos-catalog-thumbnail` markup.
 
 ## Action semantics
 
