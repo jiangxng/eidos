@@ -88,3 +88,57 @@ test("Catalog Detail rejects a missing primary gallery item", () => {
     }
   }), /EIDOS_CATALOG_DETAIL_PRIMARY_MEDIA_NOT_FOUND/);
 });
+
+
+test("Catalog Detail renders same-origin native download actions", () => {
+  const html = renderCatalogDetailToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-detail",
+    id: "template-detail-download",
+    itemId: "template:ledger",
+    title: "Ledger Runtime",
+    gallery: {
+      primaryItemId: "projection:main",
+      items: [{
+        id: "projection:main",
+        title: "Main",
+        thumbnail: { src: "/main.svg", alt: "Main" }
+      }]
+    },
+    secondaryActions: [{
+      id: "download",
+      label: "Download",
+      type: "download",
+      href: "/v1/templates/download?id=template%3Aledger&version=3",
+      downloadFileName: "ledger-v3.evo-template.json"
+    }]
+  });
+
+  assert.match(html, /data-eidos-catalog-download="download"/);
+  assert.match(html, /href="\/v1\/templates\/download\?id=template%3Aledger&amp;version=3"/);
+  assert.match(html, /download="ledger-v3\.evo-template\.json"/);
+});
+
+test("Catalog Detail refuses cross-origin download hrefs", () => {
+  assert.throws(() => renderCatalogDetailToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-detail",
+    id: "unsafe-download",
+    itemId: "template:ledger",
+    title: "Ledger Runtime",
+    gallery: {
+      primaryItemId: "projection:main",
+      items: [{
+        id: "projection:main",
+        title: "Main",
+        thumbnail: { src: "/main.svg", alt: "Main" }
+      }]
+    },
+    secondaryActions: [{
+      id: "download",
+      label: "Download",
+      type: "download",
+      href: "https://example.invalid/file.json"
+    }]
+  }), /EIDOS_CATALOG_DOWNLOAD_HREF_INVALID/);
+});
