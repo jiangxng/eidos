@@ -58,3 +58,15 @@ test("productive design language includes a first-class Review / Decision patter
     /button\[data-eidos-primary="true"\][^{]*\{[\s\S]*margin-left:auto/
   );
 });
+
+
+test("Catalog Browser follows Eidos trailing-primary and disabled-help styling", () => {
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-catalog-item\] \[data-eidos-action-help\]/
+  );
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-catalog-item\] button:disabled/
+  );
+});
