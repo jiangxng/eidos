@@ -31,3 +31,46 @@ test("App Host renders catalog-browser through the Eidos catalog capability", ()
   assert.match(html, /data-eidos-command="app-platform\.plan-install"/);
   assert.match(html, /data-eidos-item-id="ledger-configurator"/);
 });
+
+
+test("Catalog Browser renders secondary actions before the single trailing primary action", () => {
+  const html = renderAppHostPageToHtml({
+    experienceId: "templates",
+    packageId: "templates",
+    featureId: "templates.default",
+    route: { id: "templates.home", path: "/templates", pageId: "templates.home" },
+    page: { id: "templates.home", source: "app://templates/home" },
+    definition: {
+      contractVersion: "0.1.0",
+      kind: "catalog-browser",
+      id: "templates",
+      title: "Templates",
+      items: [{
+        id: "baseline",
+        title: "Baseline",
+        primaryAction: {
+          id: "use",
+          label: "Use template",
+          type: "command",
+          command: "template.use"
+        },
+        secondaryActions: [{
+          id: "preview",
+          label: "Preview",
+          type: "command",
+          command: "template.preview",
+          enabled: false,
+          disabledReason: "Viewer required",
+          helpText: "Install Viewer to preview."
+        }]
+      }]
+    }
+  });
+
+  assert.ok(
+    html.indexOf('data-eidos-catalog-action="preview"')
+      < html.indexOf('data-eidos-catalog-action="use"')
+  );
+  assert.match(html, /data-eidos-disabled-reason="Viewer required"/);
+  assert.match(html, /data-eidos-action-help/);
+});
