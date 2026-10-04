@@ -706,6 +706,9 @@ export function mountDiagramEditorPageV010(
   let panLast: { x: number; y: number } | undefined;
   let pinchStartDistance: number | undefined;
   let pinchStartZoom = 1;
+  let pinchLastDistance: number | undefined;
+  let pinchLastMidpoint: { x: number; y: number } | undefined;
+  const touchDragThresholdPx = 8;
   const listeners: Array<() => void> = [];
 
   const report = (message: string): void => {
@@ -1332,15 +1335,24 @@ export function mountDiagramEditorPageV010(
               return;
             }
             if (cancelledByNavigation) return;
+            const screenDeltaX = move.clientX - startX;
+            const screenDeltaY = move.clientY - startY;
+            if (
+              isTouch
+              && !moved
+              && Math.hypot(screenDeltaX, screenDeltaY) < touchDragThresholdPx
+            ) {
+              return;
+            }
             const nextX = Math.max(
               0,
-              originalX + (move.clientX - startX) / zoom
+              originalX + screenDeltaX / zoom
             );
             const nextY = Math.max(
               0,
-              originalY + (move.clientY - startY) / zoom
+              originalY + screenDeltaY / zoom
             );
-            moved = moved || Math.abs(nextX - originalX) > 1 || Math.abs(nextY - originalY) > 1;
+            moved = true;
             element.style.left = nextX + "px";
             element.style.top = nextY + "px";
           };
@@ -1440,6 +1452,11 @@ export function mountDiagramEditorPageV010(
       } else if (points.length >= 2 && page.viewInteraction?.zoom) {
         pinchStartDistance = Math.max(1, distance(points[0]!, points[1]!));
         pinchStartZoom = zoom;
+        pinchLastDistance = pinchStartDistance;
+        pinchLastMidpoint = {
+          x: (points[0]!.x + points[1]!.x) / 2,
+          y: (points[0]!.y + points[1]!.y) / 2
+        };
         panLast = undefined;
       }
     };
@@ -1463,10 +1480,33 @@ export function mountDiagramEditorPageV010(
           x: (points[0]!.x + points[1]!.x) / 2,
           y: (points[0]!.y + points[1]!.y) / 2
         };
+        if (pinchLastMidpoint && page.viewInteraction?.pan) {
+          const next = panDiagramViewportByScreenDeltaV010(
+            {
+              scale: zoom,
+              scrollLeft: canvas.scrollLeft,
+              scrollTop: canvas.scrollTop
+            },
+            {
+              x: midpoint.x - pinchLastMidpoint.x,
+              y: midpoint.y - pinchLastMidpoint.y
+            }
+          );
+          canvas.scrollTo({
+            left: next.scrollLeft,
+            top: next.scrollTop
+          });
+        }
+        const previousDistance = Math.max(
+          1,
+          pinchLastDistance ?? pinchStartDistance
+        );
         applyZoomAt(
-          pinchStartZoom * currentDistance / pinchStartDistance,
+          zoom * currentDistance / previousDistance,
           canvasPoint(midpoint.x, midpoint.y)
         );
+        pinchLastDistance = currentDistance;
+        pinchLastMidpoint = midpoint;
         return;
       }
 
@@ -1500,6 +1540,8 @@ export function mountDiagramEditorPageV010(
       if (points.length < 2) {
         pinchStartDistance = undefined;
         pinchStartZoom = zoom;
+        pinchLastDistance = undefined;
+        pinchLastMidpoint = undefined;
       }
       panLast = points.length === 1 ? points[0] : undefined;
       if (points.length === 0) {
@@ -1511,11 +1553,24 @@ export function mountDiagramEditorPageV010(
     canvas.addEventListener("pointermove", pointerMove);
     canvas.addEventListener("pointerup", pointerUp);
     canvas.addEventListener("pointercancel", pointerUp);
+    const lostPointerCapture = (event: PointerEvent) => {
+      if (!navigationPointers.has(event.pointerId)) return;
+      navigationPointers.delete(event.pointerId);
+      const points = [...navigationPointers.values()];
+      if (points.length < 2) {
+        pinchStartDistance = undefined;
+        pinchLastDistance = undefined;
+        pinchLastMidpoint = undefined;
+      }
+      panLast = points.length === 1 ? points[0] : undefined;
+    };
+    canvas.addEventListener("lostpointercapture", lostPointerCapture);
     listeners.push(
       () => canvas.removeEventListener("pointerdown", pointerDown),
       () => canvas.removeEventListener("pointermove", pointerMove),
       () => canvas.removeEventListener("pointerup", pointerUp),
-      () => canvas.removeEventListener("pointercancel", pointerUp)
+      () => canvas.removeEventListener("pointercancel", pointerUp),
+      () => canvas.removeEventListener("lostpointercapture", lostPointerCapture)
     );
   }
 
