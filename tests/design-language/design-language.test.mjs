@@ -5,7 +5,8 @@ import {
   eidosDesignTokensV010,
   eidosDesignTokenCss,
   eidosProductiveWorkbenchCss,
-  eidosDesignPolicyV010
+  eidosDesignPolicyV010,
+  eidosMobileDesignLanguageV010
 } from "../../dist/design-language/index.js";
 
 test("design language uses a productive 4px-derived rhythm and mobile touch target", () => {
@@ -68,5 +69,38 @@ test("Catalog Browser follows Eidos trailing-primary and disabled-help styling",
   assert.match(
     eidosProductiveWorkbenchCss,
     /data-eidos-catalog-item\] button:disabled/
+  );
+});
+
+
+test("mobile design language is a normative plugin contract", () => {
+  assert.equal(eidosMobileDesignLanguageV010.contractVersion, "0.1.0");
+  assert.equal(eidosMobileDesignLanguageV010.navigation.primaryPlacement, "bottom");
+  assert.equal(eidosMobileDesignLanguageV010.content.primaryFlow, "single-column");
+  assert.equal(eidosMobileDesignLanguageV010.interaction, undefined);
+  assert.equal(eidosMobileDesignLanguageV010.plugin.customMobileShellForbidden, true);
+  assert.equal(eidosMobileDesignLanguageV010.plugin.customBreakpointForbidden, true);
+  assert.equal(eidosMobileDesignLanguageV010.accessibility.touchTargetMinimumPx, 44);
+  assert.equal(eidosDesignPolicyV010.mobile.normativeReference, "Eidos Mobile Design Language v0.1");
+  assert.equal(eidosDesignPolicyV010.plugin.inheritResponsiveRealization, true);
+  assert.ok(eidosDesignPolicyV010.plugin.forbiddenByDefault.includes("custom-mobile-shell"));
+});
+
+test("productive Workbench realizes phone navigation, safe areas and mobile sheets", () => {
+  assert.match(eidosDesignTokenCss, /--eidos-mobile-nav-height:56px/);
+  assert.match(eidosDesignTokenCss, /--eidos-safe-area-bottom:env\(safe-area-inset-bottom,0px\)/);
+  assert.match(eidosProductiveWorkbenchCss, /Eidos Mobile Design Language v0\.1 reference realization/);
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-activity-bar\][\s\S]*grid-row:2[\s\S]*flex-direction:row/
+  );
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-status-bar\]\{display:none\}/);
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-account-menu\][\s\S]*position:fixed[\s\S]*bottom:calc/
+  );
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-catalog-detail-thumbnails\][\s\S]*overflow-x:auto[\s\S]*scroll-snap-type/
   );
 });
