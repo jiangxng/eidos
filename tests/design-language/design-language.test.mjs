@@ -6,7 +6,9 @@ import {
   eidosDesignTokenCss,
   eidosProductiveWorkbenchCss,
   eidosDesignPolicyV010,
-  eidosMobileDesignLanguageV010
+  eidosMobileDesignLanguageV010,
+  eidosTextScalePreferencesV010,
+  normalizeEidosTextScalePreferenceV010
 } from "../../dist/design-language/index.js";
 
 test("design language uses a productive 4px-derived rhythm and mobile touch target", () => {
@@ -15,6 +17,7 @@ test("design language uses a productive 4px-derived rhythm and mobile touch targ
   assert.equal(eidosDesignTokensV010.spacing.md, 8);
   assert.equal(eidosDesignTokensV010.size.activityBarDesktop, 48);
   assert.equal(eidosDesignTokensV010.size.touchTarget, 44);
+  assert.equal(eidosDesignTokensV010.type.unit, "rem");
 });
 
 test("productive Workbench CSS exposes stable semantic tokens and shell selectors", () => {
@@ -103,4 +106,32 @@ test("productive Workbench realizes phone navigation, safe areas and mobile shee
     eidosProductiveWorkbenchCss,
     /data-eidos-catalog-detail-thumbnails\][\s\S]*overflow-x:auto[\s\S]*scroll-snap-type/
   );
+});
+
+
+test("system text scaling is part of the mobile contract", () => {
+  assert.equal(eidosMobileDesignLanguageV010.typography.preferenceAuthority, "os-and-user-agent");
+  assert.equal(eidosMobileDesignLanguageV010.typography.defaultPreference, "system");
+  assert.deepEqual(eidosMobileDesignLanguageV010.typography.userScalePresets, ["system", "small", "standard", "large"]);
+  assert.equal(eidosMobileDesignLanguageV010.typography.userScaleComposesWithSystem, true);
+  assert.equal(eidosMobileDesignLanguageV010.typography.fixedPixelFontSizesForbidden, true);
+  assert.equal(eidosDesignPolicyV010.accessibility.systemTextScaleRequired, true);
+  assert.equal(eidosDesignPolicyV010.typography.sizing, "root-relative");
+  assert.match(eidosDesignTokenCss, /--eidos-font-body:\.875rem/);
+  assert.match(eidosProductiveWorkbenchCss, /html\{font-size:100%;-webkit-text-size-adjust:auto;text-size-adjust:auto\}/);
+  assert.doesNotMatch(eidosProductiveWorkbenchCss, /font-size:\s*\d+(?:\.\d+)?px/);
+});
+
+
+test("text scale presets compose with system preference", () => {
+  assert.deepEqual(
+    eidosTextScalePreferencesV010.map(item => [item.id, item.additionalScale]),
+    [["system", 1], ["small", 0.9], ["standard", 1], ["large", 1.15]]
+  );
+  assert.equal(normalizeEidosTextScalePreferenceV010("large"), "large");
+  assert.equal(normalizeEidosTextScalePreferenceV010("unknown"), "system");
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale="small"\]\{font-size:90%\}/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale="standard"\]\{font-size:100%\}/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale="large"\]\{font-size:115%\}/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale-control/);
 });
