@@ -50,3 +50,7 @@
 - **EIDOS-42** 2D/3D presentation state (layout, viewport, pose, camera, selection) is not authoritative business/domain truth. Presentation changes MUST NOT manufacture domain revisions unless an owning product explicitly defines and executes such a business operation outside Eidos.
 - **EIDOS-43** Renderer implementations are replaceable behind stable 2D/3D contracts. SVG/DOM, Three.js, WebGL, WebGPU or future renderer objects MUST NOT become public product-state authority.
 - **EIDOS-44** Existing `src/diagram/**` and `src/spatial/**` APIs are compatibility assets during 2D/3D convergence; migration MUST prefer public aliases/adapters and regression proof over unnecessary rewrites.
+
+
+- **EIDOS-45** Phone realization is governed by the Eidos Mobile Design Language. Plugins and Host products MUST reuse the same semantic Experience contracts across desktop/tablet/phone and MUST NOT introduce private mobile shells, breakpoint systems, spacing systems, or device-specific business semantics.
+- **EIDOS-46** Phone layouts prioritize one primary task surface, bottom primary navigation, compact global context chrome, single-column content flow, safe-area-aware bottom chrome, and Eidos minimum touch targets. When a standard Eidos capability cannot express a required mobile interaction, the reusable Eidos capability MUST be extended before a plugin ships a private workaround.
