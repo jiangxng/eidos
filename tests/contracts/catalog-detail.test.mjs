@@ -142,3 +142,38 @@ test("Catalog Detail refuses cross-origin download hrefs", () => {
     }]
   }), /EIDOS_CATALOG_DOWNLOAD_HREF_INVALID/);
 });
+
+
+test("Catalog Detail gallery items may expose a separate secondary action without replacing thumbnail open behavior", () => {
+  const html = renderCatalogDetailToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-detail",
+    id: "projection-gallery",
+    itemId: "software:runtime",
+    title: "Enterprise Software",
+    gallery: {
+      primaryItemId: "projection:main",
+      items: [{
+        id: "projection:main",
+        title: "Main",
+        thumbnail: { src: "/main.svg", alt: "Main" },
+        action: {
+          id: "view-main",
+          label: "View",
+          type: "command",
+          command: "projection.view"
+        },
+        secondaryActions: [{
+          id: "edit-main",
+          label: "Edit projection",
+          type: "command",
+          command: "projection.edit"
+        }]
+      }]
+    }
+  });
+
+  assert.match(html, /data-eidos-command="projection\.view"/);
+  assert.match(html, /data-eidos-command="projection\.edit"/);
+  assert.match(html, /data-eidos-catalog-detail-media-actions/);
+});
