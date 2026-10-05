@@ -76,3 +76,12 @@ test("Workbench explicit URL/deep link wins over Host default and persisted layo
     "/ledger-runtime-configurator"
   );
 });
+
+test("Workbench shell exposes a generic global-control mount without domain semantics", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/workbench/shell.ts", import.meta.url), "utf8")
+  );
+  assert.match(source, /mountGlobalControls\?:/);
+  assert.match(source, /data-eidos-global-controls/);
+  assert.doesNotMatch(source, /enterpriseId|subjectId/);
+});
