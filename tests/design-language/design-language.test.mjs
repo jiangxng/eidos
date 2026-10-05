@@ -133,4 +133,5 @@ test("text scale presets compose with system preference", () => {
   assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale="small"\]\{font-size:90%\}/);
   assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale="standard"\]\{font-size:100%\}/);
   assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale="large"\]\{font-size:115%\}/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale-control/);
 });
