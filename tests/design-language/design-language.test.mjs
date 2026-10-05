@@ -15,7 +15,7 @@ test("design language uses a productive 4px-derived rhythm and mobile touch targ
   assert.equal(eidosDesignTokensV010.contractVersion, "0.1.0");
   assert.equal(eidosDesignTokensV010.spacing.xs, 4);
   assert.equal(eidosDesignTokensV010.spacing.md, 8);
-  assert.equal(eidosDesignTokensV010.size.activityBarDesktop, 48);
+  assert.equal(eidosDesignTokensV010.size.activityBarDesktop, 56);
   assert.equal(eidosDesignTokensV010.size.touchTarget, 44);
   assert.equal(eidosDesignTokensV010.type.unit, "rem");
 });
@@ -90,7 +90,7 @@ test("mobile design language is a normative plugin contract", () => {
 });
 
 test("productive Workbench realizes phone navigation, safe areas and mobile sheets", () => {
-  assert.match(eidosDesignTokenCss, /--eidos-mobile-nav-height:56px/);
+  assert.match(eidosDesignTokenCss, /--eidos-mobile-nav-height:64px/);
   assert.match(eidosDesignTokenCss, /--eidos-safe-area-bottom:env\(safe-area-inset-bottom,0px\)/);
   assert.match(eidosProductiveWorkbenchCss, /Eidos Mobile Design Language v0\.1 reference realization/);
   assert.match(
@@ -134,4 +134,22 @@ test("text scale presets compose with system preference", () => {
   assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale="standard"\]\{font-size:100%\}/);
   assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale="large"\]\{font-size:115%\}/);
   assert.match(eidosProductiveWorkbenchCss, /data-eidos-text-scale-control/);
+});
+
+
+test("business-office visual revision replaces developer-console defaults", () => {
+  assert.equal(eidosDesignTokensV010.visualRevision, "0.2.0");
+  assert.equal(eidosDesignPolicyV010.visualRevision, "0.2.0");
+  assert.equal(eidosDesignPolicyV010.visualLanguage.developerConsoleAsDefault, false);
+  assert.equal(eidosDesignPolicyV010.workbench.statusBar.defaultVisibility, "hidden");
+  assert.equal(eidosDesignPolicyV010.workbench.workspace.internalRouteAddress, "hidden-by-default");
+  assert.equal(eidosDesignPolicyV010.mobile.primaryNavigationLabels, "visible");
+  assert.equal(eidosDesignTokensV010.color.brand, "#2B6CB0");
+  assert.equal(eidosDesignTokensV010.icon.standardMode, "monochrome");
+  assert.match(eidosDesignTokenCss, /--eidos-bg-selected:#EAF2FB/);
+  assert.match(eidosDesignTokenCss, /--eidos-shadow-raised:/);
+  assert.match(eidosProductiveWorkbenchCss, /Eidos Business Office Visual Language v0\.2/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-workspace-mode="app"/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-activity-label/);
+  assert.match(eidosProductiveWorkbenchCss, /font-family:var\(--eidos-font-family\)/);
 });
