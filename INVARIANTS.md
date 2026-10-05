@@ -54,3 +54,5 @@
 
 - **EIDOS-45** Phone realization is governed by the Eidos Mobile Design Language. Plugins and Host products MUST reuse the same semantic Experience contracts across desktop/tablet/phone and MUST NOT introduce private mobile shells, breakpoint systems, spacing systems, or device-specific business semantics.
 - **EIDOS-46** Phone layouts prioritize one primary task surface, bottom primary navigation, compact global context chrome, single-column content flow, safe-area-aware bottom chrome, and Eidos minimum touch targets. When a standard Eidos capability cannot express a required mobile interaction, the reusable Eidos capability MUST be extended before a plugin ships a private workaround.
+
+- **EIDOS-47** Eidos typography MUST respect operating-system and user-agent text-size preferences when supported. Standard typography uses root-relative sizing, Host documents opt in to system text scaling, and plugins MUST NOT defeat that behavior with fixed-pixel ordinary UI font sizes. Large text reflows; it must not reduce minimum touch targets or silently clip required content.
