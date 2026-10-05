@@ -23,7 +23,7 @@ Plugins MUST NOT create a parallel mobile shell, private breakpoint system, priv
 
 - Phone text follows the operating-system and browser text-size preference where the platform exposes it.
 - Hosts opt in to standards-based system text scaling; Eidos typography uses root-relative units rather than fixed pixel font sizes.
-- Eidos does not require a separate product font-size setting in v0.1.
+- The default preference is **Follow system**. Users may additionally choose **Small (90%)**, **Standard (100%)**, or **Large (115%)**; these are Eidos multipliers layered on top of the system/browser text preference rather than replacements for it.
 - Larger system text must reflow the interface instead of clipping labels, hiding actions or shrinking touch targets.
 - Plugins MUST NOT set ordinary UI typography with fixed pixel font sizes or override the system text-scale behavior.
 
