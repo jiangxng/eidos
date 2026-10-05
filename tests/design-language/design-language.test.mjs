@@ -77,7 +77,7 @@ test("mobile design language is a normative plugin contract", () => {
   assert.equal(eidosMobileDesignLanguageV010.contractVersion, "0.1.0");
   assert.equal(eidosMobileDesignLanguageV010.navigation.primaryPlacement, "bottom");
   assert.equal(eidosMobileDesignLanguageV010.content.primaryFlow, "single-column");
-  assert.equal(eidosMobileDesignLanguageV010.interaction, undefined);
+  assert.equal(eidosMobileDesignLanguageV010.navigation.destinationTouchTargetPx, 44);
   assert.equal(eidosMobileDesignLanguageV010.plugin.customMobileShellForbidden, true);
   assert.equal(eidosMobileDesignLanguageV010.plugin.customBreakpointForbidden, true);
   assert.equal(eidosMobileDesignLanguageV010.accessibility.touchTargetMinimumPx, 44);
