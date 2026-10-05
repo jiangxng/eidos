@@ -34,3 +34,12 @@ test("SVG rendering is self-contained and uses Eidos semantic attributes", () =>
   assert.match(svg, /aria-hidden="true"/);
   assert.doesNotMatch(svg, /fontawesome|codicon|material|heroicon/i);
 });
+
+
+test("business-office icon language is monochrome and visually stronger", () => {
+  assert.equal(eidosIconSystemMetadataV010.designLanguage, "business-calm-approachable-productive");
+  assert.equal(eidosIconSystemMetadataV010.standardUiColorMode, "monochrome");
+  assert.equal(eidosIconSystemMetadataV010.selectedStateTone, "brand");
+  const svg = renderEidosIconToSvg("dashboard", { size: 20 });
+  assert.match(svg, /stroke-width="2"/);
+});
