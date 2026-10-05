@@ -177,3 +177,148 @@ test("Catalog Detail gallery items may expose a separate secondary action withou
   assert.match(html, /data-eidos-command="projection\.edit"/);
   assert.match(html, /data-eidos-catalog-detail-media-actions/);
 });
+
+
+test("Catalog Detail supports a nine-item interactive projection gallery", () => {
+  const items = Array.from({ length: 9 }, (_, index) => ({
+    id: `projection:${index + 1}`,
+    title: index === 0 ? "Main" : `View ${index + 1}`,
+    thumbnail: {
+      src: `/projection-${index + 1}.svg`,
+      alt: `Projection ${index + 1}`
+    },
+    action: {
+      id: `view-${index + 1}`,
+      label: `Open view ${index + 1}`,
+      type: "command",
+      command: "projection.view",
+      values: {
+        projectionId: `projection:${index + 1}`
+      }
+    }
+  }));
+
+  const html = renderCatalogDetailToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-detail",
+    id: "template-projection-gallery",
+    itemId: "template:manufacturing",
+    title: "Manufacturing Template",
+    gallery: {
+      primaryItemId: "projection:1",
+      maxItems: 9,
+      requireItemActions: true,
+      items
+    }
+  });
+
+  assert.equal(
+    (html.match(/data-eidos-catalog-detail-media="thumbnail"/g) ?? []).length,
+    9
+  );
+  assert.equal(
+    (html.match(/data-eidos-command="projection\.view"/g) ?? []).length,
+    10
+  );
+});
+
+test("Catalog Detail rejects projection galleries above the declared limit", () => {
+  assert.throws(() => renderCatalogDetailToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-detail",
+    id: "too-many-projections",
+    itemId: "template:manufacturing",
+    title: "Manufacturing Template",
+    gallery: {
+      primaryItemId: "projection:1",
+      maxItems: 9,
+      items: Array.from({ length: 10 }, (_, index) => ({
+        id: `projection:${index + 1}`,
+        title: `Projection ${index + 1}`,
+        thumbnail: {
+          src: `/projection-${index + 1}.svg`,
+          alt: `Projection ${index + 1}`
+        }
+      }))
+    }
+  }), /EIDOS_CATALOG_DETAIL_GALLERY_LIMIT_INVALID/);
+});
+
+test("Catalog Detail can require every projection thumbnail to open a viewer", () => {
+  assert.throws(() => renderCatalogDetailToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-detail",
+    id: "non-interactive-projection",
+    itemId: "template:manufacturing",
+    title: "Manufacturing Template",
+    gallery: {
+      primaryItemId: "projection:main",
+      maxItems: 9,
+      requireItemActions: true,
+      items: [{
+        id: "projection:main",
+        title: "Main",
+        thumbnail: { src: "/main.svg", alt: "Main" }
+      }]
+    }
+  }), /EIDOS_CATALOG_DETAIL_GALLERY_ITEM_ACTION_REQUIRED/);
+});
+
+test("Catalog Detail exposes download, edit, create-version and share lifecycle actions together", () => {
+  const html = renderCatalogDetailToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-detail",
+    id: "template-lifecycle",
+    itemId: "template:manufacturing",
+    title: "Manufacturing Template",
+    gallery: {
+      primaryItemId: "projection:main",
+      maxItems: 9,
+      requireItemActions: true,
+      items: [{
+        id: "projection:main",
+        title: "Main",
+        thumbnail: { src: "/main.svg", alt: "Main" },
+        action: {
+          id: "view-main",
+          label: "View",
+          type: "command",
+          command: "projection.view"
+        },
+        secondaryActions: [{
+          id: "edit-main",
+          label: "Edit projection",
+          type: "command",
+          command: "projection.edit"
+        }]
+      }]
+    },
+    secondaryActions: [{
+      id: "download",
+      label: "Download",
+      type: "download",
+      href: "/v1/templates/download?id=template%3Amanufacturing"
+    }, {
+      id: "edit",
+      label: "Edit",
+      type: "command",
+      command: "template.edit"
+    }, {
+      id: "create-version",
+      label: "Create version",
+      type: "command",
+      command: "template.version.create"
+    }, {
+      id: "share",
+      label: "Share",
+      type: "command",
+      command: "template.share"
+    }]
+  });
+
+  assert.match(html, /data-eidos-catalog-download="download"/);
+  assert.match(html, /data-eidos-command="template\.edit"/);
+  assert.match(html, /data-eidos-command="template\.version\.create"/);
+  assert.match(html, /data-eidos-command="template\.share"/);
+  assert.match(html, /data-eidos-command="projection\.edit"/);
+});
