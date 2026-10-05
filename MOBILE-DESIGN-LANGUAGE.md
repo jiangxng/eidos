@@ -19,6 +19,14 @@ Plugins MUST NOT create a parallel mobile shell, private breakpoint system, priv
 - Status information that is useful but non-essential must not consume permanent phone viewport space.
 - Content flows as a single column unless a capability explicitly requires spatial presentation.
 
+## Typography and system text scale
+
+- Phone text follows the operating-system and browser text-size preference where the platform exposes it.
+- Hosts opt in to standards-based system text scaling; Eidos typography uses root-relative units rather than fixed pixel font sizes.
+- Eidos does not require a separate product font-size setting in v0.1.
+- Larger system text must reflow the interface instead of clipping labels, hiding actions or shrinking touch targets.
+- Plugins MUST NOT set ordinary UI typography with fixed pixel font sizes or override the system text-scale behavior.
+
 ## Interaction
 
 - Minimum interactive target: 44px.
