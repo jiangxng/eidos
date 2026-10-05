@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-test("Workbench public contracts support VS Code-style activity semantics", async () => {
+test("Workbench public contracts support stable activity semantics", async () => {
   const module = await import("../../dist/workbench/index.js");
   assert.equal(typeof module.mountWorkbenchShell, "function");
   assert.equal(typeof module.createBrowserWorkbenchLayoutStateStore, "function");
@@ -84,4 +84,14 @@ test("Workbench shell exposes a generic global-control mount without domain sema
   assert.match(source, /mountGlobalControls\?:/);
   assert.match(source, /data-eidos-global-controls/);
   assert.doesNotMatch(source, /enterpriseId|subjectId/);
+});
+
+
+test("business Workbench exposes workspace mode and visible mobile activity labels", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/workbench/shell.ts", import.meta.url), "utf8")
+  );
+  assert.match(source, /data-eidos-workspace-mode/);
+  assert.match(source, /data-eidos-activity-label/);
+  assert.match(source, /root\.setAttribute\("data-eidos-workspace-mode", workspaceMode\)/);
 });
