@@ -10,15 +10,19 @@ The Eidos Icon System is the canonical icon language for Workbench and standard 
 
 It is part of the Eidos Productive Design Language, not a third-party icon-library dependency.
 
+## Business Office v0.2 visual revision
+
+Standard UI icons are monochrome by default. Selected navigation/action state may apply the Eidos brand tone. Multi-color treatment is reserved for separately governed application/domain/product identity. The default stroke is 2px for clearer office-product legibility across desktop and mobile.
+
 ## Character
 
 Icons follow the same Productive / Quiet / Precise character as the rest of Eidos:
 
 - simple 24×24 coordinate system;
-- consistent 1.8px stroke language;
+- consistent rounded 2px stroke language;
 - rounded line caps and joins;
 - restrained geometry;
-- one optional Eidos accent detail;
+- semantic geometry remains simple; decorative accent fragments do not color ordinary system icons;
 - legible at 16 / 20 / 24px;
 - semantic names rather than raw SVG ownership in plugins.
 

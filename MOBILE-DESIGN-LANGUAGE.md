@@ -2,7 +2,7 @@
 
 Status: **Normative baseline**
 
-Mobile is a first-class realization of the same Eidos Experience semantics. It is not a reduced desktop page and it is not a separate plugin UI system.
+Mobile is a first-class realization of the same Eidos Experience semantics. Its current visual realization also follows `docs/product/EIDOS-BUSINESS-OFFICE-VISUAL-LANGUAGE-v0.2.md`. It is not a reduced desktop page and it is not a separate plugin UI system.
 
 ## Core rule
 
@@ -13,7 +13,7 @@ Plugins MUST NOT create a parallel mobile shell, private breakpoint system, priv
 ## Phone information architecture
 
 - One primary task surface at a time.
-- Primary destinations use bottom navigation; desktop side rails do not survive onto phone.
+- Primary destinations use bottom navigation with a visible short icon label; desktop side rails do not survive onto phone.
 - Secondary context replaces the current surface or appears as an overlay/sheet instead of permanently consuming width.
 - Global session context remains compact top chrome.
 - Status information that is useful but non-essential must not consume permanent phone viewport space.

@@ -56,3 +56,8 @@
 - **EIDOS-46** Phone layouts prioritize one primary task surface, bottom primary navigation, compact global context chrome, single-column content flow, safe-area-aware bottom chrome, and Eidos minimum touch targets. When a standard Eidos capability cannot express a required mobile interaction, the reusable Eidos capability MUST be extended before a plugin ships a private workaround.
 
 - **EIDOS-47** Eidos typography MUST respect operating-system and user-agent text-size preferences when supported. `system` is the default user preference; optional `small`, `standard`, and `large` presets are additional Eidos scale multipliers layered on top of the system/browser preference. Standard typography uses root-relative sizing, and plugins MUST NOT defeat that behavior with fixed-pixel ordinary UI font sizes. Large text reflows; it must not reduce minimum touch targets or silently clip required content.
+
+
+- **EIDOS-48** Standard Eidos product UI follows the Business Office visual language: calm business content dominates, neutral surfaces establish hierarchy, brand color is reserved for selection/focus/primary action, and technical/developer chrome is progressively disclosed rather than presented as the default product personality.
+- **EIDOS-49** Standard Eidos system icons are monochrome by default and use governed brand tone for selected/emphasized state. Multi-color identity belongs to separately governed application/domain/product identity and MUST NOT leak into ordinary control semantics.
+- **EIDOS-50** Internal App Host routes MUST NOT require a browser-like address bar or permanent technical status bar in normal business use. Such technical navigation/status chrome may remain available only in explicit web, diagnostic or advanced contexts.
