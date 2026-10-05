@@ -340,13 +340,6 @@ export async function mountWorkbenchShell(
 
   const sideFooter = document.createElement("footer");
   sideFooter.setAttribute("data-eidos-side-panel-footer", "");
-  const localeWrap = document.createElement("label");
-  localeWrap.setAttribute("data-eidos-locale-control", "");
-  const localeLabel = document.createElement("span");
-  const localeSelect = document.createElement("select");
-  localeSelect.setAttribute("data-eidos-locale", "");
-  localeWrap.append(localeLabel, localeSelect);
-  if (localization) sideFooter.append(localeWrap);
 
   sidePanel.append(sideHeader, sideContent, sideFooter);
 
@@ -374,7 +367,23 @@ export async function mountWorkbenchShell(
   const browserExternal = document.createElement("button");
   browserExternal.type = "button";
   browserExternal.setAttribute("data-eidos-browser-external", "");
-  browserToolbar.append(browserAddress, browserGo, browserExternal);
+
+  const globalControls = document.createElement("div");
+  globalControls.setAttribute("data-eidos-global-controls", "");
+  const localeWrap = document.createElement("label");
+  localeWrap.setAttribute("data-eidos-locale-control", "");
+  const localeLabel = document.createElement("span");
+  const localeSelect = document.createElement("select");
+  localeSelect.setAttribute("data-eidos-locale", "");
+  localeWrap.append(localeLabel, localeSelect);
+  if (localization) globalControls.append(localeWrap);
+
+  browserToolbar.append(
+    browserAddress,
+    browserGo,
+    browserExternal,
+    globalControls
+  );
 
   const workspaceContent = document.createElement("div");
   workspaceContent.setAttribute("data-eidos-workspace-content", "");
