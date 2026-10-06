@@ -1297,7 +1297,7 @@ export function mountDiagramEditorPageV010(
     selectionInspection = undefined;
     selectionReadGeneration += 1;
     render();
-    canvas.focus({ preventScroll: true });
+    canvas?.focus({ preventScroll: true });
   }
 
   function hideSelectedFromView(): void {
