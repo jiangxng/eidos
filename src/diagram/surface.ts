@@ -119,6 +119,7 @@ export interface DiagramEditorPageV010 {
   toolbarActions?: DiagramEditorToolbarActionV010[];
   initialCamera?: DiagramCameraTransformV010;
   viewInteraction?: DiagramEditorViewInteractionV010;
+  showTechnicalMetadata?: boolean;
   emptyMessage?: string;
 }
 
@@ -372,6 +373,10 @@ export function isDiagramEditorPageV010(
         && Number.isFinite(page.initialCamera.translateX)
         && Number.isFinite(page.initialCamera.translateY)
       )
+    )
+    && (
+      page.showTechnicalMetadata === undefined
+      || typeof page.showTechnicalMetadata === "boolean"
     )
     && (
       page.viewInteraction === undefined
@@ -1475,10 +1480,15 @@ export function mountDiagramEditorPageV010(
 
   const render = (): void => {
     if (!state || disposed) return;
-    lifecycle.textContent = state.lifecycleState
+    const showTechnicalMetadata = page.showTechnicalMetadata === true;
+    lifecycle.hidden = !showTechnicalMetadata || !state.lifecycleState;
+    revision.hidden = !showTechnicalMetadata;
+    lifecycle.textContent = showTechnicalMetadata && state.lifecycleState
       ? "State: " + state.lifecycleState
       : "";
-    revision.textContent = "Revision: " + state.revision;
+    revision.textContent = showTechnicalMetadata
+      ? "Revision: " + state.revision
+      : "";
     canvas.replaceChildren();
 
     const bounds = graphBounds();
@@ -1676,7 +1686,7 @@ export function mountDiagramEditorPageV010(
         badge.title = observation.detail ?? "";
         badge.style.display = "block";
         badge.style.marginTop = "3px";
-        badge.style.fontSize = "10px";
+        badge.style.fontSize = ".6875rem";
         badge.style.fontWeight = "400";
         element.appendChild(badge);
       }
