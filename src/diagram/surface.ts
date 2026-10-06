@@ -7,6 +7,9 @@ import type {
   DiagramCameraTransformV010
 } from "./viewport.js";
 import {
+  layoutLayeredDiagramV010
+} from "./layered-layout.js";
+import {
   createDiagramCameraTransformV010,
   fitDiagramCameraToBoundsV010,
   panDiagramCameraByScreenDeltaV010,
@@ -27,6 +30,10 @@ export type DiagramEditorEdgeArrowV010 =
   | "end"
   | "both";
 
+export type DiagramEditorToolbarPlacementV010 =
+  | "TOOLBAR"
+  | "OVERFLOW";
+
 export interface DiagramEditorViewInteractionV010 {
   zoom?: boolean;
   pan?: boolean;
@@ -37,6 +44,12 @@ export interface DiagramEditorViewInteractionV010 {
   localVisibilityReset?: boolean;
   localVisibilityResetLabel?: string;
   localVisibilityResetNotice?: string;
+  localVisibilityResetPlacement?: DiagramEditorToolbarPlacementV010;
+  localAutoLayout?: boolean;
+  localAutoLayoutLabel?: string;
+  localAutoLayoutNotice?: string;
+  localAutoLayoutDirection?: "RIGHT" | "DOWN";
+  localAutoLayoutPlacement?: DiagramEditorToolbarPlacementV010;
 }
 
 export interface DiagramEditorCommandV010 {
@@ -134,6 +147,7 @@ export interface DiagramEditorPageV010 {
   requestValues?: Record<string, JsonValue>;
   readPresets?: DiagramEditorReadPresetV010[];
   toolbarActions?: DiagramEditorToolbarActionV010[];
+  toolbarOverflowLabel?: string;
   contextNavigation?: DiagramEditorContextNavigationV010;
   initialCamera?: DiagramCameraTransformV010;
   viewInteraction?: DiagramEditorViewInteractionV010;
@@ -176,6 +190,7 @@ export interface DiagramEditorActionV010 {
   operation: JsonValue;
   requiresConfirmation?: boolean;
   captureViewState?: boolean;
+  placement?: DiagramEditorToolbarPlacementV010;
   textPrompt?: {
     label: string;
     valueKey: string;
@@ -390,6 +405,10 @@ export function isDiagramEditorPageV010(
       )
     )
     && (
+      page.toolbarOverflowLabel === undefined
+      || nonEmpty(page.toolbarOverflowLabel)
+    )
+    && (
       page.contextNavigation === undefined
       || (
         Array.isArray(page.contextNavigation.items)
@@ -462,6 +481,36 @@ export function isDiagramEditorPageV010(
         && (
           page.viewInteraction.localVisibilityResetNotice === undefined
           || nonEmpty(page.viewInteraction.localVisibilityResetNotice)
+        )
+        && (
+          page.viewInteraction.localVisibilityResetPlacement === undefined
+          || ["TOOLBAR", "OVERFLOW"].includes(
+            page.viewInteraction.localVisibilityResetPlacement
+          )
+        )
+        && (
+          page.viewInteraction.localAutoLayout === undefined
+          || typeof page.viewInteraction.localAutoLayout === "boolean"
+        )
+        && (
+          page.viewInteraction.localAutoLayoutLabel === undefined
+          || nonEmpty(page.viewInteraction.localAutoLayoutLabel)
+        )
+        && (
+          page.viewInteraction.localAutoLayoutNotice === undefined
+          || nonEmpty(page.viewInteraction.localAutoLayoutNotice)
+        )
+        && (
+          page.viewInteraction.localAutoLayoutDirection === undefined
+          || ["RIGHT", "DOWN"].includes(
+            page.viewInteraction.localAutoLayoutDirection
+          )
+        )
+        && (
+          page.viewInteraction.localAutoLayoutPlacement === undefined
+          || ["TOOLBAR", "OVERFLOW"].includes(
+            page.viewInteraction.localAutoLayoutPlacement
+          )
         )
       )
     )
@@ -628,6 +677,10 @@ export function validateDiagramEditorStateV010(
           || (
             action.captureViewState !== undefined
             && typeof action.captureViewState !== "boolean"
+          )
+          || (
+            action.placement !== undefined
+            && !["TOOLBAR", "OVERFLOW"].includes(action.placement)
           )
           || (
             action.textPrompt !== undefined
