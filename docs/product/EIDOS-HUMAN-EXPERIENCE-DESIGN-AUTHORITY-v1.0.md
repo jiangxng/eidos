@@ -376,7 +376,58 @@ Supporting architecture:
 
 Historical ADRs are loaded only when rationale, compatibility or archaeology is needed.
 
-## 18. Evolution rule
+## 18. Practice roadmap
+
+This authority is intended to evolve through measured practice rather than a one-time redesign.
+
+### Phase 1 — classify and clean
+
+- audit current navigation placement;
+- remove duplicate persistent destinations;
+- move low-frequency system/admin capabilities to Settings;
+- preserve contextual professional tools without permanent chrome;
+- audit chat-only deterministic actions and restore direct controls.
+
+### Phase 2 — strengthen direct interaction
+
+- add reusable contextual actions;
+- improve batch actions and inline operations;
+- use drag/drop only where object relationships are naturally spatial;
+- add previews/diffs and clear resulting-state feedback;
+- reduce unnecessary navigation and configuration questions.
+
+### Phase 3 — instrument Human effort
+
+Where governance permits, measure Experience friction through product evidence such as:
+
+- repeated path length;
+- repeated retries/reversals;
+- task completion time;
+- repeated manual handoffs;
+- batchable repetition;
+- Agent requests that map to deterministic actions;
+- cross-system copy/re-entry patterns.
+
+Metrics are evidence for improvement, not permission for hidden manipulation or surveillance.
+
+### Phase 4 — EC-assisted experience learning
+
+EC may use governed longitudinal evidence to identify recurring friction and propose semantic Experience improvements.
+
+EC should distinguish:
+
+- DIRECT;
+- GUIDED;
+- AGENT_ASSISTED;
+- CONVERSATIONAL / COORDINATION
+
+before proposing a solution.
+
+Eidos remains responsible for validating and deterministically realizing accepted interaction proposals.
+
+The objective is not autonomous continuous UI mutation. Improvement remains versioned, testable, reviewable and reversible.
+
+## 19. Evolution rule
 
 Keep this document short enough to be the first design read, but complete enough for a fresh LLM to classify a task correctly.
 
