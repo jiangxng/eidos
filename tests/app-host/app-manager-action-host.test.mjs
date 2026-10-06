@@ -46,3 +46,35 @@ test("AppManagerActionHost sends generic ActionRequest without backend semantics
     result: { businessDataId: "bd-1" }
   });
 });
+
+
+test("App Manager action host carries the active locale", async () => {
+  let captured;
+  const host = createAppManagerActionHost({
+    baseUrl: "http://app-manager.test",
+    locale: () => "zh-CN",
+    fetchImpl: async (url, init) => {
+      captured = { url: String(url), init };
+      return new Response(JSON.stringify({
+        ok: true,
+        correlationId: "locale-action",
+        result: { ok: true }
+      }), {
+        status: 200,
+        headers: { "content-type": "application/json" }
+      });
+    }
+  });
+
+  await host.execute({
+    contractVersion: "0.1.0",
+    command: { code: "example.command", inputVersion: "0.1.0" },
+    values: {},
+    sourceInteractionId: "locale-action"
+  });
+
+  assert.equal(
+    captured.url,
+    "http://app-manager.test/v1/actions?locale=zh-CN"
+  );
+});

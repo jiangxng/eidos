@@ -591,3 +591,19 @@ test("diagram editor follows standard professional canvas keyboard shortcuts", a
   assert.match(source, /fitSelectionToCanvas/);
   assert.match(source, /resetZoomTo100/);
 });
+
+
+test("diagram editor preserves saved hidden items and can restore the complete local view", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/diagram/surface.ts", import.meta.url), "utf8")
+  );
+
+  assert.match(source, /hiddenNodeIds\?: string\[\]/);
+  assert.match(source, /hiddenEdgeIds\?: string\[\]/);
+  assert.match(source, /function|const syncLocalVisibilityFromState/);
+  assert.match(source, /state\?\.hiddenNodeIds \?\? \[\]/);
+  assert.match(source, /state\?\.hiddenEdgeIds \?\? \[\]/);
+  assert.match(source, /data-eidos-diagram-local-visibility-reset/);
+  assert.match(source, /locallyHiddenNodeIds\.clear\(\)/);
+  assert.match(source, /locallyHiddenEdgeIds\.clear\(\)/);
+});
