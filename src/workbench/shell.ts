@@ -108,6 +108,25 @@ function routeQuerySuffix(path: string): string {
   return queryIndex >= 0 ? path.slice(queryIndex) : "";
 }
 
+function actionResultNavigateToV010(result: unknown): string | undefined {
+  if (
+    result === null
+    || typeof result !== "object"
+    || Array.isArray(result)
+    || (result as { ok?: unknown }).ok !== true
+  ) {
+    return undefined;
+  }
+  const payload = (result as { result?: unknown }).result;
+  if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
+    return undefined;
+  }
+  const navigateTo = (payload as { navigateTo?: unknown }).navigateTo;
+  if (typeof navigateTo !== "string") return undefined;
+  const route = navigateTo.trim();
+  return route.startsWith("/") ? route : undefined;
+}
+
 function isExternalUrl(value: string): boolean {
   try {
     const url = new URL(value);
@@ -594,6 +613,11 @@ export async function mountWorkbenchShell(
       onNavigate: navigateWorkspace,
       async onActionResult(result, page, renderHint) {
         await options.onActionResult?.(result, page, renderHint);
+        const navigateTo = actionResultNavigateToV010(result);
+        if (navigateTo && state.workspaceTarget !== navigateTo) {
+          await navigateWorkspace(navigateTo);
+          return;
+        }
         if (
           result !== null
           && typeof result === "object"
@@ -735,6 +759,11 @@ export async function mountWorkbenchShell(
       onNavigate: navigateWorkspace,
       async onActionResult(result, page, renderHint) {
         await options.onActionResult?.(result, page, renderHint);
+        const navigateTo = actionResultNavigateToV010(result);
+        if (navigateTo && state.workspaceTarget !== navigateTo) {
+          await navigateWorkspace(navigateTo);
+          return;
+        }
         if (
           result !== null
           && typeof result === "object"
@@ -1025,13 +1054,15 @@ export async function mountWorkbenchShell(
     }
 
     const fallback = options.initialWorkspaceRoute?.trim() || "/";
-    if (state.workspaceTarget === fallback) return;
-    workspaceMode = "app";
-    root.setAttribute("data-eidos-workspace-mode", workspaceMode);
-    state.workspaceTarget = fallback;
-    persist();
-    void renderInternalWorkspace(fallback);
-    root.setAttribute("data-mobile-surface", "workspace");
+    const fallbackHash = "#" + fallback;
+    if (window.location.hash !== fallbackHash) {
+      window.history.replaceState(window.history.state, "", fallbackHash);
+    }
+    if (state.workspaceTarget === fallback) {
+      void renderInternalWorkspace(fallback);
+      return;
+    }
+    void navigateWorkspace(fallback);
   };
   const keyboardHandler = (event: KeyboardEvent) => {
     const modifier = event.metaKey || event.ctrlKey;
