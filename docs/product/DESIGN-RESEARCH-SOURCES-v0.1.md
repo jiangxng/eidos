@@ -84,6 +84,35 @@ Eidos synthesis:
 
 > Direct manipulation, guided workflows and Agent interaction form a continuum. Choose the lowest-effort interaction that preserves Human clarity, control and enterprise governance. Agent usage is justified by reasoning, ambiguity, synthesis and coordination value—not by novelty.
 
+## Tier 1 — professional canvas / diagram / map interaction
+
+### Figma canvas navigation
+- https://help.figma.com/hc/en-us/articles/360041065034-Adjust-your-zoom-and-view-options
+- https://help.figma.com/hc/en-us/articles/15297425105303-Explore-design-files
+
+Use for: canvas-first task area, initial zoom-to-fit, direct pan/zoom, zoom-to-selection, keyboard/trackpad navigation, and keeping canvas zoom separate from general UI scale.
+
+### Miro canvas controls
+- https://help.miro.com/hc/en-us/articles/20967864443410-Miro-s-new-simplified-user-interface
+
+Use for: separating content/business tools from a compact canvas control bar, placing zoom/navigation controls at the canvas edge, and progressively disclosing secondary map/navigation options.
+
+### Mapbox GL JS interaction
+- https://docs.mapbox.com/mapbox-gl-js/guides/user-interactions/gestures/
+- https://docs.mapbox.com/mapbox-gl-js/example/cooperative-gestures/
+- https://docs.mapbox.com/mapbox-gl-js/api/markers/
+
+Use for: map-like pan/zoom gesture consistency across mouse/touch, compact navigation controls, interaction ownership, and avoiding accidental navigation/zoom conflicts.
+
+### Lucidchart shapes and lines
+- https://help.lucid.co/hc/en-us/articles/16390096079764-Add-and-customize-shapes-in-Lucidchart
+
+Use for: restrained shape fill/border hierarchy, line width/style as information hierarchy, and keeping diagram appearance systematic instead of decorating each object independently.
+
+Eidos synthesis:
+
+> Professional business diagrams should behave more like calm map/design canvases than like large forms: maximize the canvas, keep navigation controls compact, progressively disclose detail, and use selection to reduce visual noise around dense relationships.
+
 ## Tier 1 — accessibility/interaction standards
 
 ### W3C WAI-ARIA Authoring Practices

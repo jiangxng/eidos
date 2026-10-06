@@ -390,6 +390,18 @@ View
 
 Dragging a node, panning, zooming or pruning items from a projection should not automatically create durable domain revisions unless the owning Experience explicitly chooses immediate persistence. A projection editor MAY let the Human remove a selected node or relation from the current view; removing a node also suppresses its connected relations in that rendered view. This is view-state editing, not domain deletion. Prefer local manipulation followed by one declared save action that captures visible placements, camera and projection-hidden item IDs. This keeps direct manipulation fast while preserving append-only/versioned enterprise authority.
 
+### Professional canvas hierarchy
+
+A dense business graph is a canvas-first workspace, not a form with a diagram inside it. The canvas should claim the available task area and open fit-to-content when no saved camera exists. View controls belong to a compact floating canvas control group; business actions remain in the page toolbar.
+
+Selection creates temporary visual focus. The selected object and its directly connected neighborhood may become stronger while unrelated nodes and relations are visually de-emphasized. This is inspection emphasis only and must not alter domain truth.
+
+Dense relations should default to low visual weight. Edge width should remain visually stable across zoom where the renderer permits it; labels should be progressively disclosed rather than rendered as an always-on text layer when graph density makes them unreadable. Selected/connected relations may reveal their labels.
+
+Inspectors are contextual. An empty inspector should not permanently consume scarce canvas width; reveal the inspector when the Human selects an object, and collapse it again when selection clears.
+
+Node category can use restrained identity styling such as shape and very low-saturation surface tint. Semantic success/warning/danger colors remain reserved for real status, and brand color remains reserved for selection/focus/primary action.
+
 ## 18. Practice roadmap
 
 This authority is intended to evolve through measured practice rather than a one-time redesign.
