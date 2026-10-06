@@ -413,6 +413,25 @@ test("diagram workspace supports explicit viewer-to-editor toolbar navigation", 
   assert.equal(isDiagramEditorPageV010(invalid), false);
 });
 
+test("diagram workspace may expose local projection pruning without semantic deletion", () => {
+  const editable = {
+    ...page,
+    viewInteraction: {
+      zoom: true,
+      pan: true,
+      localNodeDrag: true,
+      localSelectionHide: true,
+      localSelectionHideLabel: "Remove from projection",
+      localSelectionHideNotice: "Removed from this projection."
+    }
+  };
+  assert.equal(isDiagramEditorPageV010(editable), true);
+
+  const invalid = structuredClone(editable);
+  invalid.viewInteraction.localSelectionHideLabel = "";
+  assert.equal(isDiagramEditorPageV010(invalid), false);
+});
+
 test("diagram operation request may capture local placements and camera once at explicit save", () => {
   const request = diagramEditorOperationRequestV010(
     page,
@@ -422,9 +441,10 @@ test("diagram operation request may capture local placements and camera once at 
     false,
     undefined,
     {
+      hiddenNodeIds: ["ledger"],
+      hiddenEdgeIds: ["guidance"],
       placements: [
-        { nodeId: "app", x: 144, y: 120 },
-        { nodeId: "ledger", x: 420, y: 120 }
+        { nodeId: "app", x: 144, y: 120 }
       ],
       camera: {
         scale: 1.25,
@@ -435,9 +455,10 @@ test("diagram operation request may capture local placements and camera once at 
   );
 
   assert.deepEqual(request.values.viewState, {
+    hiddenNodeIds: ["ledger"],
+    hiddenEdgeIds: ["guidance"],
     placements: [
-      { nodeId: "app", x: 144, y: 120 },
-      { nodeId: "ledger", x: 420, y: 120 }
+      { nodeId: "app", x: 144, y: 120 }
     ],
     camera: {
       scale: 1.25,
