@@ -60,4 +60,4 @@
 
 - **EIDOS-48** Standard Eidos product UI follows the Business Office visual language: calm business content dominates, neutral surfaces establish hierarchy, brand color is reserved for selection/focus/primary action, and technical/developer chrome is progressively disclosed rather than presented as the default product personality.
 - **EIDOS-49** Standard Eidos system icons are monochrome by default and use governed brand tone for selected/emphasized state. Multi-color identity belongs to separately governed application/domain/product identity and MUST NOT leak into ordinary control semantics.
-- **EIDOS-50** Internal App Host routes MUST NOT require a browser-like address bar or permanent technical status bar in normal business use. Such technical navigation/status chrome may remain available only in explicit web, diagnostic or advanced contexts.
+- **EIDOS-50** The standard Business Workbench MUST NOT render a browser-like address field, route-open button, external-open button, or permanent technical status bar. Technical navigation/status controls belong only to a separately declared diagnostic or web capability, never to ordinary business chrome.

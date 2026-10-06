@@ -142,7 +142,7 @@ test("business-office visual revision replaces developer-console defaults", () =
   assert.equal(eidosDesignPolicyV010.visualRevision, "0.2.0");
   assert.equal(eidosDesignPolicyV010.visualLanguage.developerConsoleAsDefault, false);
   assert.equal(eidosDesignPolicyV010.workbench.statusBar.defaultVisibility, "hidden");
-  assert.equal(eidosDesignPolicyV010.workbench.workspace.internalRouteAddress, "hidden-by-default");
+  assert.equal(eidosDesignPolicyV010.workbench.workspace.internalRouteAddress, "not-rendered-in-standard-business-workbench");
   assert.equal(eidosDesignPolicyV010.mobile.primaryNavigationLabels, "visible");
   assert.equal(eidosDesignTokensV010.color.brand, "#2B6CB0");
   assert.equal(eidosDesignTokensV010.icon.standardMode, "monochrome");
