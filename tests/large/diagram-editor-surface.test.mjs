@@ -99,8 +99,12 @@ test("diagram editor page is a renderer-independent App Host definition", () => 
   assert.equal(isDiagramEditorPageV010(page), true);
   const html = renderDiagramEditorPageShellToHtmlV010(page);
   assert.match(html, /data-eidos-diagram-canvas/);
+  assert.match(html, /data-eidos-diagram-canvas-wrap/);
+  assert.match(html, /data-eidos-diagram-view-controls/);
+  assert.match(html, /data-has-selection="false"/);
   assert.match(html, /data-eidos-diagram-inspector/);
   assert.match(html, /data-eidos-diagram-selection-properties/);
+  assert.doesNotMatch(html, />Selection<\/strong>/);
 });
 
 test("diagram editor validates positioned nodes and semantic edge references", () => {
@@ -486,6 +490,27 @@ test("diagram graph actions may request captured view state without changing sem
   assert.equal(validateDiagramEditorStateV010(editable).ok, false);
 });
 
+
+test("diagram workspace hides technical metadata unless explicitly requested", () => {
+  assert.equal(isDiagramEditorPageV010({
+    ...page,
+    showTechnicalMetadata: true
+  }), true);
+
+  const invalid = {
+    ...page,
+    showTechnicalMetadata: "always"
+  };
+  assert.equal(isDiagramEditorPageV010(invalid), false);
+});
+
+test("diagram workspace shell reserves the viewport for the canvas and floating view controls", () => {
+  const html = renderDiagramEditorPageShellToHtmlV010(page);
+  assert.match(html, /height:calc\(100dvh - 112px\)/);
+  assert.match(html, /grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(html, /data-has-selection="true"/);
+  assert.match(html, /position:absolute;\s*right:12px;\s*bottom:12px/);
+});
 
 test("diagram page may declare a validated initial camera", () => {
   const restored = {
