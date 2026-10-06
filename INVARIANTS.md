@@ -69,3 +69,6 @@
 
 
 - **EIDOS-54** A global Help Center is a full content Experience and MUST render in the Main Workspace (or a full-content mobile Surface), even when its launcher is a secondary Activity. Side Panels/sheets are reserved for contextual help that supports the current task; they MUST NOT host the entire searchable Help Center.
+
+
+- **EIDOS-55** Diagram inspection and persistent view editing are distinct interaction phases. A Viewer MAY hand off to an explicit edit route; local drag/pan/zoom changes MAY remain client-local until a Human chooses a declared save action. Persistent view-state save captures the current placements/camera once and delegates authority to the owning Host command; Eidos MUST NOT infer domain persistence from local diagram manipulation.

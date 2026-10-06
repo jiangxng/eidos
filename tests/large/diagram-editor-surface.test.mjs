@@ -384,3 +384,82 @@ test("Viewer-safe view interaction and directed edge metadata stay renderer-neut
   directed.edges[0].arrow = "sideways";
   assert.equal(validateDiagramEditorStateV010(directed).ok, false);
 });
+
+
+test("diagram workspace supports explicit viewer-to-editor toolbar navigation", () => {
+  const viewer = {
+    contractVersion: "0.1.0",
+    kind: "diagram-workspace",
+    id: "definition-viewer",
+    title: "Relationship map",
+    resourceId: "definition:ledger",
+    readCommand: {
+      code: "definition.read",
+      inputVersion: "0.1.0"
+    },
+    toolbarActions: [{
+      id: "edit",
+      label: "Edit projection",
+      route: "/definition-preview/2d/edit",
+      primary: true
+    }]
+  };
+
+  assert.equal(isDiagramEditorPageV010(viewer), true);
+
+  const invalid = structuredClone(viewer);
+  invalid.toolbarActions[0].route = "relative";
+  assert.equal(isDiagramEditorPageV010(invalid), false);
+});
+
+test("diagram operation request may capture local placements and camera once at explicit save", () => {
+  const request = diagramEditorOperationRequestV010(
+    page,
+    state,
+    { type: "SAVE_PROJECTION_VIEW" },
+    "projection.save",
+    false,
+    undefined,
+    {
+      placements: [
+        { nodeId: "app", x: 144, y: 120 },
+        { nodeId: "ledger", x: 420, y: 120 }
+      ],
+      camera: {
+        scale: 1.25,
+        translateX: 18,
+        translateY: -12
+      }
+    }
+  );
+
+  assert.deepEqual(request.values.viewState, {
+    placements: [
+      { nodeId: "app", x: 144, y: 120 },
+      { nodeId: "ledger", x: 420, y: 120 }
+    ],
+    camera: {
+      scale: 1.25,
+      translateX: 18,
+      translateY: -12
+    }
+  });
+});
+
+test("diagram graph actions may request captured view state without changing semantic operation shape", () => {
+  const editable = structuredClone(state);
+  editable.actions.push({
+    id: "projection.save",
+    label: "Save projection",
+    operation: { type: "SAVE_PROJECTION_VIEW" },
+    captureViewState: true
+  });
+
+  assert.deepEqual(validateDiagramEditorStateV010(editable), {
+    ok: true,
+    issues: []
+  });
+
+  editable.actions.at(-1).captureViewState = "yes";
+  assert.equal(validateDiagramEditorStateV010(editable).ok, false);
+});
