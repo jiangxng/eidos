@@ -5,6 +5,7 @@ import {
   diagramEditorReadRequestV010,
   diagramEditorSelectionReadRequestV010,
   isDiagramEditorPageV010,
+  mergeDiagramInspectorPropertiesV010,
   renderDiagramEditorPageShellToHtmlV010,
   validateDiagramEditorStateV010
 } from "../../dist/diagram/surface.js";
@@ -479,4 +480,24 @@ test("diagram page may declare a validated initial camera", () => {
   const invalid = structuredClone(restored);
   invalid.initialCamera.scale = 0;
   assert.equal(isDiagramEditorPageV010(invalid), false);
+});
+
+
+test("lazy inspector refresh replaces matching base properties instead of failing", () => {
+  const merged = mergeDiagramInspectorPropertiesV010(
+    [
+      { key: "kind", label: "Kind", value: "application" },
+      { key: "owner", label: "Owner", value: "Old owner" }
+    ],
+    [
+      { key: "owner", label: "Owner", value: "Current owner" },
+      { key: "rules", label: "Posting rules", value: 5 }
+    ]
+  );
+
+  assert.deepEqual(merged, [
+    { key: "kind", label: "Kind", value: "application" },
+    { key: "owner", label: "Owner", value: "Current owner" },
+    { key: "rules", label: "Posting rules", value: 5 }
+  ]);
 });
