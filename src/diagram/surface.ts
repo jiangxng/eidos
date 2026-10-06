@@ -1333,15 +1333,14 @@ export function mountDiagramEditorPageV010(
       toolbar.appendChild(button);
     }
 
-    if (
-      page.viewInteraction?.localVisibilityReset === true
-      && (locallyHiddenNodeIds.size > 0 || locallyHiddenEdgeIds.size > 0)
-    ) {
+    if (page.viewInteraction?.localVisibilityReset === true) {
       const button = document.createElement("button");
       button.type = "button";
       button.setAttribute("data-eidos-diagram-local-visibility-reset", "");
       button.textContent =
         page.viewInteraction.localVisibilityResetLabel ?? "Restore all";
+      button.disabled =
+        locallyHiddenNodeIds.size === 0 && locallyHiddenEdgeIds.size === 0;
       button.onclick = () => {
         locallyHiddenNodeIds.clear();
         locallyHiddenEdgeIds.clear();
