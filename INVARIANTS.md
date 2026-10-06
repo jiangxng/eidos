@@ -72,3 +72,5 @@
 
 
 - **EIDOS-55** Diagram inspection and persistent view editing are distinct interaction phases. A Viewer MAY hand off to an explicit edit route; local drag/pan/zoom changes MAY remain client-local until a Human chooses a declared save action. Persistent view-state save captures the current placements/camera once and delegates authority to the owning Host command; Eidos MUST NOT infer domain persistence from local diagram manipulation.
+
+- **EIDOS-56** Projection pruning is view-state editing, not domain deletion. When a diagram Experience allows local removal, removing a node MUST suppress its connected rendered relations and MAY be persisted only as declared view state (for example hidden node/edge identifiers). Eidos MUST NOT translate projection pruning into deletion of the underlying application, ledger, process, relation or other domain object.
