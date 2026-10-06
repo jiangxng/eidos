@@ -390,6 +390,20 @@ View
 
 Dragging a node, panning, zooming or pruning items from a projection should not automatically create durable domain revisions unless the owning Experience explicitly chooses immediate persistence. A projection editor MAY let the Human remove a selected node or relation from the current view; removing a node also suppresses its connected relations in that rendered view. This is view-state editing, not domain deletion. Prefer local manipulation followed by one declared save action that captures visible placements, camera and projection-hidden item IDs. This keeps direct manipulation fast while preserving append-only/versioned enterprise authority.
 
+### Deep context navigation
+
+Context-path navigation is conditional, not universal chrome. Experiences should introduce it only when a Human has entered a sufficiently deep object hierarchy that the parent object may no longer be obvious.
+
+For deep canvas/task pages:
+
+- desktop may show the full business path above the page title;
+- mobile should collapse that path to one visible nearest-parent return affordance;
+- the current page title remains separate from the path;
+- business actions remain separate from navigation actions;
+- every navigable path item must resolve to a reloadable route, not transient browser/session history.
+
+Top-level workspaces and shallow list/detail pages should not display breadcrumbs merely for consistency.
+
 ### Professional canvas hierarchy
 
 A dense business graph is a canvas-first workspace, not a form with a diagram inside it. The canvas should claim the available task area and open fit-to-content when no saved camera exists. View controls belong to a compact floating canvas control group; business actions remain in the page toolbar.
