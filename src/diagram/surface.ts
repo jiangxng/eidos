@@ -925,9 +925,56 @@ export function renderDiagramEditorPageShellToHtmlV010(
 }
 [data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-toolbar]{
   margin-left:auto;
+  min-width:0;
   display:flex;
   align-items:center;
+  justify-content:flex-end;
   gap:6px;
+}
+[data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-more-actions]{
+  position:relative;
+}
+[data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-more-actions]>summary{
+  list-style:none;
+  min-height:32px;
+  display:flex;
+  align-items:center;
+  cursor:pointer;
+  border:1px solid var(--eidos-border-strong,#C9D2DC);
+  border-radius:var(--eidos-radius-sm,8px);
+  padding:0 10px;
+  background:var(--eidos-bg,#FFFFFF);
+  color:var(--eidos-fg,#1F2933);
+  box-shadow:var(--eidos-shadow-surface,0 1px 2px rgba(31,41,51,.05));
+  user-select:none;
+}
+[data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-more-actions]>summary::-webkit-details-marker{
+  display:none;
+}
+[data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-more-actions]>summary::after{
+  content:"▾";
+  margin-left:6px;
+  font-size:.75em;
+}
+[data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-more-menu]{
+  position:absolute;
+  right:0;
+  top:calc(100% + 6px);
+  z-index:20;
+  min-width:168px;
+  display:grid;
+  gap:4px;
+  padding:6px;
+  border:1px solid var(--eidos-border,#E2E7ED);
+  border-radius:var(--eidos-radius-md,10px);
+  background:var(--eidos-bg,#FFFFFF);
+  box-shadow:var(--eidos-shadow-raised,0 6px 18px rgba(31,41,51,.10));
+}
+[data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-more-menu] button{
+  width:100%;
+  justify-content:flex-start;
+  text-align:left;
+  box-shadow:none;
 }
 [data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-toolbar] button,
 [data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-view-controls] button{
@@ -1034,7 +1081,21 @@ export function renderDiagramEditorPageShellToHtmlV010(
     min-height:28px;
   }
   [data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-heading-row]{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
     align-items:flex-start;
+    gap:8px;
+  }
+  [data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-toolbar]{
+    width:100%;
+    margin-left:0;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
+  [data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-more-menu]{
+    left:0;
+    right:auto;
+    max-width:min(86vw,280px);
   }
   [data-eidos-diagram-editor="${escapeHtml(page.id)}"] [data-eidos-diagram-layout],
   [data-eidos-diagram-editor="${escapeHtml(page.id)}"][data-has-selection="true"] [data-eidos-diagram-layout]{
@@ -1453,11 +1514,77 @@ export function mountDiagramEditorPageV010(
     renderActions();
   };
 
+  const applyLocalAutoLayout = (): void => {
+    if (!state) return;
+    const visibleNodeIds = new Set(
+      state.nodes
+        .filter(node => !locallyHiddenNodeIds.has(node.id))
+        .map(node => node.id)
+    );
+    if (visibleNodeIds.size === 0) return;
+
+    const layout = layoutLayeredDiagramV010({
+      nodes: state.nodes
+        .filter(node => visibleNodeIds.has(node.id))
+        .map(node => ({
+          id: node.id,
+          width: node.width,
+          height: node.height
+        })),
+      edges: state.edges
+        .filter(edge =>
+          !locallyHiddenEdgeIds.has(edge.id)
+          && visibleNodeIds.has(edge.source)
+          && visibleNodeIds.has(edge.target)
+        )
+        .map(edge => ({
+          id: edge.id,
+          source: edge.source,
+          target: edge.target
+        })),
+      options: {
+        direction:
+          page.viewInteraction?.localAutoLayoutDirection ?? "RIGHT"
+      }
+    });
+    const placementByNode = new Map(
+      layout.placements.map(placement => [
+        placement.nodeId,
+        placement
+      ] as const)
+    );
+    for (const node of state.nodes) {
+      const placement = placementByNode.get(node.id);
+      if (!placement) continue;
+      node.x = placement.x;
+      node.y = placement.y;
+    }
+    selected = undefined;
+    selectionInspection = undefined;
+    selectionReadGeneration += 1;
+    render();
+    followsFitToCanvas = true;
+    fitViewToCanvas();
+    report(
+      page.viewInteraction?.localAutoLayoutNotice
+      ?? "Diagram arranged automatically. Save the view to persist the layout."
+    );
+  };
+
   const renderActions = (): void => {
     toolbar.replaceChildren();
     viewControls.replaceChildren();
     selectionActions.replaceChildren();
     if (!state) return;
+
+    const overflowButtons: HTMLButtonElement[] = [];
+    const placeToolbarButton = (
+      button: HTMLButtonElement,
+      placement: DiagramEditorToolbarPlacementV010 = "TOOLBAR"
+    ): void => {
+      if (placement === "OVERFLOW") overflowButtons.push(button);
+      else toolbar.appendChild(button);
+    };
 
     for (const action of page.toolbarActions ?? []) {
       const button = document.createElement("button");
@@ -1562,7 +1689,23 @@ export function mountDiagramEditorPageV010(
           ?? "All diagram items are visible again. Save to persist the view."
         );
       };
-      toolbar.appendChild(button);
+      placeToolbarButton(
+        button,
+        page.viewInteraction.localVisibilityResetPlacement ?? "TOOLBAR"
+      );
+    }
+
+    if (page.viewInteraction?.localAutoLayout === true) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("data-eidos-diagram-auto-layout", "");
+      button.textContent =
+        page.viewInteraction.localAutoLayoutLabel ?? "Auto layout";
+      button.onclick = () => applyLocalAutoLayout();
+      placeToolbarButton(
+        button,
+        page.viewInteraction.localAutoLayoutPlacement ?? "TOOLBAR"
+      );
     }
 
     for (const action of state.actions ?? []) {
@@ -1602,7 +1745,25 @@ export function mountDiagramEditorPageV010(
           action.captureViewState === true
         );
       };
-      toolbar.appendChild(button);
+      placeToolbarButton(button, action.placement ?? "TOOLBAR");
+    }
+
+    if (overflowButtons.length > 0) {
+      const details = document.createElement("details");
+      details.setAttribute("data-eidos-diagram-more-actions", "");
+      const summary = document.createElement("summary");
+      summary.textContent = page.toolbarOverflowLabel ?? "More";
+      summary.setAttribute("aria-label", page.toolbarOverflowLabel ?? "More");
+      const menu = document.createElement("div");
+      menu.setAttribute("data-eidos-diagram-more-menu", "");
+      for (const button of overflowButtons) {
+        button.addEventListener("click", () => {
+          details.open = false;
+        });
+        menu.appendChild(button);
+      }
+      details.append(summary, menu);
+      toolbar.appendChild(details);
     }
 
     for (const action of matchingActions()) {
