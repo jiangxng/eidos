@@ -655,3 +655,17 @@ test("diagram editor preserves saved hidden items and can restore the complete l
   assert.match(source, /locallyHiddenNodeIds\.clear\(\)/);
   assert.match(source, /locallyHiddenEdgeIds\.clear\(\)/);
 });
+
+
+test("diagram actions may prompt for text and captured view state includes viewport size", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/diagram/surface.ts", import.meta.url), "utf8")
+  );
+
+  assert.match(source, /textPrompt\?: \{/);
+  assert.match(source, /window\.prompt\(/);
+  assert.match(source, /\[action\.textPrompt\.valueKey\]: normalized/);
+  assert.match(source, /viewport: \{/);
+  assert.match(source, /width: Math\.max\(1, canvas\.clientWidth\)/);
+  assert.match(source, /height: Math\.max\(1, canvas\.clientHeight\)/);
+});
