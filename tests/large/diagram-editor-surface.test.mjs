@@ -417,6 +417,37 @@ test("diagram workspace supports explicit viewer-to-editor toolbar navigation", 
   assert.equal(isDiagramEditorPageV010(invalid), false);
 });
 
+test("diagram workspace supports optional deep context navigation", () => {
+  const deep = {
+    ...page,
+    contextNavigation: {
+      items: [
+        { id: "ledger", label: "Ledger management", route: "/ledger" },
+        {
+          id: "detail",
+          label: "Complete ledger runtime",
+          route: "/ledger/detail?definitionId=ledger%3Amain&definitionRevision=3"
+        },
+        { id: "map", label: "Relationship map" }
+      ]
+    }
+  };
+
+  assert.equal(isDiagramEditorPageV010(deep), true);
+  const html = renderDiagramEditorPageShellToHtmlV010(deep);
+  assert.match(html, /data-eidos-diagram-context-navigation/);
+  assert.match(html, /data-eidos-context-navigation-desktop/);
+  assert.match(html, /data-eidos-context-navigation-mobile/);
+  assert.match(html, /Ledger management/);
+  assert.match(html, /Complete ledger runtime/);
+  assert.match(html, /Relationship map/);
+  assert.match(html, /data-eidos-mobile-context-parent/);
+
+  const invalid = structuredClone(deep);
+  invalid.contextNavigation.items[0].route = "relative";
+  assert.equal(isDiagramEditorPageV010(invalid), false);
+});
+
 test("diagram workspace may expose local projection pruning without semantic deletion", () => {
   const editable = {
     ...page,
@@ -502,6 +533,23 @@ test("diagram workspace hides technical metadata unless explicitly requested", (
     showTechnicalMetadata: "always"
   };
   assert.equal(isDiagramEditorPageV010(invalid), false);
+});
+
+test("deep context navigation collapses to the nearest parent on mobile", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/diagram/surface.ts", import.meta.url), "utf8")
+  );
+
+  assert.match(source, /@media \(max-width:760px\)/);
+  assert.match(
+    source,
+    /\[data-eidos-context-navigation-desktop\]\{\s*display:none;/
+  );
+  assert.match(
+    source,
+    /\[data-eidos-context-navigation-mobile\]\{\s*display:flex;/
+  );
+  assert.match(source, /data-eidos-mobile-context-parent/);
 });
 
 test("diagram workspace shell reserves the viewport for the canvas and floating view controls", () => {
