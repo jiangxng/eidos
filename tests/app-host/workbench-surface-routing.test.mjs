@@ -86,6 +86,15 @@ test("Workbench Surface routing keeps desktop default when no target/profile is 
   assert.equal(result?.resolution.route.path, "/orders");
 });
 
+test("Workbench Surface routing resolves query-qualified deep links by declared base route", () => {
+  const result = resolveWorkbenchSurfaceRouteV010(snapshot(), {
+    path: "/orders?orderId=order-7"
+  });
+  assert.equal(result?.resolution.kind, "ROUTE");
+  assert.equal(result?.resolution.target, "DESKTOP_WORKBENCH");
+  assert.equal(result?.resolution.route.path, "/orders");
+});
+
 test("Workbench Surface routing maps semantic route to explicit mobile target", () => {
   const result = resolveWorkbenchSurfaceRouteV010(snapshot(), {
     path: "/orders",
