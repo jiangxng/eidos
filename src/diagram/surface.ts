@@ -604,7 +604,9 @@ export function diagramEditorOperationRequestV010(
       resourceId: page.resourceId,
       expectedRevision: state.revision,
       operation: jsonClone(operation),
-      ...(viewState ? { viewState: jsonClone(viewState) } : {})
+      ...(viewState
+        ? { viewState: jsonClone(viewState) as unknown as JsonValue }
+        : {})
     },
     sourceInteractionId: page.id,
     actionId,
