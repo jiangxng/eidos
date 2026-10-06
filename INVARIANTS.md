@@ -85,3 +85,5 @@
 
 - **EIDOS-61** Diagram visibility state is round-trippable presentation state. When an Experience supplies persisted hidden node/relation IDs, Eidos MUST initialize its local view from them and MAY offer an explicit local restore-all affordance that clears those hidden IDs without manufacturing or deleting domain objects. Captured save state reflects the complete current local visibility state.
 - **EIDOS-62** App Manager action requests preserve the active locale when one is supplied by the Host. A page MAY NOT render in one locale while its read/save action silently falls back to another locale because an adapter dropped locale context.
+
+- **EIDOS-63** Context-path navigation is opt-in deep-page context, not mandatory global chrome. Desktop MAY expose the full reloadable business path above the title; mobile MUST reduce the same path to a nearest-parent return affordance instead of squeezing the full breadcrumb into narrow space. Navigation context MUST remain distinct from page actions and browser history.
