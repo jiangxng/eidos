@@ -98,6 +98,30 @@ test("discovers, resolves and loads active experience contributions", async () =
   host.dispose();
 });
 
+test("qualified routes resolve by base path and pass exact route identity to page reads", async () => {
+  let receivedOptions;
+  const source = {
+    async listEffectiveExperienceManifests() {
+      return [manifest()];
+    },
+    async loadPage(_page, options) {
+      receivedOptions = options;
+      return { contractVersion: "0.1.0", kind: "detail", id: "notes-detail" };
+    }
+  };
+
+  const host = createAppHost(source);
+  await host.refresh();
+
+  const qualified = "/notes?itemId=note-7&revision=3";
+  assert.equal(host.resolveRoute(qualified)?.route.path, "/notes");
+  const loaded = await host.loadRoute(qualified);
+  assert.equal(loaded?.route.path, "/notes");
+  assert.equal(receivedOptions.routePath, qualified);
+
+  host.dispose();
+});
+
 test("rejects ambiguous cross-package route conflicts deterministically", async () => {
   const source = {
     async listEffectiveExperienceManifests() {
