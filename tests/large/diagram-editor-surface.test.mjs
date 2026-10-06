@@ -669,3 +669,67 @@ test("diagram actions may prompt for text and captured view state includes viewp
   assert.match(source, /width: Math\.max\(1, canvas\.clientWidth\)/);
   assert.match(source, /height: Math\.max\(1, canvas\.clientHeight\)/);
 });
+
+
+test("diagram workspace may expose fixed auto layout and overflow actions", async () => {
+  const scalable = {
+    ...page,
+    toolbarOverflowLabel: "更多",
+    viewInteraction: {
+      zoom: true,
+      pan: true,
+      localNodeDrag: true,
+      localAutoLayout: true,
+      localAutoLayoutLabel: "自动排版",
+      localAutoLayoutNotice: "已自动排版，保存后生效。",
+      localAutoLayoutDirection: "RIGHT",
+      localAutoLayoutPlacement: "TOOLBAR",
+      localVisibilityReset: true,
+      localVisibilityResetLabel: "恢复全部",
+      localVisibilityResetPlacement: "OVERFLOW"
+    }
+  };
+  assert.equal(isDiagramEditorPageV010(scalable), true);
+
+  const scalableState = structuredClone(state);
+  scalableState.actions.push({
+    id: "save",
+    label: "保存",
+    operation: { type: "SAVE" },
+    placement: "TOOLBAR"
+  }, {
+    id: "save-as",
+    label: "另存",
+    operation: { type: "SAVE_AS" },
+    placement: "OVERFLOW"
+  });
+  assert.equal(validateDiagramEditorStateV010(scalableState).ok, true);
+
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/diagram/surface.ts", import.meta.url), "utf8")
+  );
+  assert.match(source, /layoutLayeredDiagramV010/);
+  assert.match(source, /data-eidos-diagram-auto-layout/);
+  assert.match(source, /data-eidos-diagram-more-actions/);
+  assert.match(source, /data-eidos-diagram-more-menu/);
+});
+
+test("diagram action placement rejects unknown toolbar destinations", () => {
+  const invalidState = structuredClone(state);
+  invalidState.actions.push({
+    id: "bad-placement",
+    label: "Bad",
+    operation: { type: "NOOP" },
+    placement: "SIDEWAYS"
+  });
+  assert.equal(validateDiagramEditorStateV010(invalidState).ok, false);
+
+  const invalidPage = {
+    ...page,
+    viewInteraction: {
+      localAutoLayout: true,
+      localAutoLayoutPlacement: "SIDEWAYS"
+    }
+  };
+  assert.equal(isDiagramEditorPageV010(invalidPage), false);
+});
