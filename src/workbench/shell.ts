@@ -103,6 +103,11 @@ function currentHashPath(): string | undefined {
   return hash.startsWith("#") ? hash.slice(1) : hash;
 }
 
+function routeQuerySuffix(path: string): string {
+  const queryIndex = path.indexOf("?");
+  return queryIndex >= 0 ? path.slice(queryIndex) : "";
+}
+
 function isExternalUrl(value: string): boolean {
   try {
     const url = new URL(value);
@@ -667,7 +672,8 @@ export async function mountWorkbenchShell(
       return;
     }
     if (surface?.resolution.kind === "ROUTE") {
-      resolvedPath = surface.resolution.route.path;
+      resolvedPath =
+        surface.resolution.route.path + routeQuerySuffix(path);
       nextIdentity = createSurfaceInstanceIdentityV010({
         surfaceId: surface.resolution.surfaceId,
         semanticId: surface.resolution.semanticRouteId,
@@ -765,7 +771,8 @@ export async function mountWorkbenchShell(
       let resolvedTarget = normalized;
 
       if (surface?.resolution.kind === "ROUTE") {
-        resolvedTarget = surface.resolution.route.path;
+        resolvedTarget =
+          surface.resolution.route.path + routeQuerySuffix(normalized);
         applyActiveSurface(
           surface.resolution.surfaceId,
           surface.resolution.target
@@ -1012,7 +1019,19 @@ export async function mountWorkbenchShell(
 
   const hashHandler = () => {
     const path = currentHashPath();
-    if (path && path !== state.workspaceTarget) void navigateWorkspace(path);
+    if (path) {
+      if (path !== state.workspaceTarget) void navigateWorkspace(path);
+      return;
+    }
+
+    const fallback = options.initialWorkspaceRoute?.trim() || "/";
+    if (state.workspaceTarget === fallback) return;
+    workspaceMode = "app";
+    root.setAttribute("data-eidos-workspace-mode", workspaceMode);
+    state.workspaceTarget = fallback;
+    persist();
+    void renderInternalWorkspace(fallback);
+    root.setAttribute("data-mobile-surface", "workspace");
   };
   const keyboardHandler = (event: KeyboardEvent) => {
     const modifier = event.metaKey || event.ctrlKey;
@@ -1038,7 +1057,8 @@ export async function mountWorkbenchShell(
     if (workspaceMode === "app") {
       const routed = resolveSurface(state.workspaceTarget);
       if (routed?.resolution.kind === "ROUTE") {
-        const resolvedPath = routed.resolution.route.path;
+        const resolvedPath =
+          routed.resolution.route.path + routeQuerySuffix(state.workspaceTarget);
         applyActiveSurface(
           routed.resolution.surfaceId,
           routed.resolution.target

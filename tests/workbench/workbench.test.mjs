@@ -107,3 +107,21 @@ test("standard business Workbench does not render browser address chrome", async
   assert.doesNotMatch(source, /\bbrowserAddress\b|\bbrowserGo\b|\bbrowserExternal\b/);
   assert.match(source, /browserToolbar\.append\(globalControls\)/);
 });
+
+
+test("Workbench history recovery preserves qualified routes and handles an empty hash fallback", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/workbench/shell.ts", import.meta.url), "utf8")
+  );
+
+  assert.match(source, /routeQuerySuffix/);
+  assert.match(
+    source,
+    /surface\.resolution\.route\.path \+ routeQuerySuffix\(normalized\)/
+  );
+  assert.match(
+    source,
+    /const fallback = options\.initialWorkspaceRoute\?\.trim\(\) \|\| "\/"/
+  );
+  assert.match(source, /void renderInternalWorkspace\(fallback\)/);
+});
