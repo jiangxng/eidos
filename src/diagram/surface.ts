@@ -1109,8 +1109,10 @@ export function mountDiagramEditorPageV010(
   const touchDragThresholdPx = 8;
   const listeners: Array<() => void> = [];
 
-  for (const button of root.querySelectorAll<HTMLButtonElement>(
-    "[data-eidos-diagram-context-route]"
+  for (const button of Array.from(
+    root.querySelectorAll<HTMLButtonElement>(
+      "[data-eidos-diagram-context-route]"
+    )
   )) {
     const onContextNavigate = (): void => {
       const route = button.dataset.eidosDiagramContextRoute?.trim();
