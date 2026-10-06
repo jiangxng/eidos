@@ -104,3 +104,26 @@ test("catalog browser rejects incomplete thumbnail metadata", () => {
     }]
   }), /EIDOS_CATALOG_ITEM_THUMBNAIL_INVALID/);
 });
+
+
+test("catalog browser supports business management list layout", () => {
+  const html = renderCatalogBrowserToHtml({
+    contractVersion: "0.1.0",
+    kind: "catalog-browser",
+    layout: "list",
+    id: "ledger-manager",
+    title: "Ledger Manager",
+    items: [{
+      id: "ledger",
+      title: "Main ledger",
+      primaryAction: {
+        id: "publish",
+        label: "Publish",
+        type: "command",
+        command: "ledger.publish"
+      }
+    }]
+  });
+
+  assert.match(html, /data-eidos-catalog-layout="list"/);
+});
