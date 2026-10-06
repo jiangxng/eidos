@@ -376,6 +376,20 @@ Supporting architecture:
 
 Historical ADRs are loaded only when rationale, compatibility or archaeology is needed.
 
+### Diagram view → edit → save
+
+For business diagrams, inspection and persistence should be separate when the Human is editing presentation/view state rather than domain semantics:
+
+```text
+View
+→ explicit Edit
+→ local direct manipulation
+→ explicit Save
+→ owning Host persistence/versioning
+```
+
+Dragging a node, panning or zooming should not automatically create durable domain revisions unless the owning Experience explicitly chooses immediate persistence. For projection/layout editing, prefer local manipulation followed by one declared save action that captures the final placements/camera. This keeps direct manipulation fast while preserving append-only/versioned enterprise authority.
+
 ## 18. Practice roadmap
 
 This authority is intended to evolve through measured practice rather than a one-time redesign.
