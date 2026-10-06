@@ -103,11 +103,6 @@ function currentHashPath(): string | undefined {
   return hash.startsWith("#") ? hash.slice(1) : hash;
 }
 
-function routeLookupPath(path: string): string {
-  const queryIndex = path.indexOf("?");
-  return queryIndex >= 0 ? path.slice(0, queryIndex) : path;
-}
-
 function routeQuerySuffix(path: string): string {
   const queryIndex = path.indexOf("?");
   return queryIndex >= 0 ? path.slice(queryIndex) : "";
