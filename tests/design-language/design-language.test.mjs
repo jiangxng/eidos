@@ -109,6 +109,25 @@ test("productive Workbench realizes phone navigation, safe areas and mobile shee
 });
 
 
+
+
+test("agent chat chrome responds to its own pane width", () => {
+  assert.match(eidosProductiveWorkbenchCss, /container-name:eidos-chat/);
+  assert.match(eidosProductiveWorkbenchCss, /@container eidos-chat \(max-width:520px\)/);
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-side-panel\] \[data-eidos-chat-header\] h1\][\s\S]*display:none/
+  );
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-chat-thread-selector\][\s\S]*flex:1 1 auto[\s\S]*min-width:0/
+  );
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-chat-new-thread[\s\S]*white-space:nowrap/
+  );
+});
+
 test("system text scaling is part of the mobile contract", () => {
   assert.equal(eidosMobileDesignLanguageV010.typography.preferenceAuthority, "os-and-user-agent");
   assert.equal(eidosMobileDesignLanguageV010.typography.defaultPreference, "system");
