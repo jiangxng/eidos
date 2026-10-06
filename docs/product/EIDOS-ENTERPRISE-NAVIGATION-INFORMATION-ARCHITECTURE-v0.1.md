@@ -229,6 +229,24 @@ Mobile:
 - uses contextual actions/sheets instead of permanent rails;
 - preserves the same semantic placement class as desktop.
 
+### 10.1 Help Center versus contextual help
+
+Help has two distinct Experience shapes and they MUST NOT be conflated.
+
+**Global Help Center**
+- is a full information destination;
+- owns search, browsing, categories, document lists and full help documents;
+- opens in the Main Workspace on desktop/tablet;
+- uses a full-screen/content-first realization on phone;
+- MUST NOT be rendered wholesale inside a narrow Side Panel merely because Help is a secondary Activity.
+
+**Contextual help**
+- explains the current task, field, error, object or workflow;
+- may use a Side Panel, popover, sheet or inline disclosure when that preserves the current task;
+- should deep-link to the full Help Center when broader reading is needed.
+
+The Workbench region follows Human intent, not icon placement: a secondary Activity may still open a primary Workspace Experience.
+
 ## 11. Contract direction
 
 Long-term Experience navigation should declare semantic placement intent rather than only a flat order number.
