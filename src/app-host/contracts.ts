@@ -97,6 +97,12 @@ export interface AppHostLoadedPageV010 extends AppHostResolvedRouteV010 {
 
 export interface ExperienceReadOptionsV010 {
   signal?: AbortSignal;
+  /**
+   * Exact client-side route used for this read, including a query string when
+   * the route carries reloadable page identity. Manifest matching still uses
+   * the declared base route.
+   */
+  routePath?: string;
 }
 
 export interface ExperienceSource {
