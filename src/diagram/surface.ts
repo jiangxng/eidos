@@ -1352,7 +1352,7 @@ export function mountDiagramEditorPageV010(
         followsFitToCanvas = true;
         fitViewToCanvas();
         report(
-          page.viewInteraction.localVisibilityResetNotice
+          page.viewInteraction?.localVisibilityResetNotice
           ?? "All diagram items are visible again. Save to persist the view."
         );
       };
