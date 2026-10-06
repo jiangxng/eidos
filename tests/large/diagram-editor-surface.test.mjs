@@ -448,7 +448,7 @@ test("diagram operation request may capture local placements and camera once at 
       hiddenNodeIds: ["ledger"],
       hiddenEdgeIds: ["guidance"],
       placements: [
-        { nodeId: "app", x: 144, y: 120 }
+        { nodeId: "app", x: -144, y: -120 }
       ],
       camera: {
         scale: 1.25,
@@ -462,7 +462,7 @@ test("diagram operation request may capture local placements and camera once at 
     hiddenNodeIds: ["ledger"],
     hiddenEdgeIds: ["guidance"],
     placements: [
-      { nodeId: "app", x: 144, y: 120 }
+      { nodeId: "app", x: -144, y: -120 }
     ],
     camera: {
       scale: 1.25,
@@ -546,4 +546,29 @@ test("lazy inspector refresh replaces matching base properties instead of failin
     { key: "owner", label: "Owner", value: "Current owner" },
     { key: "rules", label: "Posting rules", value: 5 }
   ]);
+});
+
+
+test("diagram editor supports unbounded drag, deselection and keyboard pruning", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/diagram/surface.ts", import.meta.url), "utf8")
+  );
+
+  assert.match(
+    source,
+    /const nextX =\s*originalX \+ screenDeltaX \/ camera\.scale/
+  );
+  assert.match(
+    source,
+    /const nextY =\s*originalY \+ screenDeltaY \/ camera\.scale/
+  );
+  assert.doesNotMatch(
+    source,
+    /const nextX = Math\.max\(\s*0,\s*originalX/
+  );
+  assert.match(source, /function clearSelection\(\): void/);
+  assert.match(source, /canvas\.addEventListener\("click", clearSelectionOnCanvasClick\)/);
+  assert.match(source, /event\.key === "Escape"/);
+  assert.match(source, /event\.key === "Delete" \|\| event\.key === "Backspace"/);
+  assert.match(source, /canvas\.focus\(\{ preventScroll: true \}\)/);
 });
