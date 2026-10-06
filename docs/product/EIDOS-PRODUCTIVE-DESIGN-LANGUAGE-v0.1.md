@@ -318,3 +318,13 @@ Rules:
 - third-party icon libraries are not a default dependency;
 - brand icons are governed separately from ordinary product icons;
 - the registry grows additively as new business domains require new semantics.
+
+
+### Catalog grid versus management list
+
+Catalog Browser supports two semantic realizations:
+
+- **grid** — discovery/browse surfaces such as stores, galleries and visually comparable options;
+- **list** — business management records where scanning, status and direct actions dominate.
+
+Plugins should select the semantic layout instead of owning private CSS. A one-record management screen should not be forced into a half-width store card merely because it reuses Catalog Browser.
