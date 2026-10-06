@@ -463,3 +463,20 @@ test("diagram graph actions may request captured view state without changing sem
   editable.actions.at(-1).captureViewState = "yes";
   assert.equal(validateDiagramEditorStateV010(editable).ok, false);
 });
+
+
+test("diagram page may declare a validated initial camera", () => {
+  const restored = {
+    ...page,
+    initialCamera: {
+      scale: 1.25,
+      translateX: 18,
+      translateY: -12
+    }
+  };
+  assert.equal(isDiagramEditorPageV010(restored), true);
+
+  const invalid = structuredClone(restored);
+  invalid.initialCamera.scale = 0;
+  assert.equal(isDiagramEditorPageV010(invalid), false);
+});
