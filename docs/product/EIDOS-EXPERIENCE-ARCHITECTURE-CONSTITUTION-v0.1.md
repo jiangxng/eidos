@@ -155,6 +155,48 @@ An Agent may say:
 
 The Agent should not merely describe an available deterministic action in prose when a safe declared action can be surfaced directly.
 
+### 7.1 Mixed-initiative rule
+
+Eidos adopts the Human-AI interaction idea of **mixed initiative**: direct manipulation and intelligent assistance are complementary, not competing product ideologies.
+
+The preferred controller at any moment is the one that can reduce total Human effort while preserving clarity, authority and recoverability.
+
+Use direct manipulation when:
+
+- intent is already known;
+- action semantics are deterministic;
+- state/consequence can be made visible;
+- the operation is frequent or strongly contextual;
+- a button, selection, batch action, short form or small drag/drop operation is cheaper than language.
+
+Use Agent initiative when:
+
+- intent is incomplete or ambiguous;
+- evidence must be synthesized;
+- work crosses people, teams, companies or software systems;
+- vocabularies/data models must be translated;
+- planning/diagnosis/exception handling is required;
+- coordination spans multiple steps or owners.
+
+An Agent may discover, prepare, explain or orchestrate a declared action, but availability of an Agent is not a reason to remove an efficient direct interaction.
+
+This rule is grounded in the Direct Manipulation and Mixed-Initiative HCI research cataloged in `DESIGN-RESEARCH-SOURCES-v0.1.md`.
+
+### 7.2 Experience simplification obligation
+
+Before adding conversational interaction to an enterprise workflow, the designer/LLM MUST ask whether product design can remove the need for conversation by:
+
+- exposing the relevant state;
+- adding a contextual action;
+- choosing a safe default;
+- supporting batch work;
+- reducing navigation;
+- adding direct manipulation;
+- turning a recurring explanation into product copy/status;
+- converting a stable repeated request into a governed workflow.
+
+AI does not excuse avoidable interaction friction.
+
 ## 8. Declared-action boundary for Agents
 
 Agent flexibility does not grant arbitrary UI or business authority.
@@ -380,6 +422,12 @@ A future LLM may change implementation details, but it must pass these gates.
 Eidos adopts principles, not visual clones.
 
 - Microsoft Windows settings guidance: smart defaults, fewer settings, task commands kept out of generic Settings, grouped configuration and on-demand advanced options.
+- Ben Shneiderman direct-manipulation research: preserve comprehensible, predictable, controllable direct interaction for suitable tasks.
+- Eric Horvitz mixed-initiative interaction research: couple intelligent services with direct manipulation rather than forcing an all-automation/all-GUI choice.
+- Microsoft Human-AI Interaction Guidelines: make capability clear, act contextually, support efficient invocation/dismissal/correction and preserve control over time.
+- Google PAIR Guidebook: first determine whether AI adds unique value; design feedback/control, graceful failure and supervision of automation.
+- Microsoft 365 Copilot UX guidance: conversational surfaces should add value that is difficult or inefficient through traditional navigation, and should expose focused capabilities rather than rebuild whole applications inside chat.
+- Apple HIG Generative AI: AI is not right for every feature; use it when it creates clear value, preserve Human agency and retain non-AI paths when practical.
 - Microsoft Fluent interaction guidance: define trigger/response/stop conditions; each turn should advance the task or close it cleanly; ask only for information needed for the next step.
 - Apple HIG: good defaults, minimal settings, task-specific options in task context, direct links to needed settings, progressive disclosure.
 - IBM Carbon: one primary action per action scope; multi-step progress communicates current/completed/future steps; validate before progression and show repair guidance.
