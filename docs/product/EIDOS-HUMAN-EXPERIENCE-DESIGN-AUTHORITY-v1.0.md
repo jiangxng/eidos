@@ -388,7 +388,7 @@ View
 → owning Host persistence/versioning
 ```
 
-Dragging a node, panning or zooming should not automatically create durable domain revisions unless the owning Experience explicitly chooses immediate persistence. For projection/layout editing, prefer local manipulation followed by one declared save action that captures the final placements/camera. This keeps direct manipulation fast while preserving append-only/versioned enterprise authority.
+Dragging a node, panning, zooming or pruning items from a projection should not automatically create durable domain revisions unless the owning Experience explicitly chooses immediate persistence. A projection editor MAY let the Human remove a selected node or relation from the current view; removing a node also suppresses its connected relations in that rendered view. This is view-state editing, not domain deletion. Prefer local manipulation followed by one declared save action that captures visible placements, camera and projection-hidden item IDs. This keeps direct manipulation fast while preserving append-only/versioned enterprise authority.
 
 ## 18. Practice roadmap
 
