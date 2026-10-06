@@ -402,6 +402,20 @@ Inspectors are contextual. An empty inspector should not permanently consume sca
 
 Node category can use restrained identity styling such as shape and very low-saturation surface tint. Semantic success/warning/danger colors remain reserved for real status, and brand color remains reserved for selection/focus/primary action.
 
+### Diagram keyboard conventions
+
+For editable canvas Experiences, prefer established cross-tool conventions before inventing product-specific shortcuts:
+
+- `Escape` clears selection or exits the current transient interaction;
+- `Delete` / `Backspace` invokes the declared view-only removal behavior when available;
+- arrow keys nudge a selected movable item by one view unit; `Shift + Arrow` uses a ten-unit step;
+- `+` / `-` zoom the canvas;
+- `Shift + 1` fits the visible graph;
+- `Shift + 2` fits the active selection;
+- `Ctrl/Cmd + 0` returns canvas zoom to 100%.
+
+These shortcuts are presentation controls. They MUST NOT infer semantic duplication, deletion, creation or mutation of business objects. Copy/paste/duplicate shortcuts remain unavailable unless an owning Experience explicitly declares safe domain semantics for them.
+
 ## 18. Practice roadmap
 
 This authority is intended to evolve through measured practice rather than a one-time redesign.
