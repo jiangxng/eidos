@@ -123,5 +123,20 @@ test("Workbench history recovery preserves qualified routes and handles an empty
     source,
     /const fallback = options\.initialWorkspaceRoute\?\.trim\(\) \|\| "\/"/
   );
-  assert.match(source, /void renderInternalWorkspace\(fallback\)/);
+  assert.match(source, /window\.history\.replaceState/);
+  assert.match(source, /void navigateWorkspace\(fallback\)/);
+});
+
+test("Workbench owns successful internal action-result navigation", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/workbench/shell.ts", import.meta.url), "utf8")
+  );
+
+  assert.match(source, /function actionResultNavigateToV010/);
+  assert.match(source, /route\.startsWith\("\/"\) \? route : undefined/);
+  assert.match(
+    source,
+    /const navigateTo = actionResultNavigateToV010\(result\);/
+  );
+  assert.match(source, /await navigateWorkspace\(navigateTo\)/);
 });
