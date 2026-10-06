@@ -95,3 +95,15 @@ test("business Workbench exposes workspace mode and visible mobile activity labe
   assert.match(source, /data-eidos-activity-label/);
   assert.match(source, /root\.setAttribute\("data-eidos-workspace-mode", workspaceMode\)/);
 });
+
+
+test("standard business Workbench does not render browser address chrome", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/workbench/shell.ts", import.meta.url), "utf8")
+  );
+  assert.doesNotMatch(source, /data-eidos-browser-address/);
+  assert.doesNotMatch(source, /data-eidos-browser-go/);
+  assert.doesNotMatch(source, /data-eidos-browser-external/);
+  assert.doesNotMatch(source, /\bbrowserAddress\b|\bbrowserGo\b|\bbrowserExternal\b/);
+  assert.match(source, /browserToolbar\.append\(globalControls\)/);
+});
