@@ -116,7 +116,7 @@ test("agent chat chrome responds to its own pane width", () => {
   assert.match(eidosProductiveWorkbenchCss, /@container eidos-chat \(max-width:520px\)/);
   assert.match(
     eidosProductiveWorkbenchCss,
-    /data-eidos-side-panel\] \[data-eidos-chat-header\] h1\][\s\S]*display:none/
+    /data-eidos-side-panel\] \[data-eidos-chat-header\] h1\{[\s\S]*display:none/
   );
   assert.match(
     eidosProductiveWorkbenchCss,
