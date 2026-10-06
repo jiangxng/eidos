@@ -572,3 +572,22 @@ test("diagram editor supports unbounded drag, deselection and keyboard pruning",
   assert.match(source, /event\.key === "Delete" \|\| event\.key === "Backspace"/);
   assert.match(source, /canvas\.focus\(\{ preventScroll: true \}\)/);
 });
+
+
+test("diagram editor follows standard professional canvas keyboard shortcuts", async () => {
+  const source = await import("node:fs/promises").then(fs =>
+    fs.readFile(new URL("../../src/diagram/surface.ts", import.meta.url), "utf8")
+  );
+
+  assert.match(source, /event\.key === "Escape"/);
+  assert.match(source, /event\.key === "Delete" \|\| event\.key === "Backspace"/);
+  assert.match(source, /\["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"\]/);
+  assert.match(source, /const step = event\.shiftKey \? 10 : 1/);
+  assert.match(source, /event\.shiftKey && event\.code === "Digit1"/);
+  assert.match(source, /event\.shiftKey && event\.code === "Digit2"/);
+  assert.match(source, /commandOrControl && event\.code === "Digit0"/);
+  assert.match(source, /applyZoomAt\(camera\.scale \* 1\.2\)/);
+  assert.match(source, /applyZoomAt\(camera\.scale \/ 1\.2\)/);
+  assert.match(source, /fitSelectionToCanvas/);
+  assert.match(source, /resetZoomTo100/);
+});
