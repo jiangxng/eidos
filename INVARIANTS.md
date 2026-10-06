@@ -87,3 +87,6 @@
 - **EIDOS-62** App Manager action requests preserve the active locale when one is supplied by the Host. A page MAY NOT render in one locale while its read/save action silently falls back to another locale because an adapter dropped locale context.
 
 - **EIDOS-63** Context-path navigation is opt-in deep-page context, not mandatory global chrome. Desktop MAY expose the full reloadable business path above the title; mobile MUST reduce the same path to a nearest-parent return affordance instead of squeezing the full breadcrumb into narrow space. Navigation context MUST remain distinct from page actions and browser history.
+
+- **EIDOS-64** Diagram save capture MAY include the current canvas viewport dimensions in addition to camera, placements and visibility state so an owning Experience can derive presentation artifacts such as current-view thumbnails. Eidos MUST NOT infer business meaning from those artifacts.
+- **EIDOS-65** A diagram action MAY request one explicit text value through a generic prompt contract. The prompt only supplies declared action input; Eidos MUST NOT infer domain rename/create semantics from the entered text.
