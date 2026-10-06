@@ -4,6 +4,8 @@
 **Date:** 2026-09-25  
 **Applies to:** App Host, Workbench, Eidos capabilities, and plugin-contributed human interfaces
 
+**Design entry point:** `docs/product/EIDOS-HUMAN-EXPERIENCE-DESIGN-AUTHORITY-v1.0.md`
+
 ## Visual revision
 
 The current normative visual realization is `EIDOS-BUSINESS-OFFICE-VISUAL-LANGUAGE-v0.2.md`. This v0.1 document remains authoritative for productive interaction hierarchy, density, accessibility and capability behavior; where visual character differs, the Business Office v0.2 revision wins.

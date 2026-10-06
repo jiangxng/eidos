@@ -1,6 +1,6 @@
 # Eidos Design Research Sources v0.1
 
-**Date reviewed:** 2026-09-28
+**Date reviewed:** 2026-10-06
 
 This is the curated external research shelf for Eidos design evolution. It is intentionally small and authority-ranked.
 
@@ -43,6 +43,46 @@ Use for: enterprise shell semantics, productive density, one-primary-action hier
 - https://developer.apple.com/design/human-interface-guidelines/context-menus
 
 Use for: purpose, agency, simplicity, good defaults, minimizing settings, keeping task-specific options in task context, direct navigation to needed settings, progressive disclosure, clear inline repair text, toolbar grouping and destructive-action separation.
+
+## Tier 1 — Human-AI interaction and mixed initiative
+
+### Ben Shneiderman — Direct Manipulation
+- https://doi.org/10.1145/238218.238281
+
+Use for: the long-standing HCI principle that interfaces should remain comprehensible, predictable and controllable through direct manipulation. Eidos applies this to frequent deterministic enterprise work: if a Human can safely act directly at lower effort than describing intent, preserve the direct path.
+
+### Eric Horvitz — Mixed-Initiative User Interfaces
+- https://www.microsoft.com/en-us/research/publication/principles-mixed-initiative-user-interfaces/
+- https://doi.org/10.1145/302979.303030
+
+Use for: coupling intelligent automation with direct manipulation rather than treating Agent automation and graphical interaction as mutually exclusive. Eidos uses mixed initiative as a design lens: Human and Agent each contribute where they are strongest, at the appropriate time.
+
+### Microsoft Research — Guidelines for Human-AI Interaction
+- https://www.microsoft.com/en-us/research/project/guidelines-for-human-ai-interaction/overview/
+- https://www.microsoft.com/en-us/research/publication/guidelines-for-human-ai-interaction/
+
+Use for: capability expectation-setting, context-aware timing, efficient invocation/dismissal, correction, control and behavior over time. The 18 guidelines were synthesized from prior Human-AI research and validated with design practitioners.
+
+### Google People + AI (PAIR) Guidebook
+- https://pair.withgoogle.com/guidebook-v2/
+- https://pair.withgoogle.com/guidebook-v2/chapters
+- https://pair.withgoogle.com/guidebook-v2/case-studies
+
+Use for: deciding whether AI actually adds user value, Human mental models, explainability, feedback/control, graceful failure, supervision of automation and returning control to the Human when automation fails.
+
+### Microsoft 365 Copilot extensibility UX guidance
+- https://learn.microsoft.com/en-us/microsoft-365-copilot/extensibility/declarative-agent-ui-widgets-guidelines
+
+Use for: conversational experiences should add value that is difficult or inefficient in traditional navigation, expose focused atomic capabilities instead of rebuilding the whole application inside chat, and preserve Human control.
+
+### Apple Human Interface Guidelines — Generative AI
+- https://developer.apple.com/design/human-interface-guidelines/generative-ai
+
+Use for: AI is not automatically appropriate for every feature; apply it where it creates clear value such as time savings, better communication or creativity, keep people in control, allow refinement/revert/retry, and retain non-AI paths where practical.
+
+Eidos synthesis:
+
+> Direct manipulation, guided workflows and Agent interaction form a continuum. Choose the lowest-effort interaction that preserves Human clarity, control and enterprise governance. Agent usage is justified by reasoning, ambiguity, synthesis and coordination value—not by novelty.
 
 ## Tier 1 — accessibility/interaction standards
 

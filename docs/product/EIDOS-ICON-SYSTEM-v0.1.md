@@ -4,6 +4,8 @@
 **Date:** 2026-09-25  
 **Owner:** Eidos
 
+**Design entry point:** `docs/product/EIDOS-HUMAN-EXPERIENCE-DESIGN-AUTHORITY-v1.0.md`
+
 ## Purpose
 
 The Eidos Icon System is the canonical icon language for Workbench and standard plugin Experiences.
