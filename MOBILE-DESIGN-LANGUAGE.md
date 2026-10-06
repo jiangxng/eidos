@@ -2,6 +2,8 @@
 
 Status: **Normative baseline**
 
+Design entry point: `docs/product/EIDOS-HUMAN-EXPERIENCE-DESIGN-AUTHORITY-v1.0.md`
+
 Mobile is a first-class realization of the same Eidos Experience semantics. Its current visual realization also follows `docs/product/EIDOS-BUSINESS-OFFICE-VISUAL-LANGUAGE-v0.2.md`. It is not a reduced desktop page and it is not a separate plugin UI system.
 
 ## Core rule
