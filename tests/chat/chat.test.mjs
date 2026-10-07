@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 import {
+  chatMessageCopyTextV010,
   isChatExperienceV010,
   isChatExperienceV020,
   renderChatExperienceToHtml,
@@ -328,3 +329,43 @@ test("Workbench honors preserveMountedPage and does not convert local reads into
   assert.match(workspaceCallback, /refreshChrome/);
 });
 
+
+
+test("Assistant Chat exposes copyable response text without leaking activity diagnostics", () => {
+  const text = chatMessageCopyTextV010({
+    id: "assistant-copy",
+    contractVersion: "0.2.0",
+    role: "assistant",
+    parts: [
+      { type: "text", text: "Primary answer." },
+      { type: "activity", label: "Tool execution", state: "complete", detail: "internal step" },
+      { type: "evidence", title: "Source A", source: "Enterprise Context" },
+      {
+        type: "proposal",
+        title: "Next action",
+        summary: "Review the exception.",
+        reasons: ["It is overdue."]
+      }
+    ]
+  });
+  assert.match(text, /Primary answer\./);
+  assert.match(text, /Source A/);
+  assert.match(text, /Next action/);
+  assert.doesNotMatch(text, /Tool execution|internal step/);
+});
+
+test("Assistant Chat v0.2 starts compact and grows through runtime behavior", async () => {
+  const html = renderChatExperienceToHtml(definitionV020);
+  assert.match(html, /rows="1"/);
+
+  const controller = await readFile(
+    new URL("../../dist/app-host/page-controller.js", import.meta.url),
+    "utf8"
+  );
+  assert.match(controller, /shell\.chatThinking/);
+  assert.match(controller, /data-eidos-chat-copy-message/);
+  assert.match(controller, /chatRequestInFlight/);
+  assert.match(controller, /event\.isComposing/);
+  assert.match(controller, /scrollHeight/);
+  assert.match(controller, /aria-busy/);
+});
