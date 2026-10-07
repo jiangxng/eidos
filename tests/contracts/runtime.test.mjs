@@ -10,3 +10,21 @@ assert.equal(validateValues(doc,{orderNo:"BAD",productId:"P-1",quantity:0,curren
 const badVersion={...doc,contractVersion:"0.1.0"}; const vr=validateUidl(badVersion); assert.equal(vr.ok,false); assert.ok(vr.diagnostics.some(x=>x.code==="EIDOS_VERSION_UNSUPPORTED"));
 const multi={...doc,actions:[...doc.actions,{id:"approve2",label:"Approve2",type:"submit"}]}; assert.equal(validateUidl(multi).ok,false);
 console.log("EIDOS convergence runtime contracts PASS");
+
+const editDoc = {
+  ...doc,
+  id: "edit-order",
+  fields: doc.fields.map((field, index) => index === 0
+    ? { ...field, initialValue: "SO-1001", readOnly: true }
+    : field.key === "currency"
+      ? { ...field, initialValue: "USD" }
+      : field)
+};
+assert.equal(validateUidl(editDoc).ok, true);
+const editHtml = renderToHtml(editDoc);
+assert.match(editHtml, /name="orderNo"[^>]*value="SO-1001"/);
+assert.match(editHtml, /value="USD" selected/);
+assert.equal(
+  toRenderModel(editDoc).fields.find(field => field.key === "orderNo").initialValue,
+  "SO-1001"
+);
