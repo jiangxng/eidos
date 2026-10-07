@@ -32,6 +32,7 @@
         "control":{"enum":["text","number","money","select","date","reference"]},
         "required":{"type":"boolean"},
         "readOnly":{"type":"boolean"},
+        "initialValue":{"$ref":"#/$defs/jsonPrimitive"},
         "unit":{"type":"string"},
         "options":{"type":"array","minItems":1,"items":{"type":"object","additionalProperties":false,"required":["value","label"],"properties":{"value":{"$ref":"#/$defs/jsonPrimitive"},"label":{"type":"string","minLength":1}}}},
         "validation":{"type":"object","additionalProperties":false,"properties":{"min":{"type":"number"},"max":{"type":"number"},"pattern":{"type":"string"}}}
