@@ -14,7 +14,7 @@ test("Eidos owns a production Workbench core icon registry", () => {
   assert.ok(Object.keys(eidosIconDefinitionsV010).length >= 24);
   for (const required of [
     "dashboard", "workspace", "plugins", "settings", "agent",
-    "sidebar", "arrowRight", "externalLink"
+    "sidebar", "arrowRight", "externalLink", "plus", "archive", "copy"
   ]) {
     assert.ok(required in eidosIconDefinitionsV010, required);
   }
