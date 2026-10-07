@@ -28,3 +28,65 @@ assert.equal(
   toRenderModel(editDoc).fields.find(field => field.key === "orderNo").initialValue,
   "SO-1001"
 );
+
+
+const fileDoc = {
+  contractVersion: "0.1.1",
+  kind: "form",
+  id: "import-source",
+  title: "Import source",
+  purpose: "execute-command",
+  command: {
+    code: "data-import.stage-file",
+    inputVersion: "0.1.0"
+  },
+  fields: [{
+    key: "sourceFile",
+    label: "Source file",
+    semanticType: "import-source-file",
+    control: "file",
+    required: true,
+    accept: [".csv", ".xlsx"],
+    maxBytes: 10485760
+  }],
+  actions: [{
+    id: "stage",
+    label: "Read file",
+    type: "submit",
+    command: "data-import.stage-file",
+    requiresConfirmation: false
+  }]
+};
+
+assert.equal(validateUidl(fileDoc).ok, true);
+const fileHtml = renderToHtml(fileDoc);
+assert.match(fileHtml, /type="file"/);
+assert.match(fileHtml, /accept="\.csv,\.xlsx"/);
+assert.match(fileHtml, /data-eidos-file-max-bytes="10485760"/);
+
+const fileRequest = createActionRequest(fileDoc, {
+  sourceFile: {
+    name: "counterparties.xlsx",
+    mediaType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    size: 5,
+    contentBase64: "SGVsbG8="
+  }
+});
+assert.equal(fileRequest.values.sourceFile.name, "counterparties.xlsx");
+
+assert.equal(validateValues(fileDoc, {
+  sourceFile: {
+    name: "too-large.xlsx",
+    mediaType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    size: 10485761,
+    contentBase64: "SGVsbG8="
+  }
+}).ok, false);
+
+assert.equal(validateUidl({
+  ...fileDoc,
+  fields: [{
+    ...fileDoc.fields[0],
+    initialValue: "forbidden.xlsx"
+  }]
+}).ok, false);
