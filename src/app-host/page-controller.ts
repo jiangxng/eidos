@@ -2,12 +2,14 @@ import { assertValidUidl } from "../runtime/validate.js";
 import type { ActionRequestV010, JsonValue } from "../runtime/contracts.js";
 import type { ActionHost } from "../adapters/ports.js";
 import {
+  chatMessageCopyTextV010,
   isChatExperienceV010,
   isChatExperienceV020,
   renderChatMessageToHtml,
   type ChatMessageV010,
   type ChatMessageV020
 } from "../chat/index.js";
+import { createEidosIconElement } from "../design-language/icons/index.js";
 import {
   isSettingsEditorV010,
   isSettingsEditorV020,
@@ -602,6 +604,81 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
       element: HTMLElement;
     }>();
     let transcriptFrame: number | undefined;
+    let chatRequestInFlight = false;
+    let pendingMessageId: string | undefined;
+
+    const copyChatText = async (text: string): Promise<void> => {
+      if (globalThis.navigator?.clipboard?.writeText) {
+        await globalThis.navigator.clipboard.writeText(text);
+        return;
+      }
+      const fallback = document.createElement("textarea");
+      fallback.value = text;
+      fallback.setAttribute("aria-hidden", "true");
+      fallback.style.position = "fixed";
+      fallback.style.opacity = "0";
+      fallback.style.pointerEvents = "none";
+      document.body.appendChild(fallback);
+      fallback.select();
+      const copied = document.execCommand("copy");
+      fallback.remove();
+      if (!copied) throw new Error("EIDOS_CHAT_COPY_FAILED");
+    };
+
+    const decorateAssistantMessage = (
+      element: HTMLElement,
+      message: ChatMessageV010 | ChatMessageV020
+    ): void => {
+      if (message.role !== "assistant") return;
+      const copyText = chatMessageCopyTextV010(message);
+      if (!copyText) return;
+      const actions = document.createElement("div");
+      actions.setAttribute("data-eidos-chat-message-actions", "");
+      const copy = document.createElement("button");
+      copy.type = "button";
+      copy.setAttribute("data-eidos-chat-copy-message", message.id);
+      copy.setAttribute(
+        "aria-label",
+        hostText("shell.chatCopy", "Copy response")
+      );
+      copy.title = hostText("shell.chatCopy", "Copy response");
+      const icon = createEidosIconElement("copy", { size: 16 });
+      if (icon) copy.appendChild(icon);
+      else copy.textContent = hostText("shell.chatCopy", "Copy response");
+      actions.appendChild(copy);
+      element.appendChild(actions);
+    };
+
+    const showPendingMessage = (): void => {
+      if (pendingMessageId) return;
+      pendingMessageId = `pending-${Date.now()}-${state.messages.length}`;
+      state.messages.push(definition.contractVersion === "0.2.0"
+        ? {
+            id: pendingMessageId,
+            contractVersion: "0.2.0",
+            role: "system",
+            parts: [{
+              type: "activity",
+              label: hostText("shell.chatThinking", "Thinking…"),
+              state: "pending"
+            }]
+          }
+        : {
+            id: pendingMessageId,
+            role: "system",
+            text: hostText("shell.chatThinking", "Thinking…")
+          });
+      renderTranscript();
+    };
+
+    const clearPendingMessage = (): void => {
+      if (!pendingMessageId) return;
+      state.messages = state.messages.filter(
+        message => message.id !== pendingMessageId
+      );
+      pendingMessageId = undefined;
+      renderTranscript();
+    };
 
     const patchTranscript = () => {
       if (!transcript) return;
@@ -634,6 +711,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
             throw new Error("EIDOS_CHAT_MESSAGE_RENDER_INVALID");
           }
           next.setAttribute("data-eidos-chat-message-id", message.id);
+          decorateAssistantMessage(next, message);
 
           if (rendered?.element.isConnected) {
             rendered.element.replaceWith(next);
@@ -675,8 +753,66 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
 
     renderTranscript();
 
+    if (transcript) {
+      const copyHandler = (event: Event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        const button = target.closest<HTMLButtonElement>(
+          "[data-eidos-chat-copy-message]"
+        );
+        if (!button || !transcript.contains(button)) return;
+        const messageId = button.dataset.eidosChatCopyMessage;
+        const message = state.messages.find(item => item.id === messageId);
+        if (!message) return;
+        const copyText = chatMessageCopyTextV010(message);
+        if (!copyText) return;
+        void (async () => {
+          try {
+            await copyChatText(copyText);
+            button.dataset.copied = "true";
+            button.title = hostText("shell.chatCopied", "Copied");
+            button.setAttribute(
+              "aria-label",
+              hostText("shell.chatCopied", "Copied")
+            );
+            window.setTimeout(() => {
+              if (!button.isConnected) return;
+              delete button.dataset.copied;
+              button.title = hostText("shell.chatCopy", "Copy response");
+              button.setAttribute(
+                "aria-label",
+                hostText("shell.chatCopy", "Copy response")
+              );
+            }, 1400);
+          } catch {
+            delete button.dataset.copied;
+          }
+        })();
+      };
+      transcript.addEventListener("click", copyHandler);
+      listeners.push(() => transcript.removeEventListener("click", copyHandler));
+    }
+
     if (form && textarea instanceof HTMLTextAreaElement) {
+      const resizeComposer = () => {
+        textarea.style.height = "auto";
+        const maxHeight = Number.parseFloat(
+          globalThis.getComputedStyle(textarea).maxHeight
+        );
+        const target = Number.isFinite(maxHeight)
+          ? Math.min(textarea.scrollHeight, maxHeight)
+          : textarea.scrollHeight;
+        textarea.style.height = Math.max(textarea.clientHeight, target) + "px";
+        textarea.style.overflowY =
+          Number.isFinite(maxHeight) && textarea.scrollHeight > maxHeight
+            ? "auto"
+            : "hidden";
+      };
+      resizeComposer();
+      textarea.addEventListener("input", resizeComposer);
+      listeners.push(() => textarea.removeEventListener("input", resizeComposer));
       const submit = async () => {
+        if (chatRequestInFlight) return;
         const message = textarea.value.trim();
         if (!message) return;
 
@@ -693,6 +829,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
               text: message
             });
         textarea.value = "";
+        resizeComposer();
         renderTranscript();
 
         if (!options.actionHost) {
@@ -717,7 +854,10 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
         }
 
         const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+        chatRequestInFlight = true;
+        form.setAttribute("aria-busy", "true");
         if (button) button.disabled = true;
+        showPendingMessage();
 
         try {
           const values: Record<string, JsonValue> = {
@@ -742,6 +882,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
           };
 
           const result = await options.actionHost.execute(request);
+          clearPendingMessage();
           const resultId = `${result.ok ? "assistant" : "error"}-${Date.now()}-${state.messages.length}`;
           state.messages.push(definition.contractVersion === "0.2.0"
             ? resultMessageV020(
@@ -764,6 +905,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
             { preserveMountedPage: true }
           );
         } catch (error) {
+          clearPendingMessage();
           const message = error instanceof Error ? error.message : String(error);
           state.messages.push(definition.contractVersion === "0.2.0"
             ? {
@@ -779,6 +921,9 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
               });
           renderTranscript();
         } finally {
+          clearPendingMessage();
+          chatRequestInFlight = false;
+          form.removeAttribute("aria-busy");
           if (button) button.disabled = false;
           textarea.focus();
         }
@@ -789,7 +934,11 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
         void submit();
       };
       const keyHandler = (event: KeyboardEvent) => {
-        if (event.key === "Enter" && !event.shiftKey) {
+        if (
+          event.key === "Enter"
+          && !event.shiftKey
+          && !event.isComposing
+        ) {
           event.preventDefault();
           void submit();
         }
@@ -803,6 +952,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
       for (const suggestion of Array.from(suggestions)) {
         const handler = () => {
           textarea.value = suggestion.dataset.eidosChatPrompt ?? "";
+          resizeComposer();
           textarea.focus();
         };
         suggestion.addEventListener("click", handler);
