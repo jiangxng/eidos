@@ -154,6 +154,18 @@ export const eidosIconDefinitionsV010 = {
     viewBox: "0 0 24 24",
     nodes: [p("M18.5 8A7 7 0 0 0 6 6.5"), poly("5 3.8 6.2 6.8 9.3 5.8"), p("M5.5 16A7 7 0 0 0 18 17.5",true), poly("19 20.2 17.8 17.2 14.7 18.2",true)]
   },
+  plus: {
+    viewBox: "0 0 24 24",
+    nodes: [l(12,5,12,19), l(5,12,19,12,true)]
+  },
+  archive: {
+    viewBox: "0 0 24 24",
+    nodes: [r(4,7,16,13,2), p("M3 4h18v4H3V4Z"), l(9,12,15,12,true)]
+  },
+  copy: {
+    viewBox: "0 0 24 24",
+    nodes: [r(5,5,11,11,2), r(8,8,11,11,2,true)]
+  },
   help: {
     viewBox: "0 0 24 24",
     nodes: [c(12,12,9), p("M9.6 9.3a2.5 2.5 0 1 1 4.2 1.8c-1.2 1-1.8 1.5-1.8 2.9",true), c(12,17,0.8,true,true)]
