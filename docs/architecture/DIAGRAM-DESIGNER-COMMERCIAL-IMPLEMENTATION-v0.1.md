@@ -59,3 +59,16 @@ An opted-in `viewInteraction.localEdgePathEdit` exposes four connector path pres
 - Congestion diagnostic is not yet a user-facing explanation/action. A proper inspector or notification must expose it.
 - Verify actual browser interaction, reroute after move, SVG label correctness and 200-node/400-edge performance; these are **NOT TESTED** by the pure route tests.
 - App Platform integration and merged production availability depend on stacked Eidos A1–A3 and App Platform #537. **Do not merge B1 to main directly or synchronize vendor before the stack is reconciled.**
+
+## Phase B2 — parallel and reverse relation lanes, self-loops (stacked, under validation)
+
+- Explicitly path-styled parallel/reverse edges between the same unordered pair receive deterministic, ordered attachment offsets. Legacy edges with no explicit `pathKind` are not silently spread into lanes.
+- Multiple self-edges receive different loop radii; an existing self-relation renders a visible path outside the source node (even when its requested style is straight, since a literal one-segment self-line would be invisible).
+- Lane attachments are clamped to the existing node boundary; relationship ids, endpoint ids, arrows and business direction are unchanged. Drag preview uses the same lane assignment as the final render.
+- Pure tests prove deterministic grouping, reverse direction, ID safety, bounded attachments, loop appearance and validation.
+
+### B2 limitations
+
+- Parallel spacing is an initial low-density presentation rule; many edges can crowd a small node boundary. A professional dense-graph router needs configurable lanes, labels and hit-target disambiguation.
+- Only the explicit style subset uses lane offsets. Self-relations are visible even for legacy paths, as a corrective rendering exception.
+- Browser rendering, touch hit testing, arrow readability and 200/400-node benchmark remain **NOT TESTED**.
