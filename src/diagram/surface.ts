@@ -2590,7 +2590,8 @@ export function mountDiagramEditorPageV010(
   if (page.viewInteraction?.zoom || page.viewInteraction?.pan) {
     canvas.style.touchAction = "none";
     if (page.viewInteraction?.pan) {
-      canvas.style.cursor = "grab";
+      canvas.style.cursor = page.viewInteraction?.localNodeDrag && canvasTool === "SELECT"
+        ? "crosshair" : "grab";
     }
 
     const canvasPoint = (clientX: number, clientY: number) => {
@@ -2606,10 +2607,29 @@ export function mountDiagramEditorPageV010(
       b: { x: number; y: number }
     ): number => Math.hypot(b.x - a.x, b.y - a.y);
 
+    let marquee: {
+      pointerId: number;
+      start: { x: number; y: number };
+      current: { x: number; y: number };
+      additive: boolean;
+      moved: boolean;
+      element: HTMLDivElement;
+    } | undefined;
+
+    const removeMarquee = (): void => {
+      marquee?.element.remove();
+      marquee = undefined;
+    };
+
     const pointerDown = (event: PointerEvent) => {
       const target = event.target as Element | null;
+      const mouse = event.pointerType === "mouse" || event.pointerType === "pen";
+      const primary = event.button === 0;
+      const wantsMarquee = mouse && primary
+        && page.viewInteraction?.localNodeDrag === true
+        && canvasTool === "SELECT" && !spaceHeld;
       if (
-        event.pointerType !== "touch"
+        mouse && primary
         && (
           target?.closest?.("[data-eidos-diagram-node]")
           || target?.closest?.("[data-eidos-diagram-edge]")
@@ -2617,11 +2637,22 @@ export function mountDiagramEditorPageV010(
       ) {
         return;
       }
-      if (!page.viewInteraction?.pan && event.pointerType !== "touch") {
-        return;
-      }
+      if (mouse && !primary && event.button !== 1 && event.button !== 2) return;
+      if (!wantsMarquee && !page.viewInteraction?.pan && event.pointerType !== "touch") return;
       event.preventDefault();
       canvas.setPointerCapture(event.pointerId);
+      if (wantsMarquee) {
+        const anchor = canvasPoint(event.clientX, event.clientY);
+        const element = document.createElement("div");
+        element.setAttribute("data-eidos-diagram-marquee", "");
+        element.style.cssText = "position:absolute;z-index:9;pointer-events:none;border:1px solid var(--eidos-primary,#2B6CB0);background:color-mix(in srgb,var(--eidos-primary-subtle,#EAF2FB) 75%,transparent);";
+        canvas.appendChild(element);
+        marquee = {
+          pointerId: event.pointerId, start: anchor, current: anchor,
+          additive: event.shiftKey, moved: false, element
+        };
+        return;
+      }
       navigationPointers.set(event.pointerId, {
         x: event.clientX,
         y: event.clientY
@@ -2642,6 +2673,19 @@ export function mountDiagramEditorPageV010(
     };
 
     const pointerMove = (event: PointerEvent) => {
+      if (marquee?.pointerId === event.pointerId) {
+        event.preventDefault();
+        const current = canvasPoint(event.clientX, event.clientY);
+        marquee.current = current;
+        if (Math.hypot(current.x - marquee.start.x, current.y - marquee.start.y) >= 4) marquee.moved = true;
+        if (marquee.moved) {
+          marquee.element.style.left = Math.min(current.x, marquee.start.x) + "px";
+          marquee.element.style.top = Math.min(current.y, marquee.start.y) + "px";
+          marquee.element.style.width = Math.abs(current.x - marquee.start.x) + "px";
+          marquee.element.style.height = Math.abs(current.y - marquee.start.y) + "px";
+        }
+        return;
+      }
       if (!navigationPointers.has(event.pointerId)) return;
       event.preventDefault();
       navigationPointers.set(event.pointerId, {
@@ -2699,6 +2743,34 @@ export function mountDiagramEditorPageV010(
     };
 
     const pointerUp = (event: PointerEvent) => {
+      if (marquee?.pointerId === event.pointerId) {
+        const box = marquee;
+        removeMarquee();
+        if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+        if (event.type === "pointerup" && box.moved) {
+          const minX = Math.min(box.start.x, box.current.x);
+          const maxX = Math.max(box.start.x, box.current.x);
+          const minY = Math.min(box.start.y, box.current.y);
+          const maxY = Math.max(box.start.y, box.current.y);
+          const ids = diagramNodesIntersectingRectV010(visibleNodes(), {
+            x: (minX - camera.translateX) / camera.scale,
+            y: (minY - camera.translateY) / camera.scale,
+            width: (maxX - minX) / camera.scale,
+            height: (maxY - minY) / camera.scale
+          });
+          if (!box.additive) selectedNodeIds.clear();
+          for (const id of ids) selectedNodeIds.add(id);
+          const last = [...selectedNodeIds].at(-1);
+          selected = last ? { kind: "node", id: last } : undefined;
+          selectionInspection = undefined;
+          selectionReadGeneration += 1;
+          suppressNextCanvasClick = true;
+          render();
+          canvas.focus({ preventScroll: true });
+          window.setTimeout(() => { suppressNextCanvasClick = false; }, 0);
+        }
+        return;
+      }
       navigationPointers.delete(event.pointerId);
       if (canvas.hasPointerCapture(event.pointerId)) {
         canvas.releasePointerCapture(event.pointerId);
@@ -2711,7 +2783,8 @@ export function mountDiagramEditorPageV010(
       }
       panLast = points.length === 1 ? points[0] : undefined;
       if (points.length === 0) {
-        canvas.style.cursor = page.viewInteraction?.pan ? "grab" : "";
+        canvas.style.cursor = page.viewInteraction?.localNodeDrag && canvasTool === "SELECT"
+          ? "crosshair" : (page.viewInteraction?.pan ? "grab" : "");
       }
     };
 
@@ -2719,6 +2792,12 @@ export function mountDiagramEditorPageV010(
     canvas.addEventListener("pointermove", pointerMove);
     canvas.addEventListener("pointerup", pointerUp);
     canvas.addEventListener("pointercancel", pointerUp);
+    const onBlur = (): void => {
+      removeMarquee();
+      navigationPointers.clear();
+      panLast = undefined;
+    };
+    window.addEventListener("blur", onBlur);
     const lostPointerCapture = (event: PointerEvent) => {
       if (!navigationPointers.has(event.pointerId)) return;
       navigationPointers.delete(event.pointerId);
@@ -2736,6 +2815,7 @@ export function mountDiagramEditorPageV010(
       () => canvas.removeEventListener("pointermove", pointerMove),
       () => canvas.removeEventListener("pointerup", pointerUp),
       () => canvas.removeEventListener("pointercancel", pointerUp),
+      () => window.removeEventListener("blur", onBlur),
       () => canvas.removeEventListener("lostpointercapture", lostPointerCapture)
     );
   }
