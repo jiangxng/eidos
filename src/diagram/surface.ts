@@ -470,6 +470,10 @@ export function isDiagramEditorPageV010(
           || typeof page.viewInteraction.localNodeDrag === "boolean"
         )
         && (
+          page.viewInteraction.localEdgePathEdit === undefined
+          || typeof page.viewInteraction.localEdgePathEdit === "boolean"
+        )
+        && (
           page.viewInteraction.localSelectionHide === undefined
           || typeof page.viewInteraction.localSelectionHide === "boolean"
         )
