@@ -13,6 +13,11 @@ import {
 } from "./edge-paths.js";
 import { diagramNodesIntersectingRectV010 } from "./selection.js";
 import {
+  diagramOffsetNodeAttachmentV010,
+  diagramParallelLaneOffsetsV010,
+  diagramSelfLoopGeometryV010
+} from "./edge-lanes.js";
+import {
   layoutLayeredDiagramV010
 } from "./layered-layout.js";
 import {
@@ -2253,6 +2258,10 @@ export function mountDiagramEditorPageV010(
 
     const renderedNodes = visibleNodes();
     const renderedEdges = visibleEdges();
+    // Lane offsets are computed only for explicitly styled edges, preserving old projections.
+    const laneOffsets = diagramParallelLaneOffsetsV010(
+      renderedEdges.filter(edge => edge.pathKind !== undefined)
+    );
     const liveEdges = new Map<string, {
       hit: SVGPathElement;
       visual: SVGPathElement;
@@ -2289,15 +2298,24 @@ export function mountDiagramEditorPageV010(
       if (!source || !target) continue;
       const sourceCenter = nodeCenter(source);
       const targetCenter = nodeCenter(target);
-      const a = nodeBoundaryPoint(source, targetCenter);
-      const b = nodeBoundaryPoint(target, sourceCenter);
+      const lane = laneOffsets.get(edge.id) ?? 0;
+      const sourceAttachment = nodeBoundaryPoint(source, targetCenter);
+      const targetAttachment = nodeBoundaryPoint(target, sourceCenter);
+      const a = edge.pathKind !== undefined && edge.source !== edge.target
+        ? diagramOffsetNodeAttachmentV010(source, sourceAttachment, targetCenter, lane)
+        : sourceAttachment;
+      const b = edge.pathKind !== undefined && edge.source !== edge.target
+        ? diagramOffsetNodeAttachmentV010(target, targetAttachment, sourceCenter, lane)
+        : targetAttachment;
       // Only explicitly styled orthogonal routes use obstacle avoidance.
       // Legacy edges remain straight; unrelated business data is never mutated.
       const routeObstacles = edge.pathKind === "orthogonal" || edge.pathKind === "rounded-orthogonal"
         ? renderedNodes.filter(node => node.id !== edge.source && node.id !== edge.target)
           .map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }))
         : [];
-      const geometry = diagramEdgeGeometryV010(a, b, edge.pathKind, { obstacles: routeObstacles });
+      const geometry = edge.source === edge.target
+        ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane)
+        : diagramEdgeGeometryV010(a, b, edge.pathKind, { obstacles: routeObstacles });
       const hit = svgElement("path");
       hit.setAttribute("d", geometry.d);
       hit.setAttribute("fill", "none");
@@ -2406,9 +2424,19 @@ export function mountDiagramEditorPageV010(
         if (!sourceNode || !targetNode) continue;
         const source = { ...sourceNode, ...positions.get(edge.source) };
         const target = { ...targetNode, ...positions.get(edge.target) };
-        const a = nodeBoundaryPoint(source, nodeCenter(target));
-        const b = nodeBoundaryPoint(target, nodeCenter(source));
-        const route = diagramEdgeGeometryV010(a, b, edge.pathKind);
+        const sourceCenter = nodeCenter(source);
+        const targetCenter = nodeCenter(target);
+        const lane = laneOffsets.get(edge.id) ?? 0;
+        const a0 = nodeBoundaryPoint(source, targetCenter);
+        const b0 = nodeBoundaryPoint(target, sourceCenter);
+        const a = edge.pathKind !== undefined && edge.source !== edge.target
+          ? diagramOffsetNodeAttachmentV010(source, a0, targetCenter, lane) : a0;
+        const b = edge.pathKind !== undefined && edge.source !== edge.target
+          ? diagramOffsetNodeAttachmentV010(target, b0, sourceCenter, lane) : b0;
+        // Drag preview remains lightweight; committed render recomputes obstacle avoidance.
+        const route = edge.source === edge.target
+          ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane)
+          : diagramEdgeGeometryV010(a, b, edge.pathKind);
         const elements = liveEdges.get(edge.id);
         if (!elements) continue;
         elements.hit.setAttribute("d", route.d);
