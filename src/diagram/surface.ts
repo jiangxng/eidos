@@ -1239,6 +1239,11 @@ export function mountDiagramEditorPageV010(
   const selectedNodeIds = new Set<string>();
   let canvasTool: "SELECT" | "PAN" = "SELECT";
   let spaceHeld = false;
+  let wheelInputMode: "MOUSE" | "TRACKPAD" = "MOUSE";
+  try {
+    wheelInputMode = window.localStorage.getItem("eidos.diagram.wheelMode") === "TRACKPAD"
+      ? "TRACKPAD" : "MOUSE";
+  } catch { /* Private browsing may disable storage; mouse stays the default. */ }
   let suppressNextCanvasClick = false;
   let selectionInspection:
     DiagramEditorSelectionInspectionV010 | undefined;
@@ -1665,6 +1670,18 @@ export function mountDiagramEditorPageV010(
         };
         toolbar.appendChild(button);
       }
+      const wheelButton = document.createElement("button");
+      wheelButton.type = "button";
+      wheelButton.textContent = wheelInputMode === "MOUSE" ? "Mouse" : "Trackpad";
+      wheelButton.title = "Switch between mouse-wheel zoom and trackpad two-finger pan";
+      wheelButton.setAttribute("data-eidos-diagram-wheel-mode", wheelInputMode);
+      wheelButton.onclick = () => {
+        wheelInputMode = wheelInputMode === "MOUSE" ? "TRACKPAD" : "MOUSE";
+        try { window.localStorage.setItem("eidos.diagram.wheelMode", wheelInputMode); }
+        catch { /* Preference remains usable for this mount. */ }
+        renderActions();
+      };
+      toolbar.appendChild(wheelButton);
       for (const option of [
         { label: "Undo", key: "undo", enabled: undoHistory.length > 0, action: undoView },
         { label: "Redo", key: "redo", enabled: redoHistory.length > 0, action: redoView }
@@ -2516,6 +2533,9 @@ export function mountDiagramEditorPageV010(
             const screenDeltaX = move.clientX - startX;
             const screenDeltaY = move.clientY - startY;
             if (
+              !moved && Math.hypot(screenDeltaX, screenDeltaY) < (isTouch ? touchDragThresholdPx : 4)
+            ) return;
+            if (
               isTouch
               && !moved
               && Math.hypot(screenDeltaX, screenDeltaY) < touchDragThresholdPx
@@ -2796,6 +2816,7 @@ export function mountDiagramEditorPageV010(
       removeMarquee();
       navigationPointers.clear();
       panLast = undefined;
+      spaceHeld = false;
     };
     window.addEventListener("blur", onBlur);
     const lostPointerCapture = (event: PointerEvent) => {
@@ -2823,14 +2844,19 @@ export function mountDiagramEditorPageV010(
   if (page.viewInteraction?.zoom) {
     const wheel = (event: WheelEvent) => {
       event.preventDefault();
-      const anchor = (() => {
-        const rect = canvas.getBoundingClientRect();
-        return {
-          x: event.clientX - rect.left,
-          y: event.clientY - rect.top
-        };
-      })();
-      const factor = event.deltaY < 0 ? 1.12 : 1 / 1.12;
+      const deltaUnit = event.deltaMode === 1 ? 16
+        : event.deltaMode === 2 ? Math.max(1, canvas.clientHeight) : 1;
+      const dx = event.deltaX * deltaUnit;
+      const dy = event.deltaY * deltaUnit;
+      if (wheelInputMode === "TRACKPAD" && !event.ctrlKey) {
+        followsFitToCanvas = false;
+        camera = panDiagramCameraByScreenDeltaV010(camera, { x: -dx, y: -dy });
+        applyCameraTransform();
+        return;
+      }
+      const rect = canvas.getBoundingClientRect();
+      const anchor = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+      const factor = Math.max(0.5, Math.min(2, Math.exp(-dy * 0.002)));
       applyZoomAt(camera.scale * factor, anchor);
     };
     canvas.addEventListener("wheel", wheel, { passive: false });
@@ -2887,6 +2913,14 @@ export function mountDiagramEditorPageV010(
       if (!ctrl && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "h") {
         canvasTool = "PAN"; renderActions(); return;
       }
+    }
+
+    if (page.viewInteraction?.localNodeDrag === true && event.code === "Space"
+      && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      spaceHeld = true;
+      canvas.style.cursor = "grab";
+      return;
     }
 
     if (event.key === "Escape" && selected) {
@@ -2968,7 +3002,15 @@ export function mountDiagramEditorPageV010(
     }
   };
   root.addEventListener("keydown", keydownHandler);
+  const keyupHandler = (event: KeyboardEvent): void => {
+    if (event.code === "Space" && spaceHeld) {
+      spaceHeld = false;
+      canvas.style.cursor = canvasTool === "SELECT" ? "crosshair" : "grab";
+    }
+  };
+  window.addEventListener("keyup", keyupHandler);
   listeners.push(() => root.removeEventListener("keydown", keydownHandler));
+  listeners.push(() => window.removeEventListener("keyup", keyupHandler));
 
   void load(
     page.readPresets?.find(preset =>
