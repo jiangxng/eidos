@@ -2270,28 +2270,27 @@ export function mountDiagramEditorPageV010(
     // Preview only the incident edges during drag; keep pointer capture and the
     // rest of the canvas mounted until the gesture commits or cancels.
     const previewIncidentEdges = (
-      moving: DiagramEditorNodeV010,
-      x: number,
-      y: number
+      positions: ReadonlyMap<string, { x: number; y: number }>
     ): void => {
-      const temporary = { ...moving, x, y };
+      if (positions.size === 0) return;
+      const byId = new Map(renderedNodes.map(node => [node.id, node] as const));
       for (const edge of renderedEdges) {
-        if (edge.source !== moving.id && edge.target !== moving.id) continue;
-        const source = edge.source === moving.id
-          ? temporary : renderedNodes.find(node => node.id === edge.source);
-        const target = edge.target === moving.id
-          ? temporary : renderedNodes.find(node => node.id === edge.target);
-        if (!source || !target) continue;
+        if (!positions.has(edge.source) && !positions.has(edge.target)) continue;
+        const sourceNode = byId.get(edge.source);
+        const targetNode = byId.get(edge.target);
+        if (!sourceNode || !targetNode) continue;
+        const source = { ...sourceNode, ...positions.get(edge.source) };
+        const target = { ...targetNode, ...positions.get(edge.target) };
         const a = nodeBoundaryPoint(source, nodeCenter(target));
         const b = nodeBoundaryPoint(target, nodeCenter(source));
-        const path = diagramEdgeGeometryV010(a, b, edge.pathKind);
+        const route = diagramEdgeGeometryV010(a, b, edge.pathKind);
         const elements = liveEdges.get(edge.id);
         if (!elements) continue;
-        elements.hit.setAttribute("d", path.d);
-        elements.visual.setAttribute("d", path.d);
+        elements.hit.setAttribute("d", route.d);
+        elements.visual.setAttribute("d", route.d);
         if (elements.label) {
-          elements.label.setAttribute("x", String(path.label.x));
-          elements.label.setAttribute("y", String(path.label.y - 8));
+          elements.label.setAttribute("x", String(route.label.x));
+          elements.label.setAttribute("y", String(route.label.y - 8));
         }
       }
     };
@@ -2424,6 +2423,33 @@ export function mountDiagramEditorPageV010(
           const startY = event.clientY;
           const originalX = node.x;
           const originalY = node.y;
+          const members = localViewDrag && selectedNodeIds.has(node.id)
+            ? renderedNodes.filter(item => selectedNodeIds.has(item.id))
+            : [node];
+          const initial = new Map(members.map(item => [item.id, {
+            x: item.x, y: item.y
+          }] as const));
+          const membersElements = new Map(members.map(item => [
+            item.id,
+            stage.querySelector<HTMLElement>(
+              `[data-eidos-diagram-node="${CSS.escape(item.id)}"]`
+            )
+          ] as const));
+          const movedPositions = (dx: number, dy: number) =>
+            new Map(members.map(item => [item.id, {
+              x: item.x + dx,
+              y: item.y + dy
+            }] as const));
+          const showPositions = (positions: ReadonlyMap<string, { x: number; y: number }>) => {
+            for (const [id, position] of positions) {
+              const target = membersElements.get(id);
+              if (target) {
+                target.style.left = position.x + "px";
+                target.style.top = position.y + "px";
+              }
+            }
+            previewIncidentEdges(positions);
+          };
           let moved = false;
           let cancelledByNavigation = false;
 
@@ -2431,9 +2457,7 @@ export function mountDiagramEditorPageV010(
             if (cancelledByNavigation) return;
             cancelledByNavigation = true;
             moved = false;
-            element.style.left = originalX + "px";
-            element.style.top = originalY + "px";
-            previewIncidentEdges(node, originalX, originalY);
+            showPositions(initial);
             suppressNextNodeClick = true;
             window.setTimeout(() => {
               suppressNextNodeClick = false;
@@ -2455,14 +2479,11 @@ export function mountDiagramEditorPageV010(
             ) {
               return;
             }
-            const nextX =
-              originalX + screenDeltaX / camera.scale;
-            const nextY =
-              originalY + screenDeltaY / camera.scale;
             moved = true;
-            element.style.left = nextX + "px";
-            element.style.top = nextY + "px";
-            previewIncidentEdges(node, nextX, nextY);
+            showPositions(movedPositions(
+              screenDeltaX / camera.scale,
+              screenDeltaY / camera.scale
+            ));
           };
 
           const pointerUp = (up: PointerEvent) => {
@@ -2476,9 +2497,14 @@ export function mountDiagramEditorPageV010(
             suppressNextNodeClick = true;
             const x = Number.parseFloat(element.style.left);
             const y = Number.parseFloat(element.style.top);
-            if (localViewDrag && (node.readOnly || !page.operationCommand)) {
-              node.x = x;
-              node.y = y;
+            if (localViewDrag && (node.readOnly || !page.operationCommand || members.length > 1)) {
+              checkpoint();
+              const dx = x - originalX;
+              const dy = y - originalY;
+              for (const item of members) {
+                item.x += dx;
+                item.y += dy;
+              }
               render();
               window.setTimeout(() => {
                 suppressNextNodeClick = false;
