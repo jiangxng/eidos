@@ -7,6 +7,11 @@ import type {
   DiagramCameraTransformV010
 } from "./viewport.js";
 import {
+  diagramEdgeGeometryV010,
+  isDiagramEdgePathKindV010,
+  type DiagramEdgePathKindV010
+} from "./edge-paths.js";
+import {
   layoutLayeredDiagramV010
 } from "./layered-layout.js";
 import {
@@ -178,6 +183,8 @@ export interface DiagramEditorEdgeV010 {
   kind: string;
   label?: string;
   style?: DiagramEditorEdgeStyleV010;
+  /** A presentation route, independent of dashed texture and semantic arrow direction. */
+  pathKind?: DiagramEdgePathKindV010;
   arrow?: DiagramEditorEdgeArrowV010;
   detail?: string;
   properties?: DiagramInspectorPropertyV010[];
@@ -633,6 +640,8 @@ export function validateDiagramEditorStateV010(
       || !nonEmpty(edge?.kind)
       || (edge.style !== undefined
         && !["solid", "dashed"].includes(edge.style))
+      || (edge.pathKind !== undefined
+        && !isDiagramEdgePathKindV010(edge.pathKind))
       || (edge.arrow !== undefined
         && !["none", "start", "end", "both"].includes(edge.arrow))
     ) {
@@ -1178,6 +1187,8 @@ function nodeBoundaryPoint(
   };
 }
 
+let diagramEditorInstanceSequence = 0;
+
 export function mountDiagramEditorPageV010(
   options: MountDiagramEditorPageOptionsV010
 ): MountedDiagramEditorPageV010 {
@@ -1232,6 +1243,7 @@ export function mountDiagramEditorPageV010(
   let followsFitToCanvas = page.initialCamera === undefined;
   let stageElement: HTMLElement | undefined;
   let suppressNextNodeClick = false;
+  const arrowMarkerId = "eidos-diagram-arrow-" + (++diagramEditorInstanceSequence);
   const locallyHiddenNodeIds = new Set<string>();
   const locallyHiddenEdgeIds = new Set<string>();
   const syncLocalVisibilityFromState = (): void => {
@@ -2047,7 +2059,7 @@ export function mountDiagramEditorPageV010(
 
     const defs = svgElement("defs");
     const markerEnd = svgElement("marker");
-    markerEnd.setAttribute("id", "eidos-diagram-arrow-end");
+    markerEnd.setAttribute("id", arrowMarkerId);
     markerEnd.setAttribute("viewBox", "0 0 10 10");
     markerEnd.setAttribute("refX", "9");
     markerEnd.setAttribute("refY", "5");
@@ -2089,11 +2101,10 @@ export function mountDiagramEditorPageV010(
       const targetCenter = nodeCenter(target);
       const a = nodeBoundaryPoint(source, targetCenter);
       const b = nodeBoundaryPoint(target, sourceCenter);
-      const hit = svgElement("line");
-      hit.setAttribute("x1", String(a.x));
-      hit.setAttribute("y1", String(a.y));
-      hit.setAttribute("x2", String(b.x));
-      hit.setAttribute("y2", String(b.y));
+      const geometry = diagramEdgeGeometryV010(a, b, edge.pathKind);
+      const hit = svgElement("path");
+      hit.setAttribute("d", geometry.d);
+      hit.setAttribute("fill", "none");
       hit.setAttribute("stroke", "transparent");
       hit.setAttribute("stroke-width", "18");
       hit.style.pointerEvents = "stroke";
@@ -2108,11 +2119,9 @@ export function mountDiagramEditorPageV010(
       });
       svg.appendChild(hit);
 
-      const line = svgElement("line");
-      line.setAttribute("x1", String(a.x));
-      line.setAttribute("y1", String(a.y));
-      line.setAttribute("x2", String(b.x));
-      line.setAttribute("y2", String(b.y));
+      const line = svgElement("path");
+      line.setAttribute("d", geometry.d);
+      line.setAttribute("fill", "none");
       const edgeSelected = selectedEdgeId === edge.id;
       const edgeConnected =
         Boolean(selectedNodeId)
@@ -2138,11 +2147,12 @@ export function mountDiagramEditorPageV010(
         line.setAttribute("stroke-dasharray", "8 6");
       }
       if (edge.arrow === "end" || edge.arrow === "both") {
-        line.setAttribute("marker-end", "url(#eidos-diagram-arrow-end)");
+        line.setAttribute("marker-end", "url(#" + arrowMarkerId + ")");
       }
       if (edge.arrow === "start" || edge.arrow === "both") {
-        line.setAttribute("marker-start", "url(#eidos-diagram-arrow-end)");
+        line.setAttribute("marker-start", "url(#" + arrowMarkerId + ")");
       }
+      line.setAttribute("data-eidos-diagram-edge-visual", edge.id);
       line.style.pointerEvents = "none";
       svg.appendChild(line);
 
@@ -2161,8 +2171,9 @@ export function mountDiagramEditorPageV010(
         );
       if (showEdgeCaption) {
         const label = svgElement("text");
-        label.setAttribute("x", String((a.x + b.x) / 2));
-        label.setAttribute("y", String((a.y + b.y) / 2 - 8));
+        label.setAttribute("x", String(geometry.label.x));
+        label.setAttribute("y", String(geometry.label.y - 8));
+        label.setAttribute("data-eidos-diagram-edge-label", edge.id);
         label.setAttribute("text-anchor", "middle");
         label.setAttribute("font-size", "11");
         label.setAttribute("fill", "var(--eidos-fg-muted,#5F6B76)");
