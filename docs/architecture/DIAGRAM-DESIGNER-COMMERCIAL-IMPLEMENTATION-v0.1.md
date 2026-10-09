@@ -72,3 +72,12 @@ An opted-in `viewInteraction.localEdgePathEdit` exposes four connector path pres
 - Parallel spacing is an initial low-density presentation rule; many edges can crowd a small node boundary. A professional dense-graph router needs configurable lanes, labels and hit-target disambiguation.
 - Only the explicit style subset uses lane offsets. Self-relations are visible even for legacy paths, as a corrective rendering exception.
 - Browser rendering, touch hit testing, arrow readability and 200/400-node benchmark remain **NOT TESTED**.
+
+## Phase B3 — manual waypoint and fixed anchor presentation editor
+
+- New optional `waypoints`, `sourceAnchor`, `targetAnchor` attributes accompany `pathKind` on a relationship. Strict bounds: max 24 finite waypoints and world coordinate absolute value <= 10 million. Straight paths cannot retain hidden waypoint data.
+- An opt-in edge inspector provides Add/Remove/Reset, X/Y numeric inputs, four 10-unit nudge buttons and independent source/target side selectors. Each action uses a single local undo checkpoint, then explicit projection Save; screen-only viewing cannot mutate it.
+- SVG visuals, actual stroke hit paths and label geometry use the same manual route; fixed anchors remain attached to their node boundary. The movement preview maintains endpoints and translates waypoints temporarily during equal two-endpoint motion.
+- A bounded, pure, renderer-independent declarative geometry contract is exported for Viewer and thumbnail reuse.
+- This is stacked on B2; downstream App Platform storage and Viewer parity are a required separate PR. NO standalone main merge or production claim.
+- Remaining B-stage work: precise pointer-handle dragging, persisted waypoint translation on commit, orthogonal segment drag constraint, collision/parallel label disambiguation, actual mobile and cross-browser gestures, concurrency recovery and perf certification.
