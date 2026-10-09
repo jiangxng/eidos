@@ -11,6 +11,7 @@ import {
   isDiagramEdgePathKindV010,
   type DiagramEdgePathKindV010
 } from "./edge-paths.js";
+import { diagramNodesIntersectingRectV010 } from "./selection.js";
 import {
   layoutLayeredDiagramV010
 } from "./layered-layout.js";
@@ -1235,6 +1236,10 @@ export function mountDiagramEditorPageV010(
   let disposed = false;
   let state: DiagramEditorStateV010 | undefined;
   let selected: { kind: "node" | "edge"; id: string } | undefined;
+  const selectedNodeIds = new Set<string>();
+  let canvasTool: "SELECT" | "PAN" = "SELECT";
+  let spaceHeld = false;
+  let suppressNextCanvasClick = false;
   let selectionInspection:
     DiagramEditorSelectionInspectionV010 | undefined;
   let selectionReadGeneration = 0;
@@ -1245,6 +1250,51 @@ export function mountDiagramEditorPageV010(
   let suppressNextNodeClick = false;
   const arrowMarkerId = "eidos-diagram-arrow-" + (++diagramEditorInstanceSequence);
   const locallyHiddenNodeIds = new Set<string>();
+  type ViewSnapshot = {
+    positions: Array<{ id: string; x: number; y: number }>;
+    hiddenNodeIds: string[];
+    hiddenEdgeIds: string[];
+  };
+  const undoHistory: ViewSnapshot[] = [];
+  const redoHistory: ViewSnapshot[] = [];
+  const captureSnapshot = (): ViewSnapshot => ({
+    positions: (state?.nodes ?? []).map(node => ({ id: node.id, x: node.x, y: node.y })),
+    hiddenNodeIds: [...locallyHiddenNodeIds],
+    hiddenEdgeIds: [...locallyHiddenEdgeIds]
+  });
+  const checkpoint = (): void => {
+    undoHistory.push(captureSnapshot());
+    if (undoHistory.length > 50) undoHistory.shift();
+    redoHistory.length = 0;
+  };
+  const restoreSnapshot = (snapshot: ViewSnapshot): void => {
+    for (const node of state?.nodes ?? []) {
+      const position = snapshot.positions.find(item => item.id === node.id);
+      if (position) { node.x = position.x; node.y = position.y; }
+    }
+    locallyHiddenNodeIds.clear();
+    locallyHiddenEdgeIds.clear();
+    for (const id of snapshot.hiddenNodeIds) locallyHiddenNodeIds.add(id);
+    for (const id of snapshot.hiddenEdgeIds) locallyHiddenEdgeIds.add(id);
+    selected = undefined;
+    selectedNodeIds.clear();
+    selectionInspection = undefined;
+    selectionReadGeneration += 1;
+    render();
+    report("View adjusted locally. Save to persist changes.");
+  };
+  const undoView = (): void => {
+    const previous = undoHistory.pop();
+    if (!previous) return;
+    redoHistory.push(captureSnapshot());
+    restoreSnapshot(previous);
+  };
+  const redoView = (): void => {
+    const next = redoHistory.pop();
+    if (!next) return;
+    undoHistory.push(captureSnapshot());
+    restoreSnapshot(next);
+  };
   const locallyHiddenEdgeIds = new Set<string>();
   const syncLocalVisibilityFromState = (): void => {
     locallyHiddenNodeIds.clear();
@@ -1301,6 +1351,9 @@ export function mountDiagramEditorPageV010(
     }
     const previousSelection = selected;
     state = stateFromResult(result.result);
+    undoHistory.length = 0;
+    redoHistory.length = 0;
+    selectedNodeIds.clear();
     syncLocalVisibilityFromState();
     selectionInspection = undefined;
     selectionReadGeneration += 1;
@@ -1368,7 +1421,7 @@ export function mountDiagramEditorPageV010(
   };
 
   const matchingActions = (): DiagramEditorActionV010[] => {
-    if (!state) return [];
+    if (!state || selectedNodeIds.size > 1) return [];
     return (state.actions ?? []).filter(action => {
       if (!action.target || action.target.kind === "graph") {
         return selected === undefined;
@@ -1429,6 +1482,9 @@ export function mountDiagramEditorPageV010(
       return;
     }
     state = stateFromResult(result.result);
+    undoHistory.length = 0;
+    redoHistory.length = 0;
+    selectedNodeIds.clear();
     syncLocalVisibilityFromState();
     selected = selectionStillExists(previousSelection)
       ? previousSelection
@@ -1565,6 +1621,7 @@ export function mountDiagramEditorPageV010(
         placement
       ] as const)
     );
+    checkpoint();
     for (const node of state.nodes) {
       const placement = placementByNode.get(node.id);
       if (!placement) continue;
@@ -1572,6 +1629,7 @@ export function mountDiagramEditorPageV010(
       node.y = placement.y;
     }
     selected = undefined;
+    selectedNodeIds.clear();
     selectionInspection = undefined;
     selectionReadGeneration += 1;
     render();
@@ -1688,9 +1746,11 @@ export function mountDiagramEditorPageV010(
       button.disabled =
         locallyHiddenNodeIds.size === 0 && locallyHiddenEdgeIds.size === 0;
       button.onclick = () => {
+        checkpoint();
         locallyHiddenNodeIds.clear();
         locallyHiddenEdgeIds.clear();
         selected = undefined;
+        selectedNodeIds.clear();
         selectionInspection = undefined;
         selectionReadGeneration += 1;
         render();
@@ -1806,8 +1866,9 @@ export function mountDiagramEditorPageV010(
   };
 
   function clearSelection(): void {
-    if (!selected && !selectionInspection) return;
+    if (!selected && !selectionInspection && selectedNodeIds.size === 0) return;
     selected = undefined;
+    selectedNodeIds.clear();
     selectionInspection = undefined;
     selectionReadGeneration += 1;
     render();
@@ -1822,12 +1883,16 @@ export function mountDiagramEditorPageV010(
     ) {
       return;
     }
-    if (selected.kind === "node") {
+    checkpoint();
+    if (selectedNodeIds.size > 1) {
+      for (const id of selectedNodeIds) locallyHiddenNodeIds.add(id);
+    } else if (selected.kind === "node") {
       locallyHiddenNodeIds.add(selected.id);
     } else {
       locallyHiddenEdgeIds.add(selected.id);
     }
     selected = undefined;
+    selectedNodeIds.clear();
     selectionInspection = undefined;
     selectionReadGeneration += 1;
     render();
@@ -1998,6 +2063,12 @@ export function mountDiagramEditorPageV010(
       return;
     }
     const item = selectedItem();
+    if (selectedNodeIds.size > 1) {
+      selectionText.textContent = selectedNodeIds.size + " nodes selected";
+      renderSelectionProperties(undefined);
+      renderActions();
+      return;
+    }
     selectionText.textContent = item
       ? [
           item.label,
@@ -2116,6 +2187,7 @@ export function mountDiagramEditorPageV010(
       hit.style.cursor = "pointer";
       hit.setAttribute("data-eidos-diagram-edge", edge.id);
       hit.addEventListener("click", () => {
+        selectedNodeIds.clear();
         selected = { kind: "edge", id: edge.id };
         selectionInspection = undefined;
         render();
@@ -2269,7 +2341,7 @@ export function mountDiagramEditorPageV010(
         node.detail ?? node.kind,
         ...observationText(node.observations)
       ].filter(Boolean).join("\n");
-      const nodeSelected = selectedNodeId === node.id;
+      const nodeSelected = selectedNodeIds.has(node.id) || selectedNodeId === node.id;
       const nodeFocused = !selected || focusedNodeIds.has(node.id);
       element.style.position = "absolute";
       element.style.left = node.x + "px";
@@ -2305,16 +2377,26 @@ export function mountDiagramEditorPageV010(
       element.style.touchAction = localViewDrag || persistentDrag ? "none" : "auto";
       element.style.zIndex = "2";
 
-      element.addEventListener("click", () => {
+      element.addEventListener("click", event => {
         if (suppressNextNodeClick) {
           suppressNextNodeClick = false;
           return;
         }
-        selected = { kind: "node", id: node.id };
+        if (event.shiftKey && page.viewInteraction?.localNodeDrag === true) {
+          if (selectedNodeIds.has(node.id)) selectedNodeIds.delete(node.id);
+          else selectedNodeIds.add(node.id);
+          const last = [...selectedNodeIds].at(-1);
+          selected = last ? { kind: "node", id: last } : undefined;
+        } else {
+          selectedNodeIds.clear();
+          selectedNodeIds.add(node.id);
+          selected = { kind: "node", id: node.id };
+        }
         selectionInspection = undefined;
+        selectionReadGeneration += 1;
         render();
         canvas.focus({ preventScroll: true });
-        void inspectSelection();
+        if (selectedNodeIds.size === 1) void inspectSelection();
       });
 
       if (localViewDrag || persistentDrag) {
