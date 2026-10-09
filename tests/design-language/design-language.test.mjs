@@ -120,12 +120,19 @@ test("agent chat chrome responds to its own pane width", () => {
   );
   assert.match(
     eidosProductiveWorkbenchCss,
-    /data-eidos-chat-thread-selector\][\s\S]*flex:1 1 auto[\s\S]*min-width:0/
+    /data-eidos-workspace-content\]:has\(> \[data-eidos-chat\]\)[\s\S]*padding:0/
   );
   assert.match(
     eidosProductiveWorkbenchCss,
-    /data-eidos-chat-new-thread[\s\S]*white-space:nowrap/
+    /data-eidos-chat-heading-group\][\s\S]*display:flex[\s\S]*align-items:center/
   );
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /data-eidos-chat-new-thread[\s\S]*data-eidos-chat-history-toggle[\s\S]*background:transparent/
+  );
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-chat-more-toggle/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-chat-toolbar-label/);
+  assert.match(eidosProductiveWorkbenchCss, /data-eidos-chat-thread-selector\][\s\S]*display:none/);
 });
 
 test("system text scaling is part of the mobile contract", () => {
