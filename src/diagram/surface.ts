@@ -2461,6 +2461,7 @@ export function mountDiagramEditorPageV010(
       if (localViewDrag || persistentDrag) {
         const pointerDown = (event: PointerEvent) => {
           if (event.pointerType !== "touch" && event.button !== 0) return;
+          if (spaceHeld || canvasTool === "PAN") return;
           const isTouch = event.pointerType === "touch";
           if (isTouch) {
             navigationPointers.set(event.pointerId, {
@@ -2550,6 +2551,7 @@ export function mountDiagramEditorPageV010(
           };
 
           const pointerUp = (up: PointerEvent) => {
+            element.removeEventListener("lostpointercapture", lostCapture);
             if (element.hasPointerCapture(up.pointerId)) {
               element.releasePointerCapture(up.pointerId);
             }
@@ -2590,9 +2592,13 @@ export function mountDiagramEditorPageV010(
             cancelForNavigation();
             pointerUp(event);
           };
+          const lostCapture = (event: PointerEvent): void => {
+            pointerCancel(event);
+          };
           element.addEventListener("pointermove", pointerMove);
           element.addEventListener("pointerup", pointerUp);
           element.addEventListener("pointercancel", pointerCancel);
+          element.addEventListener("lostpointercapture", lostCapture);
         };
         element.addEventListener("pointerdown", pointerDown);
       }
@@ -2649,7 +2655,7 @@ export function mountDiagramEditorPageV010(
         && page.viewInteraction?.localNodeDrag === true
         && canvasTool === "SELECT" && !spaceHeld;
       if (
-        mouse && primary
+        mouse && primary && !spaceHeld && canvasTool !== "PAN"
         && (
           target?.closest?.("[data-eidos-diagram-node]")
           || target?.closest?.("[data-eidos-diagram-edge]")
@@ -2875,6 +2881,8 @@ export function mountDiagramEditorPageV010(
 
   const keydownHandler = (event: KeyboardEvent): void => {
     const target = event.target;
+    const focus = document.activeElement;
+    if (focus && focus !== canvas && !focus.closest?.("[data-eidos-diagram-node]")) return;
     if (
       target instanceof HTMLInputElement
       || target instanceof HTMLTextAreaElement
