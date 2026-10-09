@@ -1245,6 +1245,7 @@ export function mountDiagramEditorPageV010(
       ? "TRACKPAD" : "MOUSE";
   } catch { /* Private browsing may disable storage; mouse stays the default. */ }
   let suppressNextCanvasClick = false;
+  let canvasClickHandlerInstalled = false;
   let selectionInspection:
     DiagramEditorSelectionInspectionV010 | undefined;
   let selectionReadGeneration = 0;
@@ -1737,7 +1738,11 @@ export function mountDiagramEditorPageV010(
     }
     clearSelection();
   };
-  canvas.onclick = clearSelectionOnCanvasClick;
+  if (!canvasClickHandlerInstalled) {
+    canvas.addEventListener("click", clearSelectionOnCanvasClick);
+    listeners.push(() => canvas.removeEventListener("click", clearSelectionOnCanvasClick));
+    canvasClickHandlerInstalled = true;
+  }
 
   if (page.viewInteraction?.zoom) {
       const addViewButton = (
@@ -2543,11 +2548,10 @@ export function mountDiagramEditorPageV010(
             ) {
               return;
             }
+            const nextX = originalX + screenDeltaX / camera.scale;
+            const nextY = originalY + screenDeltaY / camera.scale;
             moved = true;
-            showPositions(movedPositions(
-              screenDeltaX / camera.scale,
-              screenDeltaY / camera.scale
-            ));
+            showPositions(movedPositions(nextX - originalX, nextY - originalY));
           };
 
           const pointerUp = (up: PointerEvent) => {
