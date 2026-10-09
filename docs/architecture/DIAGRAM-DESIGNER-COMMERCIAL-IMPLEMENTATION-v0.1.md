@@ -31,3 +31,12 @@ A1 performs rendering for data carrying an explicit pathKind, but **does not yet
 - Run `npm run typecheck && npm test && npm run validate:repo` in Eidos.
 - For a downstream integration, first diff the current vendor file, preserve its context navigation and any intervening mainline changes, and test old/new template preview/Designer/Viewer paths end-to-end.
 - Required acceptance cases from the owner document are V01–V06, M01–M09, T01–T07, E01–E07, D01–D06, A01–A02, P01–P02. Mark unexecuted checks **NOT TESTED**, not PASS.
+
+## Phase A2 work-in-progress (stacked on A1)
+
+- View-only bounded 50-step undo/redo for positions and visibility; selection and camera navigation are not written into history.
+- Select/Hand switch, Shift multi-select, canvas marquee by rectangle intersection, grouped local node movement, and connected-edge preview.
+- Right/middle drag navigation path is distinct from primary selection; temporary Space hand tool; continuous wheel delta scaling with an explicit Mouse/Trackpad preference.
+- This is an Eidos-only interaction slice, not end-to-end projection save validation. Touch multi-pointer conversion, context menus, editable edge-path control panels, per-edge persistence, and cross-project Viewer round trips remain later gates.
+
+**Known verification limit:** Node test suite validates pure selection geometry; real browser multi-pointer behavior, mobile controls and 200/400-node performance have not been observed and must be tested before production certification.
