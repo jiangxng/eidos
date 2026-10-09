@@ -1647,6 +1647,38 @@ export function mountDiagramEditorPageV010(
     selectionActions.replaceChildren();
     if (!state) return;
 
+    if (page.viewInteraction?.localNodeDrag === true) {
+      for (const option of [
+        { id: "SELECT", label: "Select", title: "Select or marquee nodes (V)" },
+        { id: "PAN", label: "Hand", title: "Pan the canvas (H)" }
+      ] as const) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = option.label;
+        button.title = option.title;
+        button.setAttribute("data-eidos-diagram-tool", option.id);
+        button.setAttribute("aria-pressed", String(canvasTool === option.id));
+        button.onclick = () => {
+          canvasTool = option.id;
+          canvas.style.cursor = canvasTool === "PAN" ? "grab" : "crosshair";
+          renderActions();
+        };
+        toolbar.appendChild(button);
+      }
+      for (const option of [
+        { label: "Undo", key: "undo", enabled: undoHistory.length > 0, action: undoView },
+        { label: "Redo", key: "redo", enabled: redoHistory.length > 0, action: redoView }
+      ]) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = option.label;
+        button.disabled = !option.enabled;
+        button.setAttribute("data-eidos-diagram-history", option.key);
+        button.onclick = option.action;
+        toolbar.appendChild(button);
+      }
+    }
+
     const overflowButtons: HTMLButtonElement[] = [];
     const placeToolbarButton = (
       button: HTMLButtonElement,
@@ -1674,6 +1706,10 @@ export function mountDiagramEditorPageV010(
     }
 
     const clearSelectionOnCanvasClick = (event: MouseEvent): void => {
+    if (suppressNextCanvasClick) {
+      suppressNextCanvasClick = false;
+      return;
+    }
     const target = event.target as Element | null;
     if (
       target?.closest?.("[data-eidos-diagram-node]")
@@ -1684,10 +1720,7 @@ export function mountDiagramEditorPageV010(
     }
     clearSelection();
   };
-  canvas.addEventListener("click", clearSelectionOnCanvasClick);
-  listeners.push(() =>
-    canvas.removeEventListener("click", clearSelectionOnCanvasClick)
-  );
+  canvas.onclick = clearSelectionOnCanvasClick;
 
   if (page.viewInteraction?.zoom) {
       const addViewButton = (
@@ -2025,7 +2058,8 @@ export function mountDiagramEditorPageV010(
     );
 
   const inspectSelection = async (): Promise<void> => {
-    if (!state || !selected || !page.selectionReadCommand || disposed) return;
+    if (!state || !selected || !page.selectionReadCommand || disposed
+      || selectedNodeIds.size > 1) return;
     const target = { ...selected };
     const generation = ++selectionReadGeneration;
     selectionInspection = undefined;
@@ -2161,6 +2195,13 @@ export function mountDiagramEditorPageV010(
         if (edge.target === selectedNodeId) focusedNodeIds.add(edge.source);
       }
     }
+    for (const id of selectedNodeIds) {
+      focusedNodeIds.add(id);
+      for (const edge of renderedEdges) {
+        if (edge.source === id) focusedNodeIds.add(edge.target);
+        if (edge.target === id) focusedNodeIds.add(edge.source);
+      }
+    }
     if (selectedEdgeId) {
       const edge = renderedEdges.find(item => item.id === selectedEdgeId);
       if (edge) {
@@ -2202,7 +2243,8 @@ export function mountDiagramEditorPageV010(
       const edgeSelected = selectedEdgeId === edge.id;
       const edgeConnected =
         Boolean(selectedNodeId)
-        && (edge.source === selectedNodeId || edge.target === selectedNodeId);
+        && (selectedNodeIds.has(edge.source) || selectedNodeIds.has(edge.target)
+          || edge.source === selectedNodeId || edge.target === selectedNodeId);
       const edgeFocused = edgeSelected || edgeConnected;
       const edgeDimmed = Boolean(selected) && !edgeFocused;
       line.setAttribute(
@@ -2341,7 +2383,8 @@ export function mountDiagramEditorPageV010(
         ...observationText(node.observations)
       ].filter(Boolean).join("\n");
       const nodeSelected = selectedNodeIds.has(node.id) || selectedNodeId === node.id;
-      const nodeFocused = !selected || focusedNodeIds.has(node.id);
+      const nodeFocused = !selected || selectedNodeIds.has(node.id)
+        || focusedNodeIds.has(node.id);
       element.style.position = "absolute";
       element.style.left = node.x + "px";
       element.style.top = node.y + "px";
@@ -2735,6 +2778,37 @@ export function mountDiagramEditorPageV010(
       return;
     }
 
+    if (page.viewInteraction?.localNodeDrag === true) {
+      const ctrl = event.ctrlKey || event.metaKey;
+      if (ctrl && !event.altKey && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        if (event.shiftKey) redoView(); else undoView();
+        return;
+      }
+      if (ctrl && !event.altKey && event.key.toLowerCase() === "y") {
+        event.preventDefault();
+        redoView();
+        return;
+      }
+      if (ctrl && event.key.toLowerCase() === "a") {
+        event.preventDefault();
+        selectedNodeIds.clear();
+        for (const node of visibleNodes()) selectedNodeIds.add(node.id);
+        const last = [...selectedNodeIds].at(-1);
+        selected = last ? { kind: "node", id: last } : undefined;
+        selectionInspection = undefined;
+        selectionReadGeneration += 1;
+        render();
+        return;
+      }
+      if (!ctrl && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "v") {
+        canvasTool = "SELECT"; renderActions(); return;
+      }
+      if (!ctrl && !event.altKey && !event.shiftKey && event.key.toLowerCase() === "h") {
+        canvasTool = "PAN"; renderActions(); return;
+      }
+    }
+
     if (event.key === "Escape" && selected) {
       event.preventDefault();
       clearSelection();
@@ -2760,6 +2834,7 @@ export function mountDiagramEditorPageV010(
       const node = state.nodes.find(item => item.id === selected!.id);
       if (!node) return;
       event.preventDefault();
+      checkpoint();
       const step = event.shiftKey ? 10 : 1;
       if (event.key === "ArrowLeft") node.x -= step;
       if (event.key === "ArrowRight") node.x += step;
