@@ -44,6 +44,8 @@ export interface DiagramEditorViewInteractionV010 {
   zoom?: boolean;
   pan?: boolean;
   localNodeDrag?: boolean;
+  /** Permits local presentation-only connector shape changes, captured on explicit Save. */
+  localEdgePathEdit?: boolean;
   localSelectionHide?: boolean;
   localSelectionHideLabel?: string;
   localSelectionHideNotice?: string;
@@ -125,6 +127,7 @@ export interface DiagramEditorContextNavigationV010 {
 export interface DiagramEditorCapturedViewStateV010 {
   hiddenNodeIds?: string[];
   hiddenEdgeIds?: string[];
+  edgePaths?: Array<{ edgeId: string; pathKind: DiagramEdgePathKindV010 }>;
   viewport?: {
     width: number;
     height: number;
@@ -1258,6 +1261,7 @@ export function mountDiagramEditorPageV010(
   const locallyHiddenNodeIds = new Set<string>();
   type ViewSnapshot = {
     positions: Array<{ id: string; x: number; y: number }>;
+    edgePaths: Array<{ id: string; pathKind?: DiagramEdgePathKindV010 }>;
     hiddenNodeIds: string[];
     hiddenEdgeIds: string[];
   };
@@ -1265,6 +1269,7 @@ export function mountDiagramEditorPageV010(
   const redoHistory: ViewSnapshot[] = [];
   const captureSnapshot = (): ViewSnapshot => ({
     positions: (state?.nodes ?? []).map(node => ({ id: node.id, x: node.x, y: node.y })),
+    edgePaths: (state?.edges ?? []).map(edge => ({ id: edge.id, pathKind: edge.pathKind })),
     hiddenNodeIds: [...locallyHiddenNodeIds],
     hiddenEdgeIds: [...locallyHiddenEdgeIds]
   });
@@ -1277,6 +1282,13 @@ export function mountDiagramEditorPageV010(
     for (const node of state?.nodes ?? []) {
       const position = snapshot.positions.find(item => item.id === node.id);
       if (position) { node.x = position.x; node.y = position.y; }
+    }
+    for (const edge of state?.edges ?? []) {
+      const previous = snapshot.edgePaths.find(item => item.id === edge.id);
+      if (previous) {
+        if (previous.pathKind === undefined) delete edge.pathKind;
+        else edge.pathKind = previous.pathKind;
+      }
     }
     locallyHiddenNodeIds.clear();
     locallyHiddenEdgeIds.clear();
@@ -1462,6 +1474,8 @@ export function mountDiagramEditorPageV010(
         ? {
             hiddenNodeIds: [...locallyHiddenNodeIds],
             hiddenEdgeIds: [...locallyHiddenEdgeIds],
+            edgePaths: (state.edges ?? []).filter(edge => edge.pathKind !== undefined)
+              .map(edge => ({ edgeId: edge.id, pathKind: edge.pathKind! })),
             viewport: {
               width: Math.max(1, canvas.clientWidth),
               height: Math.max(1, canvas.clientHeight)
@@ -2140,6 +2154,39 @@ export function mountDiagramEditorPageV010(
     } catch (error) {
       report(error instanceof Error ? error.message : String(error));
       renderSelectionProperties(item?.properties);
+    }
+    if (selected.kind === "edge" && page.viewInteraction?.localEdgePathEdit === true) {
+      const edge = state.edges.find(item => item.id === selected!.id);
+      if (edge) {
+        const control = document.createElement("label");
+        control.textContent = "Connector path (presentation only)";
+        control.style.display = "grid";
+        control.style.gap = "6px";
+        control.style.marginTop = "14px";
+        const select = document.createElement("select");
+        select.setAttribute("data-eidos-diagram-edge-path-kind", edge.id);
+        for (const [kind, label] of [
+          ["straight", "Straight"],
+          ["orthogonal", "Orthogonal"],
+          ["rounded-orthogonal", "Rounded orthogonal"],
+          ["curve", "Curve"]
+        ] as const) {
+          const option = document.createElement("option");
+          option.value = kind;
+          option.textContent = label;
+          select.appendChild(option);
+        }
+        select.value = edge.pathKind ?? "straight";
+        select.onchange = () => {
+          if (!isDiagramEdgePathKindV010(select.value) || select.value === (edge.pathKind ?? "straight")) return;
+          checkpoint();
+          edge.pathKind = select.value;
+          render();
+          report("Connector presentation updated locally. Save the projection to persist.");
+        };
+        control.appendChild(select);
+        selectionProperties.appendChild(control);
+      }
     }
     renderActions();
   };
