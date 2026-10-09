@@ -1,3 +1,8 @@
+import {
+  routeDiagramOrthogonallyV010,
+  type DiagramRoutingObstacleV010
+} from "./orthogonal-router.js";
+
 /**
  * Deterministic declarative edge geometry for the Eidos 2D surface.
  * This module owns presentation only: it never mutates graph topology or business direction.
@@ -18,6 +23,9 @@ export interface DiagramEdgeGeometryV010 {
   d: string;
   label: DiagramEdgePointV010;
   kind: DiagramEdgePathKindV010;
+  /** True when the orthogonal planner certified avoidance of provided obstacles. */
+  cleared?: boolean;
+  notice?: "ROUTE_CONGESTED" | "ROUTE_BUDGET_EXCEEDED";
 }
 
 const permittedKinds: readonly DiagramEdgePathKindV010[] = [
@@ -105,7 +113,8 @@ function roundedPath(points: readonly DiagramEdgePointV010[]): string {
 export function diagramEdgeGeometryV010(
   start: DiagramEdgePointV010,
   end: DiagramEdgePointV010,
-  requestedKind: DiagramEdgePathKindV010 = "straight"
+  requestedKind: DiagramEdgePathKindV010 = "straight",
+  obstacles: readonly DiagramRoutingObstacleV010[] = []
 ): DiagramEdgeGeometryV010 {
   if (![start.x, start.y, end.x, end.y].every(Number.isFinite)) {
     throw new Error("EIDOS_DIAGRAM_EDGE_COORDINATES_INVALID");
@@ -143,12 +152,17 @@ export function diagramEdgeGeometryV010(
       label
     };
   }
-  const corners = elbowPoints(start, end);
+  const route = obstacles.length > 0
+    ? routeDiagramOrthogonallyV010(start, end, obstacles)
+    : { points: elbowPoints(start, end), cleared: true as const };
+  const corners = route.points;
   return {
     kind: requestedKind,
     d: requestedKind === "orthogonal"
       ? corners.map((p, i) => (i === 0 ? "M " : "L ") + point(p)).join(" ")
       : roundedPath(corners),
-    label: halfwayOnSegments(corners)
+    label: halfwayOnSegments(corners),
+    cleared: route.cleared,
+    ...("notice" in route ? { notice: route.notice } : {})
   };
 }
