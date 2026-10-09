@@ -40,3 +40,7 @@ A1 performs rendering for data carrying an explicit pathKind, but **does not yet
 - This is an Eidos-only interaction slice, not end-to-end projection save validation. Touch multi-pointer conversion, context menus, editable edge-path control panels, per-edge persistence, and cross-project Viewer round trips remain later gates.
 
 **Known verification limit:** Node test suite validates pure selection geometry; real browser multi-pointer behavior, mobile controls and 200/400-node performance have not been observed and must be tested before production certification.
+
+## Phase A3 — Eidos opt-in route editing
+
+An opted-in `viewInteraction.localEdgePathEdit` exposes four connector path presets for an explicitly selected edge. This is **presentation-only**: `source`, `target`, arrow semantics and relationship identity are never changed. Every path edit enters the bounded undo/redo snapshot history. Captured view-state includes a closed `edgePaths` collection keyed by edge identity; edges without a path kind remain legacy straight lines. This PR alone does not persist those fields; downstream App Platform requires a separate reviewed contract/storage integration before claiming refresh consistency.
