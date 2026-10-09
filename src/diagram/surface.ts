@@ -2355,7 +2355,12 @@ export function mountDiagramEditorPageV010(
           anchor.value = edge[field] ?? "auto";
           anchor.onchange = () => editRoute(() => {
             if (anchor.value === "auto") delete edge[field];
-            else edge[field] = anchor.value as DiagramEdgeAnchorSideV010;
+            else {
+              // An old implicit-straight edge becomes explicit only when the user edits it.
+              // Otherwise view capture would omit this fixed presentation anchor.
+              edge.pathKind ??= "straight";
+              edge[field] = anchor.value as DiagramEdgeAnchorSideV010;
+            }
           });
           row.appendChild(anchor);
           selectionProperties.appendChild(row);
