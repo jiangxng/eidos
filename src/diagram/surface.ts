@@ -2291,7 +2291,13 @@ export function mountDiagramEditorPageV010(
       const targetCenter = nodeCenter(target);
       const a = nodeBoundaryPoint(source, targetCenter);
       const b = nodeBoundaryPoint(target, sourceCenter);
-      const geometry = diagramEdgeGeometryV010(a, b, edge.pathKind);
+      // Only explicitly styled orthogonal routes use obstacle avoidance.
+      // Legacy edges remain straight; unrelated business data is never mutated.
+      const routeObstacles = edge.pathKind === "orthogonal" || edge.pathKind === "rounded-orthogonal"
+        ? renderedNodes.filter(node => node.id !== edge.source && node.id !== edge.target)
+          .map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }))
+        : [];
+      const geometry = diagramEdgeGeometryV010(a, b, edge.pathKind, { obstacles: routeObstacles });
       const hit = svgElement("path");
       hit.setAttribute("d", geometry.d);
       hit.setAttribute("fill", "none");
@@ -2300,6 +2306,10 @@ export function mountDiagramEditorPageV010(
       hit.style.pointerEvents = "stroke";
       hit.style.cursor = "pointer";
       hit.setAttribute("data-eidos-diagram-edge", edge.id);
+      if (geometry.congested) {
+        hit.setAttribute("data-eidos-diagram-route-congested", "true");
+        hit.setAttribute("aria-label", "Connector route congested; manual adjustment may be needed");
+      }
       hit.addEventListener("click", () => {
         selectedNodeIds.clear();
         selected = { kind: "edge", id: edge.id };
