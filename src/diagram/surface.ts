@@ -2075,6 +2075,11 @@ export function mountDiagramEditorPageV010(
 
     const renderedNodes = visibleNodes();
     const renderedEdges = visibleEdges();
+    const liveEdges = new Map<string, {
+      hit: SVGPathElement;
+      visual: SVGPathElement;
+      label?: SVGTextElement;
+    }>();
     const focusedNodeIds = new Set<string>();
     const selectedNodeId = selected?.kind === "node" ? selected.id : undefined;
     const selectedEdgeId = selected?.kind === "edge" ? selected.id : undefined;
@@ -2155,6 +2160,7 @@ export function mountDiagramEditorPageV010(
       line.setAttribute("data-eidos-diagram-edge-visual", edge.id);
       line.style.pointerEvents = "none";
       svg.appendChild(line);
+      liveEdges.set(edge.id, { hit, visual: line });
 
       const edgeCaption = [
         edge.label,
@@ -2185,8 +2191,38 @@ export function mountDiagramEditorPageV010(
         label.textContent = edgeCaption;
         label.style.pointerEvents = "none";
         svg.appendChild(label);
+        liveEdges.get(edge.id)!.label = label;
       }
     }
+
+    // Preview only the incident edges during drag; keep pointer capture and the
+    // rest of the canvas mounted until the gesture commits or cancels.
+    const previewIncidentEdges = (
+      moving: DiagramEditorNodeV010,
+      x: number,
+      y: number
+    ): void => {
+      const temporary = { ...moving, x, y };
+      for (const edge of renderedEdges) {
+        if (edge.source !== moving.id && edge.target !== moving.id) continue;
+        const source = edge.source === moving.id
+          ? temporary : renderedNodes.find(node => node.id === edge.source);
+        const target = edge.target === moving.id
+          ? temporary : renderedNodes.find(node => node.id === edge.target);
+        if (!source || !target) continue;
+        const a = nodeBoundaryPoint(source, nodeCenter(target));
+        const b = nodeBoundaryPoint(target, nodeCenter(source));
+        const path = diagramEdgeGeometryV010(a, b, edge.pathKind);
+        const elements = liveEdges.get(edge.id);
+        if (!elements) continue;
+        elements.hit.setAttribute("d", path.d);
+        elements.visual.setAttribute("d", path.d);
+        if (elements.label) {
+          elements.label.setAttribute("x", String(path.label.x));
+          elements.label.setAttribute("y", String(path.label.y - 8));
+        }
+      }
+    };
 
     stage.appendChild(svg);
 
@@ -2283,6 +2319,7 @@ export function mountDiagramEditorPageV010(
 
       if (localViewDrag || persistentDrag) {
         const pointerDown = (event: PointerEvent) => {
+          if (event.pointerType !== "touch" && event.button !== 0) return;
           const isTouch = event.pointerType === "touch";
           if (isTouch) {
             navigationPointers.set(event.pointerId, {
@@ -2314,6 +2351,7 @@ export function mountDiagramEditorPageV010(
             moved = false;
             element.style.left = originalX + "px";
             element.style.top = originalY + "px";
+            previewIncidentEdges(node, originalX, originalY);
             suppressNextNodeClick = true;
             window.setTimeout(() => {
               suppressNextNodeClick = false;
@@ -2342,6 +2380,7 @@ export function mountDiagramEditorPageV010(
             moved = true;
             element.style.left = nextX + "px";
             element.style.top = nextY + "px";
+            previewIncidentEdges(node, nextX, nextY);
           };
 
           const pointerUp = (up: PointerEvent) => {
@@ -2350,7 +2389,7 @@ export function mountDiagramEditorPageV010(
             }
             element.removeEventListener("pointermove", pointerMove);
             element.removeEventListener("pointerup", pointerUp);
-            element.removeEventListener("pointercancel", pointerUp);
+            element.removeEventListener("pointercancel", pointerCancel);
             if (cancelledByNavigation || !moved) return;
             suppressNextNodeClick = true;
             const x = Number.parseFloat(element.style.left);
@@ -2376,9 +2415,13 @@ export function mountDiagramEditorPageV010(
             );
           };
 
+          const pointerCancel = (event: PointerEvent): void => {
+            cancelForNavigation();
+            pointerUp(event);
+          };
           element.addEventListener("pointermove", pointerMove);
           element.addEventListener("pointerup", pointerUp);
-          element.addEventListener("pointercancel", pointerUp);
+          element.addEventListener("pointercancel", pointerCancel);
         };
         element.addEventListener("pointerdown", pointerDown);
       }
