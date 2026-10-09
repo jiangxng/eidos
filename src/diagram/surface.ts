@@ -2841,9 +2841,17 @@ export function mountDiagramEditorPageV010(
               checkpoint();
               const dx = x - originalX;
               const dy = y - originalY;
+              const movingIds = new Set(members.map(item => item.id));
               for (const item of members) {
                 item.x += dx;
                 item.y += dy;
+              }
+              // A manually routed relation follows a group only when both endpoints
+              // moved by the same delta; single-endpoint drags keep controls in place.
+              for (const edge of state?.edges ?? []) {
+                if (!edge.waypoints?.length || !movingIds.has(edge.source)
+                  || !movingIds.has(edge.target)) continue;
+                edge.waypoints = diagramTranslateWaypointsV010(edge.waypoints, dx, dy);
               }
               render();
               window.setTimeout(() => {
