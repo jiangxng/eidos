@@ -14,7 +14,7 @@ test("Eidos owns a production Workbench core icon registry", () => {
   assert.ok(Object.keys(eidosIconDefinitionsV010).length >= 24);
   for (const required of [
     "dashboard", "workspace", "plugins", "settings", "agent",
-    "sidebar", "arrowRight", "externalLink"
+    "newChat", "history", "moreHorizontal", "sidebar", "arrowRight", "externalLink"
   ]) {
     assert.ok(required in eidosIconDefinitionsV010, required);
   }
@@ -23,6 +23,8 @@ test("Eidos owns a production Workbench core icon registry", () => {
 test("semantic aliases preserve stable Workbench intent", () => {
   assert.equal(resolveEidosIconName("apps"), "dashboard");
   assert.equal(resolveEidosIconName("plugin"), "plugins");
+  assert.equal(resolveEidosIconName("new-chat"), "newChat");
+  assert.equal(resolveEidosIconName("more"), "moreHorizontal");
   assert.equal(resolveEidosIconName("arrow-right"), "arrowRight");
   assert.equal(resolveEidosIconName("unknown-icon"), undefined);
 });
