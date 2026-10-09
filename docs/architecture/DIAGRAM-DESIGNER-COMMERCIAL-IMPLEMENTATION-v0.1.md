@@ -81,3 +81,11 @@ An opted-in `viewInteraction.localEdgePathEdit` exposes four connector path pres
 - A bounded, pure, renderer-independent declarative geometry contract is exported for Viewer and thumbnail reuse.
 - This is stacked on B2; downstream App Platform storage and Viewer parity are a required separate PR. NO standalone main merge or production claim.
 - Remaining B-stage work: precise pointer-handle dragging, persisted waypoint translation on commit, orthogonal segment drag constraint, collision/parallel label disambiguation, actual mobile and cross-browser gestures, concurrency recovery and perf certification.
+
+## Phase B4a — immediate second-touch cancellation
+
+- A currently active selected-node drag registers one cancellation callback. When another touch arrives on either a node or canvas, the callback restores the pre-gesture visual positions immediately. A subsequent pointerup cannot commit the abandoned drag.
+- Active drag coordinates update the shared touch pointer map, so the second touch establishes its pan/pinch baseline from the latest positions, not the first contact's stale coordinates.
+- Window blur likewise cancels the uncommitted drag. Callback ownership is released when the first gesture ends to avoid cancelling a subsequent gesture accidentally.
+- The rule is scoped to this diagram mount; unrelated App Platform surfaces are unaffected.
+- **NOT YET BROWSER CERTIFIED**: iPhone/iPad Safari and Android Chrome multi-touch, pointercapture ordering, two-to-one transition, focus loss and accessibility alternatives still need actual device or browser automation evidence.
