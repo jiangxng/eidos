@@ -12,6 +12,7 @@ import {
   type DiagramEdgePathKindV010
 } from "./edge-paths.js";
 import { diagramNodesIntersectingRectV010 } from "./selection.js";
+import { createDiagramObstacleSpatialIndexV010 } from "./obstacle-spatial-index.js";
 import {
   diagramSnapTranslationV010,
   diagramSnapHandleOffsetV010,
@@ -2605,6 +2606,16 @@ export function mountDiagramEditorPageV010(
 
     const renderedNodes = visibleNodes();
     const renderedEdges = visibleEdges();
+    // P01a: one stable source-order lookup per full render. Edge endpoints and
+    // relevant obstacle lists no longer rescan all visible nodes for each edge.
+    const renderedNodeById = new Map(renderedNodes.map(node => [node.id, node] as const));
+    // P01a: small diagrams measured a selection-redraw regression when
+    // constructing a spatial index. Switch only when E×N warrants it.
+    // This is a presentation performance choice, not a persisted graph flag.
+    const useSpatialIndex = renderedNodes.length * renderedEdges.length >= 150_000;
+    const spatialObstacles = useSpatialIndex
+      ? createDiagramObstacleSpatialIndexV010(renderedNodes)
+      : undefined;
     const editableRoutes: Array<{ edge: DiagramEditorEdgeV010; start: { x: number; y: number }; end: { x: number; y: number } }> = [];
     // Lane offsets are computed only for explicitly styled edges, preserving old projections.
     const laneOffsets = diagramParallelLaneOffsetsV010(
@@ -2641,8 +2652,8 @@ export function mountDiagramEditorPageV010(
     }
 
     for (const edge of renderedEdges) {
-      const source = renderedNodes.find(node => node.id === edge.source);
-      const target = renderedNodes.find(node => node.id === edge.target);
+      const source = renderedNodeById.get(edge.source);
+      const target = renderedNodeById.get(edge.target);
       if (!source || !target) continue;
       const sourceCenter = nodeCenter(source);
       const targetCenter = nodeCenter(target);
@@ -2660,8 +2671,10 @@ export function mountDiagramEditorPageV010(
       // Only explicitly styled orthogonal routes use obstacle avoidance.
       // Legacy edges remain straight; unrelated business data is never mutated.
       const routeObstacles = edge.pathKind === "orthogonal" || edge.pathKind === "rounded-orthogonal"
-        ? renderedNodes.filter(node => node.id !== edge.source && node.id !== edge.target)
-          .map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }))
+        ? spatialObstacles
+          ? spatialObstacles.near(a, b, edge.source, edge.target)
+          : renderedNodes.filter(node => node.id !== edge.source && node.id !== edge.target)
+            .map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }))
         : [];
       const geometry = edge.source === edge.target
         ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane)
@@ -2670,7 +2683,14 @@ export function mountDiagramEditorPageV010(
               pathKind: edge.pathKind ?? "orthogonal", waypoints: edge.waypoints,
               sourceAnchor: edge.sourceAnchor, targetAnchor: edge.targetAnchor
             })
-          : diagramEdgeGeometryV010(a, b, edge.pathKind, { obstacles: routeObstacles });
+          : diagramEdgeGeometryV010(a, b, edge.pathKind, {
+              obstacles: routeObstacles,
+              // Previously passing all unrelated nodes made the router
+              // normalize even when they were geographically irrelevant.
+              // Spatial filtering must retain that exact rendered SVG shape.
+              forceRouteWhenEmpty: renderedNodes.length > (edge.source === edge.target ? 1 : 2)
+                && (edge.pathKind === "orthogonal" || edge.pathKind === "rounded-orthogonal")
+            });
       if (selectedEdgeId === edge.id && page.viewInteraction?.localEdgePathEdit === true
         && edge.source !== edge.target && edge.waypoints?.length
         && edge.pathKind && edge.pathKind !== "straight") {
@@ -2961,7 +2981,8 @@ export function mountDiagramEditorPageV010(
       positions: ReadonlyMap<string, { x: number; y: number }>
     ): void => {
       if (positions.size === 0) return;
-      const byId = new Map(renderedNodes.map(node => [node.id, node] as const));
+      // Reuse the render's immutable endpoint index during pointer previews.
+      const byId = renderedNodeById;
       for (const edge of renderedEdges) {
         if (!positions.has(edge.source) && !positions.has(edge.target)) continue;
         const sourceNode = byId.get(edge.source);
