@@ -237,6 +237,8 @@ export interface DiagramEditorStateV010 {
   contractVersion: "0.1.0";
   resourceId: string;
   revision: number;
+  /** Opaque host-owned optimistic write token; independent of domain revision. */
+  writeToken?: string;
   lifecycleState?: string;
   nodes: DiagramEditorNodeV010[];
   edges: DiagramEditorEdgeV010[];
@@ -596,6 +598,11 @@ export function validateDiagramEditorStateV010(
   ) {
     issues.push("revision must be a non-negative integer.");
   }
+  if (state.writeToken !== undefined
+    && (typeof state.writeToken !== "string"
+      || state.writeToken.length === 0 || state.writeToken.length > 256)) {
+    issues.push("writeToken must be a non-empty opaque string.");
+  }
   if (!Array.isArray(state.nodes)) issues.push("nodes must be an array.");
   if (!Array.isArray(state.edges)) issues.push("edges must be an array.");
   for (const [field, value] of [
@@ -843,6 +850,7 @@ export function diagramEditorOperationRequestV010(
       ...(page.requestValues ? jsonClone(page.requestValues) : {}),
       resourceId: page.resourceId,
       expectedRevision: state.revision,
+      ...(state.writeToken !== undefined ? { expectedWriteToken: state.writeToken } : {}),
       operation: jsonClone(operation),
       ...(viewState
         ? { viewState: jsonClone(viewState) as unknown as JsonValue }
@@ -1501,6 +1509,16 @@ export function mountDiagramEditorPageV010(
     });
   };
 
+  let operationInFlight = false;
+  // Compare the in-memory draft on either side of an async write. Users may
+  // continue panning or editing while a server response is in flight.
+  const localViewFingerprint = (): string => JSON.stringify({
+    nodes: state?.nodes,
+    edges: state?.edges,
+    hiddenNodes: [...locallyHiddenNodeIds].sort(),
+    hiddenEdges: [...locallyHiddenEdgeIds].sort(),
+    camera
+  });
   const executeOperation = async (
     operation: JsonValue,
     actionId: string,
@@ -1509,6 +1527,10 @@ export function mountDiagramEditorPageV010(
     captureViewState = false
   ): Promise<void> => {
     if (!state || disposed) return;
+    if (operationInFlight) {
+      report("An operation is already being saved.");
+      return;
+    }
     if (
       requiresConfirmation
       && !window.confirm(actionId)
@@ -1551,14 +1573,40 @@ export function mountDiagramEditorPageV010(
         : undefined
     );
     const previousSelection = selected;
+    const dispatchedFingerprint = localViewFingerprint();
+    operationInFlight = true;
     report("Saving…");
-    const result = await actionHost.execute(request);
-    await options.onActionResult?.(result);
+    let result: Awaited<ReturnType<typeof actionHost.execute>>;
+    try {
+      result = await actionHost.execute(request);
+      await options.onActionResult?.(result);
+    } catch (error) {
+      report("Save failed; local edits are preserved. " +
+        (error instanceof Error ? error.message : String(error)));
+      return;
+    } finally {
+      operationInFlight = false;
+    }
+    if (disposed || !state) return;
     if (!result.ok) {
-      report(result.error?.message ?? "Diagram operation failed.");
+      const conflict = result.error?.code === "DEFINITION_PROJECTION_WRITE_CONFLICT";
+      report(conflict
+        ? "Projection changed elsewhere. Local edits are preserved; save as a new projection or compare before retrying."
+        : (result.error?.message ?? "Save failed; local edits are preserved."));
       return;
     }
-    state = stateFromResult(result.result);
+    const committedState = stateFromResult(result.result);
+    if (dispatchedFingerprint !== localViewFingerprint()) {
+      // A later local edit must not be erased by an older async response.
+      // Never copy a token from Save As (it refers to another resource).
+      if (state.resourceId === committedState.resourceId) {
+        state.writeToken = committedState.writeToken;
+      }
+      report("An earlier snapshot was saved; newer local edits remain unsaved.");
+      render();
+      return;
+    }
+    state = committedState;
     undoHistory.length = 0;
     redoHistory.length = 0;
     selectedNodeIds.clear();
