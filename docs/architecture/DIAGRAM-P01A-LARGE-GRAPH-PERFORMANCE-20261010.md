@@ -32,3 +32,7 @@
 ## 最新重复测量（2026-10-10）
 
 独立第三轮 [App Chrome CI 38014903344](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38014903344) Chrome 154 / 同 runner B6b vs P01a 重复比较通过：200/400 selection **18.5→16.9ms (-8.65%)**，500/1000 selection **44.8→38.5ms (-14.06%)**。此前的 [38014785156](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38014785156) selection 分别 -12.95%、-16.46%。小图回退后的条件索引策略有两次独立的正向 selection 证据，但拖动事件 CDP p95 不是 FPS，500/1000 第三次反而 +7.37%。正式 P01 设备性能仍未验收。
+
+## 第四次对比的反例（2026-10-10）
+
+[App Perf CI 38015041848](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38015041848) 同机 Chrome 154 配对：200/400 selection **38.0→40.0 ms (+5.26% 回退)**，500/1000 selection **81.1→68.6 ms (-15.41%)**。因此不能称 200/400 已稳定优化，虽然前两轮小图 selection 改善，大图选择重绘在多轮测试中较持续改善。维持 hybrid 作为保守工程方案，但未来应检查小图波动原因；此阶段不新增未经证明的“达到 FPS”承诺。
