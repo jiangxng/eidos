@@ -15,6 +15,6 @@
 ## 验证和边界
 
 - 源码单测覆盖 4 个重叠候选的稳定顺序、逐一 rank、去重、缩放阈值、非法参数、不变更原坐标，并静态检查不改变 44px hit area 和 Undo 路径。
-- CI 结果需以新 PR 的 GitHub Actions 为准。静态/纯几何测试**不能证明**真实鼠标点击循环后拖动能够准确命中第三/第四段；该测试需单独运行真实 Chrome 和录入证据。
-- Shift+Alt 为桌面键鼠增强手势，不得冒充移动端方案。复杂圆角/自环、实体 macOS/Windows/iOS/Android、触控板/辅助技术完整行为、1000 边长期操作及 §14 39 项正式验收仍未通过。
+- Eidos [Draft #145](https://github.com/jiangxng/eidos/pull/145) CI PASS；App [Draft #590](https://github.com/jiangxng/EVO-App-Platform/pull/590) 集成 CI PASS。[App Chrome 154 eleven-tab CI #38020601326](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38020601326) **PASS**：新建第十一 Chrome 标签页，以真实 Inspector 数字输入构建 5 个手工路径点、多于 2 个重叠段；CDP Shift+Alt 单击由默认第二候选切换第三候选（`3/N`），原 SVG 保持不变且 44px 命中区未缩小，再 Shift+Alt 拖动第三候选使 SVG 改变，一次 Undo 完全还原；Host 投影 Store 未隐式写入。日志 `b8dNativeDenseOverlapCycleAndUndo=true`，原 B8c、B8b、CAS 子场景同时 PASS。
+- 已覆盖 Chrome 第三候选的真实浏览器鼠标场景；第四及更多候选逐个拖动尚无独立浏览器证明。Shift+Alt 为桌面键鼠增强手势，不得冒充移动端方案。复杂圆角/自环、实体 macOS/Windows/iOS/Android、触控板/辅助技术完整行为、1000 边长期操作及 §14 39 项正式验收仍未通过。
 - 分支/PR 保持 Draft，未经主线集成审查不得合并、部署；不会修改全局进度文件。
