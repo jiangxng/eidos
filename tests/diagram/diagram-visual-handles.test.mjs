@@ -58,3 +58,4 @@ test("drag rejects invalid indices, nonfinite coordinates, unsupported path kind
   assert.throws(()=>diagramDragOrthogonalSegmentV010(start,end,
     {pathKind:"curve",waypoints:override.waypoints},0,3),/INVALID/);
 });
+\ntest("on-canvas drag handles remain screen-sized across viewport zoom",async()=>{\n  const {readFile}=await import("node:fs/promises");\n  const source=await readFile(new URL("../../src/diagram/surface.ts",import.meta.url),"utf8");\n  assert.match(source,/data-eidos-diagram-handle-screen-radius/);\n  assert.match(source,/radius \\/ camera\\.scale/);\n  assert.match(source,/target\\.setAttribute\\("data-eidos-diagram-handle-screen-radius", "22"\\)/);\n});\n
