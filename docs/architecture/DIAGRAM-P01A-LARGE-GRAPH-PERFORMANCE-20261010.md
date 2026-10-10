@@ -20,3 +20,11 @@
 - 自动回归 `tests/diagram/diagram-obstacle-spatial-index.test.mjs`，涵盖路径语义一致、远处障碍、巨大障碍、负坐标、极宽范围、源顺序确定性。
 - App Platform `tools/diagram-performance-browser-proof.mjs` 基于真实 Chrome 的 *synthetic Eidos DOM*：200/400、500/1000；记录 render/load、节点选择重绘、原生鼠标事件调度、DOM/SVG 与 JS Heap；配套同 runner 构建 B6b 与 P01a、预热并重复 3 次/规模。测量结果应引用最终比较日志，不能用不同机器的单次结果推断提升。
 - 此阶段仍完整渲染全部节点与边，没有做虚拟滚动或缩略图降质，也没有改变实际 business graph 的 API。真实多设备 FPS、触控板交互、曲线/多段自环、超大图缓存回收和 Viewer 往返**未通过 §14 P01 正式验收**。
+
+## P01a 补充：小图回退引发的规模自适应决策
+
+独立两轮同 runner 比较发现 200/400 selection 的 `+14.76%` 与 `+4.94%` 回退，不能宣称空间索引在小图上也有收益。为此 Surface 选择 `visibleNodes × visibleEdges >= 150,000` 才构建桶索引；否则直接沿用原始全部障碍扫描，但端点 Map 仍共用。这是**基于项目测试结果的实现阈值**，不是参考软件的经验法则，也不是稳定业务契约，应在更多图分布中继续调校。
+
+[新 Chrome 配对 CI 38014785156](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38014785156) Chrome 154、同 runner、两次预热及 3 次中位数，200/400 selection **19.3→16.8ms (-12.95%)**，500/1000 selection **48.6→40.6ms (-16.46%)**；对应 mount 200/400 **75.1→76.4ms (+1.73%)**、500/1000 **97.7→96.6ms (-1.13%)**。不同独立 runner 的绝对数值变化明显，故此仅为当前方向正确的工程证据而不是已达到 FPS 验收标准。
+
+新增路径由旧有 geometry parity tests 和 Eidos 全套 CI 共同检查：小图走原 route obstacles，较大图走同语义的空间候选；任何规模、样式均无隐性业务写入。
