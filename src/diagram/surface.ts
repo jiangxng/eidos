@@ -2445,7 +2445,8 @@ export function mountDiagramEditorPageV010(
                 // A self-edge has no meaningful center-center midpoint.
                 // Start with the editable exterior contour, not inside its node.
                 edge.waypoints = diagramSelfLoopRouteControlsV010(
-                  source, edge.pathKind
+                  source, edge.pathKind, 0,
+                  state?.nodes.filter(other => other.id !== edge.source) ?? []
                 ).waypoints;
               } else {
                 edge.waypoints = [...(edge.waypoints ?? []),
@@ -2703,8 +2704,22 @@ export function mountDiagramEditorPageV010(
           : renderedNodes.filter(node => node.id !== edge.source && node.id !== edge.target)
             .map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }))
         : [];
+      // B8g: a self-loop only needs neighbors within its outer control
+      // corridor. Reuse the existing render-level spatial index on large
+      // graphs instead of scanning every node once per self-relation.
+      // near() covers 134 world units around the node rectangle; only use
+      // it when the maximum loop reach plus 22 units fits that envelope.
+      const loopReach = Math.max(38, 56 + lane);
+      const loopObstacles = edge.source === edge.target && edge.pathKind !== undefined
+        ? spatialObstacles && loopReach + 22 <= 134
+          ? spatialObstacles.near({ x: source.x, y: source.y },
+              { x: source.x + source.width, y: source.y + source.height },
+              edge.source, edge.source)
+          : renderedNodes.filter(other => other.id !== edge.source)
+        : [];
       const geometry = edge.source === edge.target
-        ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane, edge.waypoints)
+        ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane,
+            edge.waypoints, loopObstacles)
         : edge.waypoints?.length
           ? diagramManualEdgeGeometryV010(a, b, {
               pathKind: edge.pathKind ?? "orthogonal", waypoints: edge.waypoints,
@@ -2724,7 +2739,8 @@ export function mountDiagramEditorPageV010(
           // B8f: retain the exact existing automatic self-loop until a handle
           // is actually dragged. Manual curve and orthogonal controls have
           // fixed right-side boundary terminals; the relation stays a self-edge.
-          const loop = diagramSelfLoopRouteControlsV010(source, edge.pathKind, lane);
+          const loop = diagramSelfLoopRouteControlsV010(source, edge.pathKind,
+            lane, loopObstacles, edge.waypoints);
           editableRoutes.push({
             edge, start: loop.start, end: loop.end,
             waypoints: edge.waypoints?.length ? edge.waypoints : loop.waypoints,
@@ -3171,7 +3187,10 @@ export function mountDiagramEditorPageV010(
               movedSource!.x - sourceNode.x, movedSource!.y - sourceNode.y)
           : edge.waypoints;
         const route = edge.source === edge.target
-          ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane, points)
+          ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane, points,
+              edge.pathKind === undefined ? [] : renderedNodes
+                .filter(node => node.id !== edge.source)
+                .map(node => ({ ...node, ...positions.get(node.id) })))
           : points?.length
             ? diagramManualEdgeGeometryV010(a, b, { pathKind: edge.pathKind ?? "orthogonal", waypoints: points })
             : diagramEdgeGeometryV010(a, b, edge.pathKind);
