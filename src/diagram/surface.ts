@@ -2816,10 +2816,12 @@ export function mountDiagramEditorPageV010(
       // Only explicitly styled orthogonal routes use obstacle avoidance.
       // Legacy edges remain straight; unrelated business data is never mutated.
       const routeObstacles = edge.pathKind === "orthogonal" || edge.pathKind === "rounded-orthogonal"
-        ? spatialObstacles
-          ? spatialObstacles.near(a, b, edge.source, edge.target)
-          : renderedNodes.filter(node => node.id !== edge.source && node.id !== edge.target)
-            .map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }))
+        ? preciseRouteGeometries.has(edge.id) && selectedEdgeId !== edge.id
+          ? [] // B8k: geometry already rendered and cached; do not route twice.
+          : spatialObstacles
+            ? spatialObstacles.near(a, b, edge.source, edge.target)
+            : renderedNodes.filter(node => node.id !== edge.source && node.id !== edge.target)
+              .map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }))
         : [];
       const loopObstacles = edge.source === edge.target && edge.pathKind !== undefined
         ? loopObstaclesFor(source,lane) : [];
