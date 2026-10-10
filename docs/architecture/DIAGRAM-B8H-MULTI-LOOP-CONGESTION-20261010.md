@@ -20,3 +20,9 @@
 ## 本轮测试矩阵
 - Eidos test：单条原右 SVG 一致；四条自环稳定分配；第 5/6 条错层与诚实拥堵；四方向都被节点覆盖时拥堵/面积非零；手工侧别不跳；非法输入拒绝；Surface DOM 警示 pointer-events:none；B8f/B8g 测试继续通过。
 - App 集成、浏览器专项：使用**隔离模拟自环关系**，不改真实业务定义。新增实际 Chrome 23-tab 场景检查 5 条自环的绘制、目标区域拖动、拥堵标记、Viewer 只读和四侧障碍警示；是否 PASS 必须以 [App Draft #596](https://github.com/jiangxng/EVO-App-Platform/pull/596) 最新运行报告确认，不能以计划代替实际证据。
+
+## B8h 补充核验与优先级修正
+
+- **手工路径优先**：同一节点的全部已保存手工自环先占外侧方向，不论其关系 ID 在自动自环之前还是之后；其余自动自环按稳定 ID 次序择侧。这样不会因新添 ID 更小的自环使先前保存的手工路径被覆盖或视觉交错。对应 Surface 代码与测试均已增加约束。
+- [B8h Chrome 23 标签页实测 #38024189776](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38024189776) **PASS**，Chrome/154.0.8037.97，日志 `b8hMultiLoopCongestionNativePointerViewer=true`；B8g/B8f/B8e/B8d/B8c/B8b/CAS 历史验证同时为 true。第 21 页：5 条合成自环稳定分右、下、左、上、右，第五条有警示和能命中的 44px bulge；CDP 原生鼠标拖动成功但不自动 Save。第 22 页真实只读 Viewer 仍保持原测试源的未保存形状。第 23 页四侧被模拟节点遮挡，所有自环均带 aria 拥堵说明和 pointer-events:none 警示。请勿将这项隔离测试解释为现网真实企业图验收。
+- 代码、性能和浏览器最终是否都 PASS，以本轮 GitHub 最新 PR head 的 CI 为准；上一份浏览器运行是已完成的实证，但后续优先级修正仍需最新 CI 回归。
