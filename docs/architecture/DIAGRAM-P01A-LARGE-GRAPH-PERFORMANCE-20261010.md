@@ -28,3 +28,7 @@
 [新 Chrome 配对 CI 38014785156](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38014785156) Chrome 154、同 runner、两次预热及 3 次中位数，200/400 selection **19.3→16.8ms (-12.95%)**，500/1000 selection **48.6→40.6ms (-16.46%)**；对应 mount 200/400 **75.1→76.4ms (+1.73%)**、500/1000 **97.7→96.6ms (-1.13%)**。不同独立 runner 的绝对数值变化明显，故此仅为当前方向正确的工程证据而不是已达到 FPS 验收标准。
 
 新增路径由旧有 geometry parity tests 和 Eidos 全套 CI 共同检查：小图走原 route obstacles，较大图走同语义的空间候选；任何规模、样式均无隐性业务写入。
+
+## 最新重复测量（2026-10-10）
+
+独立第三轮 [App Chrome CI 38014903344](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38014903344) Chrome 154 / 同 runner B6b vs P01a 重复比较通过：200/400 selection **18.5→16.9ms (-8.65%)**，500/1000 selection **44.8→38.5ms (-14.06%)**。此前的 [38014785156](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38014785156) selection 分别 -12.95%、-16.46%。小图回退后的条件索引策略有两次独立的正向 selection 证据，但拖动事件 CDP p95 不是 FPS，500/1000 第三次反而 +7.37%。正式 P01 设备性能仍未验收。
