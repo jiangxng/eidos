@@ -83,10 +83,10 @@ test("B8g route selection is stable under obstacle reordering, ties and bad inpu
 test("B8g Surface passes visible obstacle geometry into both Designer and Viewer",async()=>{
   const s=await readFile(new URL("../../src/diagram/surface.ts",import.meta.url),"utf8");
   assert.match(s,/const loopObstacles = edge.source === edge.target/);
-  assert.match(s,/diagramSelfLoopGeometryV010\(source, edge\.pathKind, lane,\s*edge\.waypoints, loopObstacles\)/);
-  assert.match(s,/diagramSelfLoopRouteControlsV010\(source, edge\.pathKind,\s*lane, loopObstacles, edge\.waypoints\)/);
+  assert.match(s,/diagramSelfLoopGeometryV010\(source, edge\.pathKind, lane,\s*edge\.waypoints, loopObstacles, loopReservations\)/);
+  assert.match(s,/diagramSelfLoopRouteControlsV010\(source, edge\.pathKind,\s*lane, loopObstacles, edge\.waypoints, loopReservations\)/);
   assert.match(s,/diagramSelfLoopGeometryV010\(source, edge\.pathKind, lane, points,/);
-  assert.match(s,/renderedNodes\.filter\(other => other\.id !== edge\.source\)/);
+  assert.match(s,/renderedNodes\.filter\(other => other\.id !== source\.id\)/);
 });
 
 test("B8g spatial neighborhood and full obstacle scan give identical sides",async()=>{
@@ -106,6 +106,6 @@ test("B8g spatial neighborhood and full obstacle scan give identical sides",asyn
     diagramSelfLoopSideV010(source,nodes.slice(1)),
     "B8g large-graph shortcut must not miss near or enormous blocking nodes");
   const s=await readFile(new URL("../../src/diagram/surface.ts",import.meta.url),"utf8");
-  assert.match(s,/loopReach \+ 22 <= 134/);
+  assert.match(s,/reach \+ 22 <= 134/);
   assert.match(s,/spatialObstacles\.near\(\{ x: source\.x, y: source\.y \}/);
 });
