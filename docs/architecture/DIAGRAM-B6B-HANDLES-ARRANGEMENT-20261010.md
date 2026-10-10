@@ -15,3 +15,9 @@
 - `tests/diagram/diagram-snapping-tools.test.mjs` 验证双轴/单轴吸附、3 倍缩放拒绝不合法吸附、10% 网格、六方向对齐/等距分布、输入不可变和非法间距失败。该文件与原 `diagram-snapping.test.mjs` 同由 Eidos CI 执行。
 - App Platform 的对应 Draft PR #568 负责 vendored 差分与 Browser/Host 保存边界证明；不能把 Node 单测说成真实浏览器已验收。
 - 悬而未决：路径手柄真实浏览器在曲线/正交路径上拖动的覆盖、实体触摸和触控板、隐藏/锁定对象特殊组合与密集图性能；原 §14 的 E03/A02/P01 全量验收仍须实测。
+
+## 浏览器专项反馈及修复（新增证据）
+
+App Platform 的真实 Chrome（`154.0.8037.97`）测试发现，路径点的透明 44px 命中圆与正交段透明命中圆重叠；B5a 原次序是 **先绘制 waypoint、再绘制 segment**，DOM 最上层 segment 会抢占 waypoint 指针事件。此为实际浏览器反馈，而非外部参考猜测。本切片修正为**先绘制 segment、最后绘制 waypoint**，两者仍保留 44px 热区；Eidos 与 vendored Surface 对应回归断言明确保护此顺序。
+
+[App Browser Conflict CI 38012891164](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38012891164) 实际在第四 Chrome 标签页中选择真实关系、转为正交折线、添加 waypoint、使用原生鼠标指针捕获拖动到网格、释放并 Undo 恢复原 waypoint，并验证没有隐式 Host 保存。日志包含 `nativeRouteHandleSnapAndUndo=true`。**这仅覆盖手工 waypoint 的真实 Chrome 鼠标子场景，不能外推至正交段的真实鼠标拖动、手机触摸或原 §14 E03 的完整验收。**
