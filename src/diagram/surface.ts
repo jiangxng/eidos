@@ -41,7 +41,9 @@ import {
   diagramSelfLoopRouteControlsV010,
   diagramSelfLoopSideV010,
   diagramSelfLoopManualSideV010,
-  type DiagramSelfLoopSideV010
+  diagramSelfLoopFitBoundsV010,
+  type DiagramSelfLoopSideV010,
+  type DiagramSelfLoopInkV010
 } from "./edge-lanes.js";
 import {
   layoutLayeredDiagramV010
@@ -1511,16 +1513,9 @@ export function mountDiagramEditorPageV010(
     if (!state || nodes.length === 0) {
       return { x: 0, y: 0, width: 1, height: 1 };
     }
-    const minX = Math.min(...nodes.map(node => node.x));
-    const minY = Math.min(...nodes.map(node => node.y));
-    const maxX = Math.max(...nodes.map(node => node.x + node.width));
-    const maxY = Math.max(...nodes.map(node => node.y + node.height));
-    return {
-      x: minX,
-      y: minY,
-      width: Math.max(1, maxX - minX),
-      height: Math.max(1, maxY - minY)
-    };
+    // B8i: include external self-loop handles in Fit all without tying
+    // routing to the transient viewport, pan or zoom camera.
+    return diagramSelfLoopFitBoundsV010(nodes,visibleEdges());
   };
 
   const matchingActions = (): DiagramEditorActionV010[] => {
@@ -1675,16 +1670,10 @@ export function mountDiagramEditorPageV010(
           );
         })();
     if (nodes.length === 0) return undefined;
-    const minX = Math.min(...nodes.map(node => node.x));
-    const minY = Math.min(...nodes.map(node => node.y));
-    const maxX = Math.max(...nodes.map(node => node.x + node.width));
-    const maxY = Math.max(...nodes.map(node => node.y + node.height));
-    return {
-      x: minX,
-      y: minY,
-      width: Math.max(1, maxX - minX),
-      height: Math.max(1, maxY - minY)
-    };
+    // B8i: Fit selection must not crop a saved or automatic self-loop.
+    const focus=selected?.kind==="edge"
+      ? state!.edges.filter(edge=>edge.id===selected?.id) : [];
+    return diagramSelfLoopFitBoundsV010(nodes,focus);
   };
 
   const fitSelectionToCanvas = (): void => {
@@ -2670,6 +2659,43 @@ export function mountDiagramEditorPageV010(
       group.push(edge);
       siblingGroups.set(edge.source, group);
     }
+    // B8i: bounded route-ink preview. These are non-incident edge spans,
+    // not business-relationship changes and not transient selected-label DOM.
+    // Manual controls are unchanged; side scoring uses stable world coordinates.
+    // Cap O(loop owners * edges) until a dedicated stroke spatial index exists.
+    const loopInkCache = new Map<string,DiagramSelfLoopInkV010>();
+    const loopInkFor = (nodeId: string): DiagramSelfLoopInkV010 => {
+      const cached = loopInkCache.get(nodeId);
+      if(cached)return cached;
+      const segments: Array<{start:{x:number;y:number};end:{x:number;y:number}}>=[];
+      const labels: Array<{x:number;y:number;width:number;height:number}>=[];
+      if(renderedEdges.length <= 1500 && siblingGroups.size <= 48) {
+        for(const other of renderedEdges){
+          if(other.source === other.target || other.source === nodeId || other.target === nodeId)continue;
+          const a=renderedNodeById.get(other.source),b=renderedNodeById.get(other.target);
+          if(!a||!b)continue;
+          const points=[nodeCenter(a),...(other.waypoints??[]),nodeCenter(b)];
+          for(let i=1;i<points.length;i++)segments.push({
+            start:points[i-1]!,end:points[i]!
+          });
+          // Reserve a conservative label corridor consistently even if zoom
+          // or selection temporarily hides the label in DOM.
+          const caption=[other.label,...(other.observations??[])
+            .map(item=>item.label+" "+item.value)].filter(Boolean).join(" · ");
+          if(caption){
+            // Straight/legacy connectors display their label at the actual
+            // midpoint of the edge, never on the lower endpoint node.
+            const center={x:(points[0]!.x+points[points.length-1]!.x)/2,
+              y:(points[0]!.y+points[points.length-1]!.y)/2};
+            const width=Math.min(176,Math.max(24,caption.length*6.2));
+            labels.push({x:center.x-width/2,y:center.y-23,width,height:18});
+          }
+        }
+      }
+      const value={segments,labels};
+      loopInkCache.set(nodeId,value);
+      return value;
+    };
     for (const [nodeId, siblings] of siblingGroups) {
       const node = renderedNodeById.get(nodeId);
       if (!node) continue;
@@ -2688,7 +2714,7 @@ export function mountDiagramEditorPageV010(
         const lane = laneOffsets.get(edge.id) ?? 0;
         loopReservedSides.set(edge.id,[...reserved]);
         reserved.push(diagramSelfLoopSideV010(
-          node,loopObstaclesFor(node,lane),lane,reserved));
+          node,loopObstaclesFor(node,lane),lane,reserved,loopInkFor(nodeId)));
       }
     }
     const liveEdges = new Map<string, {
@@ -2751,7 +2777,8 @@ export function mountDiagramEditorPageV010(
       const loopReservations = loopReservedSides.get(edge.id) ?? [];
       const geometry = edge.source === edge.target
         ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane,
-            edge.waypoints, loopObstacles, loopReservations)
+            edge.waypoints, loopObstacles, loopReservations,
+            loopInkFor(edge.source))
         : edge.waypoints?.length
           ? diagramManualEdgeGeometryV010(a, b, {
               pathKind: edge.pathKind ?? "orthogonal", waypoints: edge.waypoints,
@@ -2772,7 +2799,8 @@ export function mountDiagramEditorPageV010(
           // is actually dragged. Manual curve and orthogonal controls have
           // fixed right-side boundary terminals; the relation stays a self-edge.
           const loop = diagramSelfLoopRouteControlsV010(source, edge.pathKind,
-            lane, loopObstacles, edge.waypoints, loopReservations);
+            lane, loopObstacles, edge.waypoints, loopReservations,
+            loopInkFor(edge.source));
           editableRoutes.push({
             edge, start: loop.start, end: loop.end,
             waypoints: edge.waypoints?.length ? edge.waypoints : loop.waypoints,
