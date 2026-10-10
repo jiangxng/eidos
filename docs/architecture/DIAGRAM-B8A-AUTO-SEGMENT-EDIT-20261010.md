@@ -17,3 +17,9 @@
 ## 后续验收缺口
 
 退化重叠热区的显式消歧；500/1000 拥堵图下连续自动线段编辑；rounded 转手工后半径细节验收；跨页面保存/重新读取/Viewer 显示；真实 Android/iOS 双指、触控板及硬件 FPS。以上不因纯几何单测通过而被认为完成。
+
+## 实际 Chrome 回归证据与范围（2026-10-10）
+
+[App Platform Browser CI 38016452101](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38016452101) Chrome/154.0.8037.97 **PASS**，六个独立页面；自动 orthogonal 边无 waypoint，原生鼠标拖动成功预览，第五标签页注入 pointercancel 后原 SVG d / 无手工控制点恢复；第六独立页面正常鼠标松手后出现显式 waypoint，随后 Undo 恢复原自动 SVG 与手工点缺席。机器输出 `autoSegmentDragCancelConvertUndo=true`，早先 B7b 并发冲突、重试、B6b 手工手柄等同时全部 PASS。
+
+第一次测试在注入合成 DOM `pointercancel` 后试图用同页 Chrome 原生鼠标立即重新抓取，第二次输入未触发预览。由于事件为人工合成，无法确定是 CDP 鼠标状态还是真实产品丢失捕获。本次采用不同独立页面完成取消与正常提交，**同页系统级取消后重新抓取尚未被证明**，继续作为真实设备测试缺口。业务只涉及展示布局，未合并、未部署。
