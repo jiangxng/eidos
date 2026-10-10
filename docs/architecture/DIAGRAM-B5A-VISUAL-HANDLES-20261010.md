@@ -20,7 +20,7 @@
 
 ## Automatic testing
 
-- `tests/diagram-visual-handles.test.mjs` — waypoint immutability, segment handle direction, endpoint invariance, right-angle validity, finite bounds and error behavior.
+- `tests/diagram/diagram-visual-handles.test.mjs` — waypoint immutability, segment handle direction, endpoint invariance, right-angle validity, finite bounds and error behavior.
 - Eidos `npm run typecheck && npm test && npm run validate:repo` via PR CI; actual commit/workflow state must be checked live, not inferred from this document.
 
 ## Known limitations and next implementation
