@@ -16,6 +16,9 @@ import {
   diagramEdgeAnchorPointV010,
   diagramManualEdgeGeometryV010,
   diagramTranslateWaypointsV010,
+  diagramMoveWaypointV010,
+  diagramEditableOrthogonalSegmentsV010,
+  diagramDragOrthogonalSegmentV010,
   validDiagramEdgePathOverrideV010,
   type DiagramEdgeAnchorSideV010
 } from "./edge-waypoints.js";
@@ -1359,6 +1362,7 @@ export function mountDiagramEditorPageV010(
   const navigationPointers = new Map<number, { x: number; y: number }>();
   // A second touch can arrive while an editor node owns another pointer capture.
   let cancelActiveNodeDrag: (() => void) | undefined;
+  let cancelActiveRouteDrag: (() => void) | undefined;
   let panLast: { x: number; y: number } | undefined;
   let pinchStartDistance: number | undefined;
   let pinchLastDistance: number | undefined;
@@ -1452,6 +1456,16 @@ export function mountDiagramEditorPageV010(
     if (!stageElement) return;
     stageElement.style.transform =
       `matrix(${camera.scale},0,0,${camera.scale},${camera.translateX},${camera.translateY})`;
+    // A zoom updates the transform without a full DOM redraw. Keep handle hit
+    // targets at 44 CSS px and visible markers at a fixed screen radius.
+    for (const target of Array.from(stageElement.querySelectorAll<SVGCircleElement>(
+      "[data-eidos-diagram-handle-screen-radius]"
+    ))) {
+      const radius = Number(target.dataset.eidosDiagramHandleScreenRadius);
+      if (Number.isFinite(radius)) {
+        target.setAttribute("r", String(radius / camera.scale));
+      }
+    }
   };
 
   const graphBounds = (): {
@@ -2428,6 +2442,7 @@ export function mountDiagramEditorPageV010(
 
     const renderedNodes = visibleNodes();
     const renderedEdges = visibleEdges();
+    const editableRoutes: Array<{ edge: DiagramEditorEdgeV010; start: { x: number; y: number }; end: { x: number; y: number } }> = [];
     // Lane offsets are computed only for explicitly styled edges, preserving old projections.
     const laneOffsets = diagramParallelLaneOffsetsV010(
       renderedEdges.filter(edge => edge.pathKind !== undefined)
@@ -2493,6 +2508,11 @@ export function mountDiagramEditorPageV010(
               sourceAnchor: edge.sourceAnchor, targetAnchor: edge.targetAnchor
             })
           : diagramEdgeGeometryV010(a, b, edge.pathKind, { obstacles: routeObstacles });
+      if (selectedEdgeId === edge.id && page.viewInteraction?.localEdgePathEdit === true
+        && edge.source !== edge.target && edge.waypoints?.length
+        && edge.pathKind && edge.pathKind !== "straight") {
+        editableRoutes.push({ edge, start: a, end: b });
+      }
       const hit = svgElement("path");
       hit.setAttribute("d", geometry.d);
       hit.setAttribute("fill", "none");
@@ -2584,6 +2604,166 @@ export function mountDiagramEditorPageV010(
         label.style.pointerEvents = "none";
         svg.appendChild(label);
         liveEdges.get(edge.id)!.label = label;
+      }
+    }
+
+
+    // B5a: selected manual routes get screen-sized, presentation-only drag handles.
+    // Pointer previews never mutate state. A normal release commits one undo step;
+    // cancel, lost capture, blur, or a second touch discards the preview.
+    for (const { edge, start, end } of editableRoutes) {
+      const rendered = liveEdges.get(edge.id);
+      if (!rendered || !edge.waypoints?.length || !edge.pathKind) continue;
+      const original = edge.waypoints.map(point => ({ ...point }));
+      const previewRoute = (points: { x: number; y: number }[]): void => {
+        const geometry = diagramManualEdgeGeometryV010(start, end, {
+          pathKind: edge.pathKind!, waypoints: points,
+          sourceAnchor: edge.sourceAnchor, targetAnchor: edge.targetAnchor
+        });
+        rendered.hit.setAttribute("d", geometry.d);
+        rendered.visual.setAttribute("d", geometry.d);
+        if (rendered.label) {
+          rendered.label.setAttribute("x", String(geometry.label.x));
+          rendered.label.setAttribute("y", String(geometry.label.y - 8));
+        }
+      };
+      const handle = (
+        x: number, y: number, kind: "point" | "segment", index: number,
+        axis?: "x" | "y"
+      ): void => {
+        const marker = svgElement("circle");
+        marker.setAttribute("cx", String(x));
+        marker.setAttribute("cy", String(y));
+        marker.setAttribute("r", String((kind === "point" ? 6 : 5) / camera.scale));
+        marker.setAttribute("data-eidos-diagram-handle-screen-radius", kind === "point" ? "6" : "5");
+        marker.setAttribute("fill", kind === "point"
+          ? "var(--eidos-primary,#2B6CB0)" : "var(--eidos-bg,#FFFFFF)");
+        marker.setAttribute("stroke", "var(--eidos-primary,#2B6CB0)");
+        marker.setAttribute("stroke-width", "2");
+        marker.setAttribute("vector-effect", "non-scaling-stroke");
+        marker.style.pointerEvents = "none";
+        const target = svgElement("circle");
+        target.setAttribute("cx", String(x));
+        target.setAttribute("cy", String(y));
+        target.setAttribute("r", String(22 / camera.scale));
+        target.setAttribute("data-eidos-diagram-handle-screen-radius", "22");
+        target.setAttribute("fill", "transparent");
+        target.setAttribute("data-eidos-diagram-" + (kind === "point"
+          ? "waypoint-handle" : "segment-handle"), edge.id + ":" + index);
+        target.setAttribute("aria-label", kind === "point"
+          ? "Drag path point " + (index + 1)
+          : "Drag orthogonal segment " + (index + 1));
+        target.style.pointerEvents = "all";
+        target.style.touchAction = "none";
+        target.style.cursor = kind === "point"
+          ? "move" : axis === "x" ? "ew-resize" : "ns-resize";
+        target.addEventListener("click", event => { event.preventDefault(); event.stopPropagation(); });
+        target.addEventListener("pointerdown", (event: PointerEvent) => {
+          if (event.pointerType !== "touch" && event.button !== 0) return;
+          // Preserve the first pointer's position for the canvas pinch baseline.
+          if (event.pointerType === "touch" && navigationPointers.size > 0) {
+            navigationPointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            cancelActiveRouteDrag?.();
+            return;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          cancelActiveRouteDrag?.();
+          const pointerId = event.pointerId;
+          const downX = event.clientX, downY = event.clientY;
+          const isTouch = event.pointerType === "touch";
+          if (isTouch) navigationPointers.set(pointerId, { x: downX, y: downY });
+          let current = original;
+          let moved = false;
+          let active = true;
+          const resetPreview = (): void => {
+            previewRoute(original);
+            marker.setAttribute("cx", String(x));
+            marker.setAttribute("cy", String(y));
+            target.setAttribute("cx", String(x));
+            target.setAttribute("cy", String(y));
+          };
+          const cleanup = (): void => {
+            target.removeEventListener("pointermove", onMove);
+            target.removeEventListener("pointerup", onUp);
+            target.removeEventListener("pointercancel", onCancel);
+            target.removeEventListener("lostpointercapture", onCancel);
+            if (cancelActiveRouteDrag === onCancel) cancelActiveRouteDrag = undefined;
+            if (target.hasPointerCapture(pointerId)) target.releasePointerCapture(pointerId);
+          };
+          const onCancel = (): void => {
+            if (!active) return;
+            active = false;
+            resetPreview();
+            if (isTouch && navigationPointers.size < 2) navigationPointers.delete(pointerId);
+            cleanup();
+          };
+          const onMove = (move: PointerEvent): void => {
+            if (move.pointerId !== pointerId || !active) return;
+            move.preventDefault();
+            move.stopPropagation();
+            if (isTouch) {
+              navigationPointers.set(pointerId, { x: move.clientX, y: move.clientY });
+              if (navigationPointers.size >= 2) { onCancel(); return; }
+            }
+            const px = move.clientX - downX, py = move.clientY - downY;
+            if (!moved && Math.hypot(px, py) < (isTouch ? 8 : 4)) return;
+            try {
+              const next = kind === "point"
+                ? diagramMoveWaypointV010(original, index, px / camera.scale, py / camera.scale)
+                : diagramDragOrthogonalSegmentV010(
+                    start, end,
+                    { pathKind: edge.pathKind!, waypoints: original },
+                    index, (axis === "x" ? px : py) / camera.scale
+                  );
+              previewRoute(next);
+              current = next;
+              moved = true;
+              const nextX = x + (kind === "point" || axis === "x" ? px / camera.scale : 0);
+              const nextY = y + (kind === "point" || axis === "y" ? py / camera.scale : 0);
+              marker.setAttribute("cx", String(nextX));
+              marker.setAttribute("cy", String(nextY));
+              target.setAttribute("cx", String(nextX));
+              target.setAttribute("cy", String(nextY));
+            } catch {
+              // Ignore out-of-range previews; never commit malformed coordinates.
+            }
+          };
+          const onUp = (up: PointerEvent): void => {
+            if (up.pointerId !== pointerId || !active) return;
+            up.preventDefault();
+            up.stopPropagation();
+            active = false;
+            if (isTouch) navigationPointers.delete(pointerId);
+            cleanup();
+            suppressNextCanvasClick = true;
+            window.setTimeout(() => { suppressNextCanvasClick = false; }, 0);
+            if (!moved) return;
+            checkpoint();
+            edge.waypoints = current;
+            followsFitToCanvas = false;
+            render();
+            canvas.focus({ preventScroll: true });
+            report("Connector route adjusted locally. Save the projection to persist.");
+          };
+          target.addEventListener("pointermove", onMove);
+          target.addEventListener("pointerup", onUp);
+          target.addEventListener("pointercancel", onCancel);
+          target.addEventListener("lostpointercapture", onCancel);
+          cancelActiveRouteDrag = onCancel;
+          target.setPointerCapture(pointerId);
+        });
+        svg.append(marker, target);
+      };
+      for (const [index, point] of original.entries()) {
+        handle(point.x, point.y, "point", index);
+      }
+      if (edge.pathKind === "orthogonal" || edge.pathKind === "rounded-orthogonal") {
+        for (const segment of diagramEditableOrthogonalSegmentsV010(
+          start, end, { pathKind: edge.pathKind, waypoints: original }
+        )) {
+          handle(segment.x, segment.y, "segment", segment.index, segment.axis);
+        }
       }
     }
 
@@ -2751,7 +2931,7 @@ export function mountDiagramEditorPageV010(
               x: event.clientX,
               y: event.clientY
             });
-            if (navigationPointers.size >= 2) cancelActiveNodeDrag?.();
+            if (navigationPointers.size >= 2) { cancelActiveNodeDrag?.(); cancelActiveRouteDrag?.(); }
             const touchDragEligible =
               selected?.kind === "node"
               && selected.id === node.id
@@ -2981,6 +3161,7 @@ export function mountDiagramEditorPageV010(
       });
       if (event.pointerType === "touch" && navigationPointers.size >= 2) {
         cancelActiveNodeDrag?.();
+        cancelActiveRouteDrag?.();
       }
       const points = [...navigationPointers.values()];
       if (points.length === 1) {
@@ -3119,6 +3300,7 @@ export function mountDiagramEditorPageV010(
     canvas.addEventListener("pointercancel", pointerUp);
     const onBlur = (): void => {
       cancelActiveNodeDrag?.();
+      cancelActiveRouteDrag?.();
       removeMarquee();
       navigationPointers.clear();
       panLast = undefined;
@@ -3231,6 +3413,12 @@ export function mountDiagramEditorPageV010(
       return;
     }
 
+    if (event.key === "Escape" && cancelActiveRouteDrag) {
+      event.preventDefault();
+      cancelActiveRouteDrag();
+      return;
+    }
+
     if (event.key === "Escape" && selected) {
       event.preventDefault();
       clearSelection();
@@ -3338,6 +3526,7 @@ export function mountDiagramEditorPageV010(
       );
     },
     dispose() {
+      cancelActiveRouteDrag?.();
       disposed = true;
       for (const listener of listeners) listener();
     }
