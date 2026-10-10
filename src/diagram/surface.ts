@@ -2609,7 +2609,13 @@ export function mountDiagramEditorPageV010(
     // P01a: one stable source-order lookup per full render. Edge endpoints and
     // relevant obstacle lists no longer rescan all visible nodes for each edge.
     const renderedNodeById = new Map(renderedNodes.map(node => [node.id, node] as const));
-    const spatialObstacles = createDiagramObstacleSpatialIndexV010(renderedNodes);
+    // P01a: small diagrams measured a selection-redraw regression when
+    // constructing a spatial index. Switch only when E×N warrants it.
+    // This is a presentation performance choice, not a persisted graph flag.
+    const useSpatialIndex = renderedNodes.length * renderedEdges.length >= 150_000;
+    const spatialObstacles = useSpatialIndex
+      ? createDiagramObstacleSpatialIndexV010(renderedNodes)
+      : undefined;
     const editableRoutes: Array<{ edge: DiagramEditorEdgeV010; start: { x: number; y: number }; end: { x: number; y: number } }> = [];
     // Lane offsets are computed only for explicitly styled edges, preserving old projections.
     const laneOffsets = diagramParallelLaneOffsetsV010(
@@ -2665,7 +2671,10 @@ export function mountDiagramEditorPageV010(
       // Only explicitly styled orthogonal routes use obstacle avoidance.
       // Legacy edges remain straight; unrelated business data is never mutated.
       const routeObstacles = edge.pathKind === "orthogonal" || edge.pathKind === "rounded-orthogonal"
-        ? spatialObstacles.near(a, b, edge.source, edge.target)
+        ? spatialObstacles
+          ? spatialObstacles.near(a, b, edge.source, edge.target)
+          : renderedNodes.filter(node => node.id !== edge.source && node.id !== edge.target)
+            .map(node => ({ x: node.x, y: node.y, width: node.width, height: node.height }))
         : [];
       const geometry = edge.source === edge.target
         ? diagramSelfLoopGeometryV010(source, edge.pathKind, lane)
