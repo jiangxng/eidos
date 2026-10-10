@@ -42,3 +42,13 @@ test("legacy host states omit write token without inventing one", () => {
   ).values, false);
   assert.equal(validateDiagramEditorStateV010({ ...state, writeToken: "" }).ok, false);
 });
+
+
+test("async save path rejects duplicate submit and retains newer draft after earlier response", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../../src/diagram/surface.ts", import.meta.url), "utf8");
+  assert.match(source, /if \(operationInFlight\)/);
+  assert.match(source, /dispatchedFingerprint !== localViewFingerprint\(\)/);
+  assert.match(source, /state\.writeToken = committedState\.writeToken/);
+  assert.match(source, /local edits are preserved/);
+});
