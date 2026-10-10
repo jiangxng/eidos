@@ -21,3 +21,9 @@
 App Platform 的真实 Chrome（`154.0.8037.97`）测试发现，路径点的透明 44px 命中圆与正交段透明命中圆重叠；B5a 原次序是 **先绘制 waypoint、再绘制 segment**，DOM 最上层 segment 会抢占 waypoint 指针事件。此为实际浏览器反馈，而非外部参考猜测。本切片修正为**先绘制 segment、最后绘制 waypoint**，两者仍保留 44px 热区；Eidos 与 vendored Surface 对应回归断言明确保护此顺序。
 
 [App Browser Conflict CI 38012891164](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38012891164) 实际在第四 Chrome 标签页中选择真实关系、转为正交折线、添加 waypoint、使用原生鼠标指针捕获拖动到网格、释放并 Undo 恢复原 waypoint，并验证没有隐式 Host 保存。日志包含 `nativeRouteHandleSnapAndUndo=true`。**这仅覆盖手工 waypoint 的真实 Chrome 鼠标子场景，不能外推至正交段的真实鼠标拖动、手机触摸或原 §14 E03 的完整验收。**
+
+## B6b 补充：真实正交线段手柄验收子场景
+
+[App Chrome Browser CI 38013268466](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38013268466) 在 Chrome `154.0.8037.97` 中通过。相同第四标签页先用真实属性区 waypoint 数字微调创建明确折弯，找到未被其他图元遮挡的 orthogonal segment 44px target；用真实鼠标 press/move/release 沿其可动轴吸附，确认 SVG 线形改变，并通过 Undo 精确恢复原始 SVG path。机器日志 `nativeOrthogonalSegmentSnapAndUndo=true`。这补足了之前只通过几何单测的正交线段真实鼠标子场景。
+
+仍需强调：在“路径点与唯一折线段手柄精确重合”的退化几何下，waypoint 有更高命中优先级；用户可先使用已提供的 44px 数字路径点编辑控件调整拐点，随后选择线段手柄。这一可操作替代方式已在浏览器证据中使用；更强的重叠目标消歧可后续单独设计。真实手机/触控板、多指与复杂交叉图仍未验收。
