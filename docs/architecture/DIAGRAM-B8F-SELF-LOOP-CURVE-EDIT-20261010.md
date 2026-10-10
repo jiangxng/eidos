@@ -16,6 +16,6 @@
 ## 证据状态
 
 - Eidos [#147](https://github.com/jiangxng/eidos/pull/147) release-check CI **PASS**。纯几何测试覆盖四种默认自环 SVG 的非变性，正交/圆角控制柄、端点不移动、曲线 bulge、节点整体平移、非法坐标，以及 Surface 的渲染/编辑联动。
-- App 普通 14 标签页 Chrome 回归、CI 集成与平台层已通过；B8f 专属 **17 标签页自环 Chrome** 使用隔离的测试自环注入到测试用 artifact source，并使用真实 App Host/CAS 与只读 Viewer；以对应 GitHub Actions **完成结果**为准，尚不可自动视为通过。
+- App [Chrome 17 标签页 CI #38022453391](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38022453391) **PASS**（Chrome/154.0.8037.97）：日志 `b8fSelfLoopCurveNativeDragSaveViewer=true`，原 B8e/B8d/B8c/B8b 子场景也同时为 true。第 15 页通过隔离测试 artifact source 的 **虚拟自环关系**、真实 Designer DOM/原生 CDP 鼠标和 Escape：自动 cubic 外侧 bulge 无持久点 → 拖动预览 → 取消 SVG 还原 → 同页重抓提交 → Undo/Redo → 显式 App Host/CAS Save 投影版本 5→6。第 16 页全新 Designer、第 17 页真实只读 Viewer 从相同测试 Store 读取完全相同的 cubic SVG；业务定义 history 不变。测试样本非真实业务关系，不能冒充已在用户现网数据中验证。
 - 测试自环不是生产企业关系，本轮**没有**改动实际业务图的关系结构。自环在现有密集图中仍有被右侧邻接节点覆盖的可能；测试将控制柄放在画布内、右侧空旷的位置，不能作为「自动自环避障」已完成的证据。
 - 物理 iOS/Android、Windows/macOS 实体鼠标/触控板、系统触摸中断、复杂多自环与跨关系避障、重启后数据库持久化、完整 §14 39 项商用验收继续 **NOT TESTED**。Draft、未合并、未部署。
