@@ -10,3 +10,4 @@ export * from "./workspace.js";
 export * from "./viewport.js";
 export * from "./selection.js";
 export * from "./edge-waypoints.js";
+export * from "./snapping.js";
