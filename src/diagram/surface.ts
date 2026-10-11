@@ -95,6 +95,8 @@ export interface DiagramEditorViewInteractionV010 {
   localVisibilityResetNotice?: string;
   localVisibilityResetPlacement?: DiagramEditorToolbarPlacementV010;
   localAutoLayout?: boolean;
+  /** A01 session-only node position pin, separate from readOnly business authority. */
+  localPositionLock?: boolean;
   localAutoLayoutLabel?: string;
   localAutoLayoutNotice?: string;
   localAutoLayoutDirection?: "RIGHT" | "DOWN";
@@ -2123,6 +2125,29 @@ export function mountDiagramEditorPageV010(
         button,
         page.viewInteraction.localVisibilityResetPlacement ?? "TOOLBAR"
       );
+    }
+
+    if (page.viewInteraction?.localPositionLock === true) {
+      const lockedNode = selected?.kind === "node"
+        ? state.nodes.find(node => node.id === selected.id)
+        : undefined;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("data-eidos-diagram-position-lock", "");
+      button.textContent = lockedNode?.positionLocked
+        ? "Unpin position" : "Pin position (session)";
+      button.title = "Position lock lasts until this editor is reopened; it does not change the business graph.";
+      button.disabled = !lockedNode;
+      button.setAttribute("aria-pressed", String(lockedNode?.positionLocked === true));
+      button.onclick = () => {
+        if (!lockedNode) return;
+        lockedNode.positionLocked = !lockedNode.positionLocked;
+        render();
+        report(lockedNode.positionLocked
+          ? "Position pinned locally. Auto layout cannot move this node."
+          : "Position unpinned locally.");
+      };
+      placeToolbarButton(button, "OVERFLOW");
     }
 
     if (page.viewInteraction?.localAutoLayout === true) {
