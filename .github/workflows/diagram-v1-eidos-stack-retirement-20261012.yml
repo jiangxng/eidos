@@ -58,9 +58,19 @@ jobs:
               }
               if(r.existsBefore){
                 if(r.refSha!==r.expectedHeadSha)throw Error('Bad original SHA '+r.head);
-                const ref=(await github.rest.git.getRef({owner,repo,ref:'heads/'+r.head})).data;
-                if(ref.object.sha!==r.expectedHeadSha)throw Error('Live staged head drift '+r.head);
-                if((await github.rest.repos.getBranch({owner,repo,branch:r.head})).data.protected)
+                let ref=null;
+                try {ref=(await github.rest.git.getRef({owner,repo,ref:'heads/'+r.head})).data;}
+                catch(err){
+                  // GitHub auto-deleted #130 source ref after its ancestry-only #172 merge.
+                  // This exception is exact-PR/SHA and only when GitHub confirms merged.
+                  if(!(err.status===404 && r.number===130 && p.merged &&
+                       p.merge_commit_sha==='99cf0dbd15cb265823730180ca591f1440612261'))
+                    throw err;
+                  core.info('EIDOS_ALREADY_AUTO_RETIRED_130 '+r.head);
+                }
+                if(ref && ref.object.sha!==r.expectedHeadSha)
+                  throw Error('Live staged head drift '+r.head);
+                if(ref && (await github.rest.repos.getBranch({owner,repo,branch:r.head})).data.protected)
                   throw Error('Protected old source branch '+r.head);
               }else if(r.number!==159)throw Error('Unexpected preexisting missing branch');
               core.info('EIDOS_LEGACY_VERIFIED #'+r.number+' '+r.head);
@@ -119,7 +129,7 @@ jobs:
                 throw Error('Driver PR not part of current main');
             }
             const toDelete=[
-              ...m.records.filter(x=>x.existsBefore).map(x=>({head:x.head,expectedHeadSha:x.expectedHeadSha})),
+              ...m.records.filter(x=>x.existsBefore && x.number!==130).map(x=>({head:x.head,expectedHeadSha:x.expectedHeadSha})),
               old,
               {head:'chore/diagram-v1-commercial-stack-retirement-20261012',expectedHeadSha:cleanup.head.sha},
               ...(driver?[{head:'chore/diagram-v1-eidos-postmerge-retirement-20261012',expectedHeadSha:driver.head.sha}]:[])
