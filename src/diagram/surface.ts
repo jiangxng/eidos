@@ -563,6 +563,10 @@ export function isDiagramEditorPageV010(
           || typeof page.viewInteraction.localAutoLayout === "boolean"
         )
         && (
+          page.viewInteraction.localPositionLock === undefined
+          || typeof page.viewInteraction.localPositionLock === "boolean"
+        )
+        && (
           page.viewInteraction.localAutoLayoutLabel === undefined
           || nonEmpty(page.viewInteraction.localAutoLayoutLabel)
         )
