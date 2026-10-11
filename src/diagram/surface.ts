@@ -2910,6 +2910,9 @@ export function mountDiagramEditorPageV010(
       hit.setAttribute("fill", "none");
       hit.setAttribute("stroke", "transparent");
       hit.setAttribute("stroke-width", "18");
+      // Keep the transparent pointer stroke 18 CSS px at 10%–300% zoom.
+      // The visible connector already uses a non-scaling stroke.
+      hit.setAttribute("vector-effect", "non-scaling-stroke");
       hit.style.pointerEvents = "stroke";
       hit.style.cursor = "pointer";
       hit.setAttribute("data-eidos-diagram-edge", edge.id);
