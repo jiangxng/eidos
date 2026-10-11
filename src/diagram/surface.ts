@@ -2132,8 +2132,9 @@ export function mountDiagramEditorPageV010(
     }
 
     if (page.viewInteraction?.localPositionLock === true) {
-      const lockedNode = selected?.kind === "node"
-        ? state.nodes.find(node => node.id === selected.id)
+      const selectedNodeId = selected?.kind === "node" ? selected.id : undefined;
+      const lockedNode = selectedNodeId
+        ? state.nodes.find(node => node.id === selectedNodeId)
         : undefined;
       const button = document.createElement("button");
       button.type = "button";
