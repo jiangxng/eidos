@@ -602,14 +602,10 @@ test("diagram editor supports unbounded drag, deselection and keyboard pruning",
     fs.readFile(new URL("../../src/diagram/surface.ts", import.meta.url), "utf8")
   );
 
-  assert.match(
-    source,
-    /const nextX =\s*originalX \+ screenDeltaX \/ camera\.scale/
-  );
-  assert.match(
-    source,
-    /const nextY =\s*originalY \+ screenDeltaY \/ camera\.scale/
-  );
+  // World-space dragging still divides screen deltas by camera scale, but
+  // B6a now passes the result through deterministic group snapping.
+  assert.match(source, /screenDeltaX \/ camera\.scale, screenDeltaY \/ camera\.scale/);
+  assert.match(source, /showPositions\(movedPositions\(snapped\.dx, snapped\.dy\)\)/);
   assert.doesNotMatch(
     source,
     /const nextX = Math\.max\(\s*0,\s*originalX/
