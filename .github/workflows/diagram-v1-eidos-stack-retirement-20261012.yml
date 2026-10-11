@@ -36,9 +36,9 @@ jobs:
                m.mergedCorePr!==160||m.sideDocsPr!==156||m.missingMergedOriginalRefPr!==159||
                m.records?.length!==29||!sha.test(m.coreOriginalHeadSha))
               throw Error('Unexpected Eidos manifest');
-            const core=await github.rest.pulls.get({owner,repo,pull_number:160});
-            if(!core.data.merged||core.data.head.sha!==m.coreOriginalHeadSha||
-               core.data.base.ref!=='main')throw Error('Core #160 not trusted');
+            const corePr=await github.rest.pulls.get({owner,repo,pull_number:160});
+            if(!corePr.data.merged||corePr.data.head.sha!==m.coreOriginalHeadSha||
+               corePr.data.base.ref!=='main')throw Error('Core #160 not trusted');
             const seen=new Set(),refs=new Set();
             for(const r of m.records){
               if(!Number.isInteger(r.number)||r.number<130||r.number>159||r.number===142||
