@@ -1356,6 +1356,8 @@ export function mountDiagramEditorPageV010(
   };
   const undoHistory: ViewSnapshot[] = [];
   const redoHistory: ViewSnapshot[] = [];
+  // D02: Undo back to the exact saved presentation must not claim a dirty draft.
+  let savedEditBaselineFingerprint: string | undefined;
   const captureSnapshot = (): ViewSnapshot => ({
     positions: (state?.nodes ?? []).map(node => ({ id: node.id, x: node.x, y: node.y })),
     edgePaths: (state?.edges ?? []).map(edge => ({
@@ -1368,6 +1370,7 @@ export function mountDiagramEditorPageV010(
     hiddenNodeIds: [...locallyHiddenNodeIds],
     hiddenEdgeIds: [...locallyHiddenEdgeIds]
   });
+  const editFingerprint = (): string => JSON.stringify(captureSnapshot());
   const checkpoint = (): void => {
     undoHistory.push(captureSnapshot());
     if (undoHistory.length > 50) undoHistory.shift();
@@ -1402,7 +1405,9 @@ export function mountDiagramEditorPageV010(
     selectionInspection = undefined;
     selectionReadGeneration += 1;
     render();
-    report("View adjusted locally. Save to persist changes.");
+    report(editFingerprint() === savedEditBaselineFingerprint
+      ? "Saved."
+      : "View adjusted locally. Save to persist changes.");
   };
   const undoView = (): void => {
     const previous = undoHistory.pop();
@@ -1483,6 +1488,7 @@ export function mountDiagramEditorPageV010(
     redoHistory.length = 0;
     selectedNodeIds.clear();
     syncLocalVisibilityFromState();
+    savedEditBaselineFingerprint = editFingerprint();
     selectionInspection = undefined;
     selectionReadGeneration += 1;
     selected = preserveViewState && previousSelection && (
@@ -1633,6 +1639,7 @@ export function mountDiagramEditorPageV010(
     );
     const previousSelection = selected;
     const dispatchedFingerprint = localViewFingerprint();
+    const submittedEditFingerprint = editFingerprint();
     operationInFlight = true;
     report("Saving…");
     let result: Awaited<ReturnType<typeof actionHost.execute>>;
@@ -1660,6 +1667,7 @@ export function mountDiagramEditorPageV010(
       // Never copy a token from Save As (it refers to another resource).
       if (state.resourceId === committedState.resourceId) {
         state.writeToken = committedState.writeToken;
+        savedEditBaselineFingerprint = submittedEditFingerprint;
       }
       report("An earlier snapshot was saved; newer local edits remain unsaved.");
       render();
@@ -1670,6 +1678,7 @@ export function mountDiagramEditorPageV010(
     redoHistory.length = 0;
     selectedNodeIds.clear();
     syncLocalVisibilityFromState();
+    savedEditBaselineFingerprint = editFingerprint();
     selected = selectionStillExists(previousSelection)
       ? previousSelection
       : undefined;
