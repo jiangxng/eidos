@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "scope": "eidos-2d-commercial-stack-20261012",
+  "baselineMainSha": "79e124d32fa5435a645968617d3147358518cb4f",
+  "mergedCorePr": 160,
+  "coreOriginalHeadSha": "4302ee78ffd581274b603c3a020c633575693289",
+  "records": [
+    {
+      "number": 130,
+      "head": "feat/diagram-commercial-paths-a1-20261009",
+      "expectedHeadSha": "acb18e7792ed4d34b79d36cb440e95b5922e1351",
+      "existsBefore": true,
+      "refSha": "acb18e7792ed4d34b79d36cb440e95b5922e1351"
+    },
+    {
+      "number": 131,
+      "head": "feat/diagram-commercial-selection-a2-20261009",
+      "expectedHeadSha": "d78c19c19c5bab7403f4825688ff4ac96386c1e8",
+      "existsBefore": true,
+      "refSha": "d78c19c19c5bab7403f4825688ff4ac96386c1e8"
+    },
+    {
+      "number": 132,
+      "head": "feat/diagram-commercial-projection-style-a3-20261009",
+      "expectedHeadSha": "59c83c007d8c2bc2118b553bc835db2ae018dfa6",
+      "existsBefore": true,
+      "refSha": "59c83c007d8c2bc2118b553bc835db2ae018dfa6"
+    },
+    {
+      "number": 133,
+      "head": "feat/diagram-commercial-obstacle-routing-b1-20261010",
+      "expectedHeadSha": "29a3a1424ef3516fb59fbb7364f4ea7ae1a62140",
+      "existsBefore": true,
+      "refSha": "29a3a1424ef3516fb59fbb7364f4ea7ae1a62140"
+    },
+    {
+      "number": 134,
+      "head": "feat/diagram-commercial-parallel-loops-b2-20261010",
+      "expectedHeadSha": "2d41535713dead2e1280dd8a85475fe8e5d4e4f7",
+      "existsBefore": true,
+      "refSha": "2d41535713dead2e1280dd8a85475fe8e5d4e4f7"
+    },
+    {
+      "number": 135,
+      "head": "feat/diagram-commercial-waypoints-b3-20261010",
+      "expectedHeadSha": "709fe88aba62cebcad9b21049df03210ae4a14d9",
+      "existsBefore": true,
+      "refSha": "709fe88aba62cebcad9b21049df03210ae4a14d9"
+    },
+    {
+      "number": 136,
+      "head": "feat/diagram-commercial-touch-cancel-b4-20261010",
+      "expectedHeadSha": "0bbf25975cd966f13426e5b13b5c3044f197bd2c",
+      "existsBefore": true,
+      "refSha": "0bbf25975cd966f13426e5b13b5c3044f197bd2c"
+    },
+    {
+      "number": 137,
+      "head": "feat/diagram-commercial-visual-waypoint-drag-b5a-20261010",
+      "expectedHeadSha": "dfb5852971119d07efd8cdb96ba00f4b0c83e653",
+      "existsBefore": true,
+      "refSha": "dfb5852971119d07efd8cdb96ba00f4b0c83e653"
+    },
+    {
+      "number": 138,
+      "head": "feat/diagram-commercial-write-token-b7-20261010",
+      "expectedHeadSha": "aba189c7b8f0216408d3a66d2bfcc360d1bacf7e",
+      "existsBefore": true,
+      "refSha": "aba189c7b8f0216408d3a66d2bfcc360d1bacf7e"
+    },
+    {
+      "number": 139,
+      "head": "feat/diagram-commercial-snapping-b6a-20261010",
+      "expectedHeadSha": "dca40ed1db84910591454f2321d36bc6d41189f4",
+      "existsBefore": true,
+      "refSha": "dca40ed1db84910591454f2321d36bc6d41189f4"
+    },
+    {
+      "number": 140,
+      "head": "feat/diagram-commercial-snapping-tools-b6b-20261010",
+      "expectedHeadSha": "aa27771b79ac5085a277de5410483737107b8d01",
+      "existsBefore": true,
+      "refSha": "aa27771b79ac5085a277de5410483737107b8d01"
+    },
+    {
+      "number": 141,
+      "head": "feat/diagram-commercial-perf-p01a-20261010",
+      "expectedHeadSha": "843762344f4ed3c85ba9f47fb2e3e6a4c9a80d22",
+      "existsBefore": true,
+      "refSha": "843762344f4ed3c85ba9f47fb2e3e6a4c9a80d22"
+    },
+    {
+      "number": 143,
+      "head": "feat/diagram-commercial-auto-route-segment-b8a-20261010",
+      "expectedHeadSha": "738527316c04ba120f4153c7ea5d048623e7bd0d",
+      "existsBefore": true,
+      "refSha": "738527316c04ba120f4153c7ea5d048623e7bd0d"
+    },
+    {
+      "number": 144,
+      "head": "feat/diagram-commercial-overlap-regrab-b8c-20261010",
+      "expectedHeadSha": "eff78acdc52fe883319d07c52ec49e0177632c7a",
+      "existsBefore": true,
+      "refSha": "eff78acdc52fe883319d07c52ec49e0177632c7a"
+    },
+    {
+      "number": 145,
+      "head": "feat/diagram-commercial-overlap-cycle-b8d-20261010",
+      "expectedHeadSha": "db39d6910dec20da5cb0bc48487eb287987448d6",
+      "existsBefore": true,
+      "refSha": "db39d6910dec20da5cb0bc48487eb287987448d6"
+    },
+    {
+      "number": 146,
+      "head": "test/diagram-commercial-rounded-dense-b8e-20261010",
+      "expectedHeadSha": "99489c794efe6db4691776f7e07a51527bde679a",
+      "existsBefore": true,
+      "refSha": "99489c794efe6db4691776f7e07a51527bde679a"
+    },
+    {
+      "number": 147,
+      "head": "feat/diagram-commercial-loop-curve-b8f-20261010",
+      "expectedHeadSha": "93742b2ba901cc8a8f3163e2a598edb897bbfb4e",
+      "existsBefore": true,
+      "refSha": "93742b2ba901cc8a8f3163e2a598edb897bbfb4e"
+    },
+    {
+      "number": 148,
+      "head": "feat/diagram-commercial-self-loop-obstacle-b8g-20261010",
+      "expectedHeadSha": "db2a6a28cc9cd505526e4d82197acb5c119bab8b",
+      "existsBefore": true,
+      "refSha": "db2a6a28cc9cd505526e4d82197acb5c119bab8b"
+    },
+    {
+      "number": 149,
+      "head": "feat/diagram-commercial-loop-congestion-b8h-20261010",
+      "expectedHeadSha": "694ac71a02c3f7aaebc205122153cd374b68a918",
+      "existsBefore": true,
+      "refSha": "694ac71a02c3f7aaebc205122153cd374b68a918"
+    },
+    {
+      "number": 150,
+      "head": "feat/diagram-commercial-loop-edge-label-b8i-20261010",
+      "expectedHeadSha": "4b78af9c441eb700ae9a1bd0731368f71af27540",
+      "existsBefore": true,
+      "refSha": "4b78af9c441eb700ae9a1bd0731368f71af27540"
+    },
+    {
+      "number": 151,
+      "head": "feat/diagram-commercial-precise-ink-index-b8jk-20261010",
+      "expectedHeadSha": "4fb6342bbb20c21d747e4d4febad03180e14910b",
+      "existsBefore": true,
+      "refSha": "4fb6342bbb20c21d747e4d4febad03180e14910b"
+    },
+    {
+      "number": 152,
+      "head": "feat/diagram-commercial-label-metrics-density-b8lm-20261010",
+      "expectedHeadSha": "1402fb0eff359003f723c543bb317eacd16ce68a",
+      "existsBefore": true,
+      "refSha": "1402fb0eff359003f723c543bb317eacd16ce68a"
+    },
+    {
+      "number": 153,
+      "head": "feat/diagram-commercial-multilingual-density-b8no-20261010",
+      "expectedHeadSha": "bbe911156ab9e8634f3ab88702f8db717a57cd46",
+      "existsBefore": true,
+      "refSha": "bbe911156ab9e8634f3ab88702f8db717a57cd46"
+    },
+    {
+      "number": 154,
+      "head": "feat/diagram-commercial-word-bidi-perf-b8pq-20261010",
+      "expectedHeadSha": "a18862c6c29f24b91510e3057b1a1a68f1fcd56c",
+      "existsBefore": true,
+      "refSha": "a18862c6c29f24b91510e3057b1a1a68f1fcd56c"
+    },
+    {
+      "number": 155,
+      "head": "feat/diagram-commercial-auto-routing-cross-browser-b8rs-20261010",
+      "expectedHeadSha": "802edccfeca022b484a1d122b94e946e415ec67f",
+      "existsBefore": true,
+      "refSha": "802edccfeca022b484a1d122b94e946e415ec67f"
+    },
+    {
+      "number": 156,
+      "head": "docs/diagram-b8rs-context-recovery-20261010",
+      "expectedHeadSha": "60c971dd418737045e1e2a67a1e753d2e45b2342",
+      "existsBefore": true,
+      "refSha": "60c971dd418737045e1e2a67a1e753d2e45b2342"
+    },
+    {
+      "number": 157,
+      "head": "feat/diagram-commercial-budget-text-acceptance-b8tu-20261010",
+      "expectedHeadSha": "8e8404cc8b1ddc51b009bb5fc7a2ac496c034a4f",
+      "existsBefore": true,
+      "refSha": "8e8404cc8b1ddc51b009bb5fc7a2ac496c034a4f"
+    },
+    {
+      "number": 158,
+      "head": "feat/diagram-commercial-congestion-summary-postselect-b8vw-20261010",
+      "expectedHeadSha": "8160cb63621ee7f1578c2de6a44ffe6d199cff6e",
+      "existsBefore": true,
+      "refSha": "8160cb63621ee7f1578c2de6a44ffe6d199cff6e"
+    },
+    {
+      "number": 159,
+      "head": "feat/diagram-commercial-mobile-toolbar-wrap-b9t-20261011",
+      "expectedHeadSha": "4302ee78ffd581274b603c3a020c633575693289",
+      "existsBefore": false,
+      "refSha": null
+    }
+  ],
+  "extraOldStandalone": {
+    "head": "feat/diagram-obstacle-routing-b1-20261009",
+    "expectedHeadSha": "aea7c4d54fd9948897549fd0e0bce6d1ca7f9227"
+  },
+  "sideDocsPr": 156,
+  "missingMergedOriginalRefPr": 159
+}
