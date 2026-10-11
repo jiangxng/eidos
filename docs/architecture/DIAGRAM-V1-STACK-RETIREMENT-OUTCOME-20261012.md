@@ -24,3 +24,5 @@ The post-merge closed-event [workflow #38156910421](https://github.com/jiangxng/
 Platform old 12 branches were similarly history-reconciled and deleted by [Platform #780](https://github.com/jiangxng/EVO-App-Platform/pull/780), with an actual successful main-run [#38156172588](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38156172588). Historical experimental UI ideas **not adopted** into current product remain named and archived in Platform's `DIAGRAM-V1-12-LEGACY-HEADS-RECONCILIATION-20261012.md`.
 
 Browser-automation subcase evidence is associated with all 39 original v1.0 acceptance cases; **formal customer/real-device signoff remains 0/39**. No deployment, customer release, new business definition version or regression-free performance SLA is inferred from branch retirement.
+
+Repository hygiene note: the one-time cleanup workflow is intentionally removed by the closeout PR after all 2D legacy refs were independently enumerated absent; the original workflow definition and failed-after-cleanup log remain accessible via #173 and GitHub Actions history.
