@@ -1,6 +1,7 @@
 name: Eidos Diagram v1 Historic Stack Retirement
 on:
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     paths:
       - "repository-hygiene/diagram-v1-eidos-stacked-head-retirement-20261012.json"
       - ".github/workflows/diagram-v1-eidos-stack-retirement-20261012.yml"
@@ -23,7 +24,7 @@ jobs:
         with: {persist-credentials: false}
       - uses: actions/github-script@v7
         env:
-          EXECUTE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          EXECUTE: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && github.event.pull_request.number == 173) }}
         with:
           script: |
             const fs=require('node:fs');
@@ -73,7 +74,10 @@ jobs:
             if((await github.rest.repos.getBranch({owner,repo,branch:old.head})).data.protected)
               throw Error('Protected standalone source');
             if(!execute){core.info('EIDOS_STACK_AUDIT_ONLY=29');return;}
-            if(context.eventName!=='push'||context.ref!=='refs/heads/main')throw Error('Not main push');
+            const mergedClose=context.eventName==='pull_request' && context.payload.action==='closed' &&
+              context.payload.pull_request?.number===173 && context.payload.pull_request?.merged===true;
+            if(!(context.eventName==='push'&&context.ref==='refs/heads/main')&&!mergedClose)
+              throw Error('Not an authorized merged main/PR-close event');
             const mainSha=(await github.rest.git.getRef({owner,repo,ref:'heads/main'})).data.object.sha;
             const ancestral=[m.baselineMainSha,m.coreOriginalHeadSha,
               m.records.find(x=>x.number===156).expectedHeadSha,old.expectedHeadSha];
@@ -101,10 +105,22 @@ jobs:
               }else if(p.merged)throw Error('Unexpected prior merge #'+r.number);
             }
             const open=await github.paginate(github.rest.pulls.list,{owner,repo,state:'open',per_page:100});
+            let driver=null;
+            if(mergedClose){
+              driver=(await github.rest.pulls.get({owner,repo,pull_number:173})).data;
+              if(!driver.merged||driver.state!=='closed'||driver.base.ref!=='main'||
+                 driver.head.ref!=='chore/diagram-v1-eidos-postmerge-retirement-20261012'||
+                 driver.head.sha!==context.payload.pull_request.head.sha)
+                throw Error('Driver PR #173 provenance mismatch');
+              const d=(await github.rest.repos.compareCommits({owner,repo,base:driver.head.sha,head:mainSha})).data;
+              if(d.behind_by!==0||d.merge_base_commit?.sha!==driver.head.sha)
+                throw Error('Driver PR not part of current main');
+            }
             const toDelete=[
               ...m.records.filter(x=>x.existsBefore).map(x=>({head:x.head,expectedHeadSha:x.expectedHeadSha})),
               old,
-              {head:'chore/diagram-v1-commercial-stack-retirement-20261012',expectedHeadSha:cleanup.head.sha}
+              {head:'chore/diagram-v1-commercial-stack-retirement-20261012',expectedHeadSha:cleanup.head.sha},
+              ...(driver?[{head:'chore/diagram-v1-eidos-postmerge-retirement-20261012',expectedHeadSha:driver.head.sha}]:[])
             ];
             for(const r of toDelete){
               if(open.some(p=>p.base.ref===r.head||
