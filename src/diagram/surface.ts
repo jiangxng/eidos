@@ -1499,6 +1499,9 @@ export function mountDiagramEditorPageV010(
       `matrix(${camera.scale},0,0,${camera.scale},${camera.translateX},${camera.translateY})`;
     const gridStep = diagramGridStepV010(camera.scale);
     stageElement.style.backgroundSize = gridStep + "px " + gridStep + "px";
+    // 18 CSS px hit corridor independent of CSS camera scale; O(1) variable
+    // update on zoom rather than modifying every connector or redrawing SVG.
+    stageElement.style.setProperty("--eidos-diagram-hit-world", (18 / camera.scale) + "px");
     // A zoom updates the transform without a full DOM redraw. Keep handle hit
     // targets at 44 CSS px and visible markers at a fixed screen radius.
     for (const target of Array.from(stageElement.querySelectorAll<SVGCircleElement>(
@@ -2910,9 +2913,10 @@ export function mountDiagramEditorPageV010(
       hit.setAttribute("fill", "none");
       hit.setAttribute("stroke", "transparent");
       hit.setAttribute("stroke-width", "18");
-      // Keep the transparent pointer stroke 18 CSS px at 10%–300% zoom.
-      // The visible connector already uses a non-scaling stroke.
-      hit.setAttribute("vector-effect", "non-scaling-stroke");
+      // The canvas uses a CSS matrix scale. Chrome hit-testing does not
+      // reliably expand SVG non-scaling strokes at low zoom, so compensate
+      // the transparent hit stroke in world units via one inherited variable.
+      hit.style.strokeWidth = "var(--eidos-diagram-hit-world)";
       hit.style.pointerEvents = "stroke";
       hit.style.cursor = "pointer";
       hit.setAttribute("data-eidos-diagram-edge", edge.id);
