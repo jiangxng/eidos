@@ -95,6 +95,8 @@ export interface DiagramEditorViewInteractionV010 {
   localVisibilityResetNotice?: string;
   localVisibilityResetPlacement?: DiagramEditorToolbarPlacementV010;
   localAutoLayout?: boolean;
+  /** A01 session-only node position pin, separate from readOnly business authority. */
+  localPositionLock?: boolean;
   localAutoLayoutLabel?: string;
   localAutoLayoutNotice?: string;
   localAutoLayoutDirection?: "RIGHT" | "DOWN";
@@ -215,6 +217,8 @@ export interface DiagramEditorNodeV010 {
   width: number;
   height: number;
   readOnly?: boolean;
+  /** Position pin for presentation editing; independent of semantic readOnly. */
+  positionLocked?: boolean;
   typeLabel?: string;
   detail?: string;
   properties?: DiagramInspectorPropertyV010[];
@@ -559,6 +563,10 @@ export function isDiagramEditorPageV010(
           || typeof page.viewInteraction.localAutoLayout === "boolean"
         )
         && (
+          page.viewInteraction.localPositionLock === undefined
+          || typeof page.viewInteraction.localPositionLock === "boolean"
+        )
+        && (
           page.viewInteraction.localAutoLayoutLabel === undefined
           || nonEmpty(page.viewInteraction.localAutoLayoutLabel)
         )
@@ -665,6 +673,7 @@ export function validateDiagramEditorStateV010(
       || !finite(node?.height)
       || node.width <= 0
       || node.height <= 0
+      || (node.positionLocked !== undefined && typeof node.positionLocked !== "boolean")
       || (node.issue !== undefined && (
         !["warning", "error"].includes(node.issue.level)
         || !nonEmpty(node.issue.message)
@@ -1811,7 +1820,7 @@ export function mountDiagramEditorPageV010(
     checkpoint();
     for (const node of state.nodes) {
       const placement = placementByNode.get(node.id);
-      if (!placement) continue;
+      if (!placement || node.positionLocked === true) continue;
       node.x = placement.x;
       node.y = placement.y;
     }
@@ -2120,6 +2129,30 @@ export function mountDiagramEditorPageV010(
         button,
         page.viewInteraction.localVisibilityResetPlacement ?? "TOOLBAR"
       );
+    }
+
+    if (page.viewInteraction?.localPositionLock === true) {
+      const selectedNodeId = selected?.kind === "node" ? selected.id : undefined;
+      const lockedNode = selectedNodeId
+        ? state.nodes.find(node => node.id === selectedNodeId)
+        : undefined;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("data-eidos-diagram-position-lock", "");
+      button.textContent = lockedNode?.positionLocked
+        ? "Unpin position" : "Pin position (session)";
+      button.title = "Position lock lasts until this editor is reopened; it does not change the business graph.";
+      button.disabled = !lockedNode;
+      button.setAttribute("aria-pressed", String(lockedNode?.positionLocked === true));
+      button.onclick = () => {
+        if (!lockedNode) return;
+        lockedNode.positionLocked = !lockedNode.positionLocked;
+        render();
+        report(lockedNode.positionLocked
+          ? "Position pinned locally. Auto layout cannot move this node."
+          : "Position unpinned locally.");
+      };
+      placeToolbarButton(button, "OVERFLOW");
     }
 
     if (page.viewInteraction?.localAutoLayout === true) {
@@ -3698,9 +3731,9 @@ export function mountDiagramEditorPageV010(
       element.style.transition =
         "border-color .12s ease,background-color .12s ease,box-shadow .12s ease,opacity .12s ease";
       const localViewDrag = page.viewInteraction?.localNodeDrag === true;
-      const persistentDrag = !node.readOnly && state.lifecycleState !== "PUBLISHED";
-      element.style.cursor = localViewDrag || persistentDrag ? "grab" : "default";
-      element.style.touchAction = localViewDrag || persistentDrag ? "none" : "auto";
+      const persistentDrag = !node.readOnly && !node.positionLocked && state.lifecycleState !== "PUBLISHED";
+      element.style.cursor = (localViewDrag && !node.positionLocked) || persistentDrag ? "grab" : "default";
+      element.style.touchAction = (localViewDrag && !node.positionLocked) || persistentDrag ? "none" : "auto";
       element.style.zIndex = "2";
 
       element.addEventListener("click", event => {
@@ -3725,7 +3758,7 @@ export function mountDiagramEditorPageV010(
         if (selectedNodeIds.size === 1) void inspectSelection();
       });
 
-      if (localViewDrag || persistentDrag) {
+      if ((localViewDrag && !node.positionLocked) || persistentDrag) {
         const pointerDown = (event: PointerEvent) => {
           if (event.pointerType !== "touch" && event.button !== 0) return;
           if (spaceHeld || canvasTool === "PAN") return;
@@ -4460,7 +4493,7 @@ export function mountDiagramEditorPageV010(
       && state
     ) {
       const node = state.nodes.find(item => item.id === selected!.id);
-      if (!node) return;
+      if (!node || node.positionLocked) return;
       event.preventDefault();
       checkpoint();
       const step = event.shiftKey ? 10 : 1;
