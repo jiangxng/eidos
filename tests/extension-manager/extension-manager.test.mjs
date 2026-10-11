@@ -236,3 +236,16 @@ test("Extension Manager separates readiness from lifecycle and collapses technic
   assert.match(html, /Technical details/);
   assert.match(html, /data-eidos-extension-action="setup"/);
 });
+
+test('optional details description is escaped and initially collapsed; legacy rendering is preserved', () => {
+  const plain = renderExtensionManagerToHtml(definition);
+  assert.ok(!plain.includes('data-eidos-extension-details-description'));
+  const input = structuredClone(definition);
+  input.items[0].detailsDescription = '<script>unsafe</script> & purpose';
+  const html = renderExtensionManagerToHtml(input);
+  const start = html.indexOf('<details data-eidos-extension-technical>');
+  assert.ok(start > 0);
+  assert.ok(!html.slice(0, start).includes('unsafe'));
+  assert.ok(html.slice(start).includes('<p data-eidos-extension-details-description>&lt;script&gt;unsafe&lt;/script&gt; &amp; purpose</p>'));
+  assert.ok(!html.includes('<script>unsafe'));
+});
