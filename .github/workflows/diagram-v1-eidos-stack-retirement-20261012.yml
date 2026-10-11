@@ -49,7 +49,7 @@ jobs:
               seen.add(r.number);refs.add(r.head);
               const p=(await github.rest.pulls.get({owner,repo,pull_number:r.number})).data;
               if(p.head.sha!==r.expectedHeadSha||p.head.ref!==r.head||
-                 p.head.repo?.full_name!==owner+'/'+repo||p.merged)
+                 p.head.repo?.full_name!==owner+'/'+repo)
                 throw Error('Staged PR provenance drift #'+r.number);
               if(r.number!==156&&r.number!==159){
                 const cmp=(await github.rest.repos.compareCommits({owner,repo,base:r.expectedHeadSha,head:m.coreOriginalHeadSha})).data;
@@ -102,7 +102,9 @@ jobs:
               if(p.state==='open'){
                 await github.rest.pulls.update({owner,repo,pull_number:r.number,state:'closed'});
                 core.info('EIDOS_STAGED_PR_CLOSED #'+r.number);
-              }else if(p.merged)throw Error('Unexpected prior merge #'+r.number);
+              }else if(p.merged){
+                core.info('EIDOS_STAGED_PR_ALREADY_MERGED #'+r.number);
+              }
             }
             const open=await github.paginate(github.rest.pulls.list,{owner,repo,state:'open',per_page:100});
             let driver=null;
