@@ -1,0 +1,5 @@
+# B9t — Mobile Diagram Designer toolbar wrap (2026-10-11)
+
+An isolated App Chrome regression using actual 390×844 viewport (synthetic S2C/P2P) showed **Designer document scrollWidth 698px at 390px viewport**, while readonly Viewer document width was 390px. The SVG world width of 904px inside clipped Viewer canvas was NOT an actual page overflow defect. The Designer overflow correlates with mobile `data-eidos-diagram-toolbar` declaring `flex-wrap:nowrap`. Change that one common Eidos mobile rule to `flex-wrap:wrap`, preserving the existing desktop model and token styles. Separate App vendor differential patch (do not copy whole surface.ts because Host context navigation differs).
+
+This is a test-backed narrow CSS improvement, not a redesign of toolbar controls or physical phone acceptance. App B9t adds a hard assertion that 390px Chrome document width fits 390px viewport, on actual synthetic S2C/P2P Designer and readonly Viewer after CAS native Save; physical iOS/Android, assistive technologies and original §14 39 formal rows remain NOT TESTED. Draft PR only, no main merge or deployment.
