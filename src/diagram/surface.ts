@@ -3465,7 +3465,15 @@ export function mountDiagramEditorPageV010(
       }
       const label = document.createElement("strong");
       label.textContent = node.label;
-      label.style.display = "block";
+      // V05: wrap CJK/unbroken English safely; clamp visible text to two lines.
+      // Full original text stays in DOM and in the node tooltip.
+      label.style.display = "-webkit-box";
+      label.style.webkitBoxOrient = "vertical";
+      label.style.webkitLineClamp = "2";
+      label.style.overflow = "hidden";
+      label.style.overflowWrap = "anywhere";
+      label.style.wordBreak = "break-word";
+      label.style.maxWidth = "100%";
       label.style.lineHeight = "1.35";
       label.style.fontWeight = "650";
       element.appendChild(label);
@@ -3481,6 +3489,7 @@ export function mountDiagramEditorPageV010(
         element.appendChild(badge);
       }
       element.title = [
+        node.label,
         node.detail ?? node.kind,
         ...observationText(node.observations)
       ].filter(Boolean).join("\n");
