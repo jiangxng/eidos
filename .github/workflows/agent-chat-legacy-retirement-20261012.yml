@@ -1,0 +1,36 @@
+name: One-time Eidos Agent chat legacy retirement
+on:
+  pull_request:
+    paths: [".github/workflows/agent-chat-legacy-retirement-20261012.yml"]
+  push:
+    branches: [main]
+    paths: [".github/workflows/agent-chat-legacy-retirement-20261012.yml"]
+permissions:
+  contents: write
+  pull-requests: read
+jobs:
+  audit-and-retire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner,repo}=context.repo;
+            if(owner!=='jiangxng'||repo!=='eidos')throw Error('wrong repo');
+            const execute=context.eventName==='push'&&context.ref==='refs/heads/main';
+            const main=(await github.rest.git.getRef({owner,repo,ref:'heads/main'})).data.object.sha;
+            if(execute&&context.sha!==main)throw Error('Main changed');
+            const target=execute?main:context.payload.pull_request?.head?.sha;
+            if(!target)throw Error('Missing candidate head');
+            const name='improve/agent-chat-interactions-v01', expected='8d83400ff10e6fb8d53f40e91a1f4b5419272637';
+            const cmp=(await github.rest.repos.compareCommits({owner,repo,base:expected,head:target})).data;
+            if(cmp.behind_by!==0||cmp.merge_base_commit?.sha!==expected)throw Error('Legacy Eidos branch not integrated');
+            const get=async branch=>{try{return (await github.rest.git.getRef({owner,repo,ref:'heads/'+branch})).data.object.sha;}catch(e){if(e.status===404)return null;throw e;}};
+            if(await get(name)!==expected)throw Error('Legacy branch moved');
+            const prs=await github.paginate(github.rest.pulls.list,{owner,repo,state:'open',per_page:100});
+            if(prs.some(p=>p.base.ref===name||(p.head.ref===name&&p.head.repo?.full_name===owner+'/'+repo)))throw Error('Legacy branch used by open PR');
+            if(!execute){core.info('AUDIT_ONLY_EIDOS '+name);return;}
+            if(await get(name)!==expected)throw Error('Branch raced');
+            await github.rest.git.deleteRef({owner,repo,ref:'heads/'+name});
+            core.info('DELETED_EIDOS_LEGACY_AGENT '+name);
+            core.info('EIDOS_LEGACY_AGENT_RETIRED');
