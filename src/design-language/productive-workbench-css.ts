@@ -2545,4 +2545,55 @@ form[data-eidos-id] button:hover,
   }
 }
 
+
+/* Agent chat message copy and busy affordances (legacy behavior, current layout retained). */
+[data-eidos-chat-part="activity"][data-state="pending"] [data-eidos-chat-activity-indicator]{
+  background:var(--eidos-primary);
+  animation:eidos-chat-thinking-pulse 1.2s ease-in-out infinite;
+}
+@keyframes eidos-chat-thinking-pulse{
+  0%,100%{opacity:.35;transform:scale(.82)}
+  50%{opacity:1;transform:scale(1)}
+}
+[data-eidos-chat-message-actions]{
+  min-height:28px;
+  display:flex;
+  align-items:center;
+  gap:var(--eidos-space-xs);
+  margin-top:var(--eidos-space-xs);
+  opacity:0;
+  transition:opacity .12s ease;
+}
+[data-eidos-chat-message][data-role="assistant"]:hover [data-eidos-chat-message-actions],
+[data-eidos-chat-message][data-role="assistant"]:focus-within [data-eidos-chat-message-actions]{
+  opacity:1;
+}
+[data-eidos-chat-message-actions] button{
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:var(--eidos-radius-sm);
+  padding:0;
+  background:transparent;
+  color:var(--eidos-fg-subtle);
+}
+[data-eidos-chat-message-actions] button:hover{
+  background:var(--eidos-bg-hover);
+  color:var(--eidos-fg);
+}
+[data-eidos-chat-message-actions] button[data-copied="true"]{
+  background:var(--eidos-success-bg);
+  color:var(--eidos-success);
+}
+@media(hover:none){
+  [data-eidos-chat-message-actions]{opacity:1}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-eidos-chat-part="activity"][data-state="pending"] [data-eidos-chat-activity-indicator]{
+    animation:none;
+  }
+}
+
 `;
