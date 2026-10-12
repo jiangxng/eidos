@@ -21,6 +21,38 @@ function attr(name: string, value: unknown): string {
   return " " + name + "=\"" + esc(value) + "\"";
 }
 
+export function chatMessageCopyTextV010(
+  message: ChatMessageV010 | ChatMessageV020
+): string {
+  if ("text" in message) return message.text.trim();
+  return message.parts
+    .flatMap(part => {
+      if (part.type === "text") return [part.text];
+      if (part.type === "notice") {
+        return [[part.title, part.text].filter(Boolean).join("\n")];
+      }
+      if (part.type === "evidence") {
+        return [[
+          part.title,
+          part.source,
+          part.context,
+          part.freshness
+        ].filter(Boolean).join("\n")];
+      }
+      if (part.type === "proposal") {
+        return [[
+          part.title,
+          part.summary,
+          ...(part.reasons ?? []),
+          part.risk
+        ].filter(Boolean).join("\n")];
+      }
+      return [];
+    })
+    .join("\n\n")
+    .trim();
+}
+
 function renderAction(action: ChatActionV020): string {
   return "<button type=\"button\""
     + attr("data-eidos-chat-action", action.id)
@@ -114,7 +146,7 @@ export function renderChatExperienceToHtml(document: ChatExperienceV010 | ChatEx
     + readiness
     + "<div data-eidos-chat-transcript role=\"log\" aria-live=\"polite\" aria-relevant=\"additions text\">" + empty + "</div>"
     + "<form data-eidos-chat-composer>"
-    + "<textarea" + attr("name", document.composer.key) + " rows=\"3\""
+    + "<textarea" + attr("name", document.composer.key) + " rows=\"1\""
     + attr("placeholder", document.composer.placeholder)
     + attr("aria-label", document.composer.placeholder)
     + (disabled ? " disabled" : "") + "></textarea>"
