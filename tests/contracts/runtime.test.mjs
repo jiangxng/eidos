@@ -112,3 +112,23 @@ assert.equal(validateUidl({
   ...fieldLinkDoc,
   fields:[{...fieldLinkDoc.fields[0],contextLink:{label:"Bad",route:"javascript:alert(1)"}}]
 }).ok,false);
+
+
+const exclusiveDoc={
+  ...doc,
+  id:"exclusive-mapping-test",
+  fields:[
+    {key:"map_0",label:"Column A",semanticType:"data-import-field-mapping",control:"select",required:true,
+     initialValue:"code",options:[{value:"__IGNORE__",label:"Ignore"},{value:"code",label:"Code"},{value:"name",label:"Name"}],
+     exclusiveSelect:{group:"import-fields",exemptValues:["__IGNORE__"]}},
+    {key:"map_1",label:"Column B",semanticType:"data-import-field-mapping",control:"select",required:true,
+     initialValue:"__IGNORE__",options:[{value:"__IGNORE__",label:"Ignore"},{value:"code",label:"Code"},{value:"name",label:"Name"}],
+     exclusiveSelect:{group:"import-fields",exemptValues:["__IGNORE__"]}}
+  ]
+};
+assert.equal(validateUidl(exclusiveDoc).ok,true);
+assert.deepEqual(toRenderModel(exclusiveDoc).fields[0].exclusiveSelect,
+ {group:"import-fields",exemptValues:["__IGNORE__"]});
+assert.match(renderToHtml(exclusiveDoc),/data-eidos-exclusive-group="import-fields"/);
+assert.equal(validateUidl({...exclusiveDoc,fields:[{...exclusiveDoc.fields[0],control:"text"}]}).ok,false);
+assert.equal(validateUidl({...exclusiveDoc,fields:[{...exclusiveDoc.fields[0],exclusiveSelect:{group:"",exemptValues:["__IGNORE__"]}}]}).ok,false);
