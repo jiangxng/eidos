@@ -17,6 +17,8 @@ export interface UidlField {
   validation?: { min?: number; max?: number; pattern?: string };
   /** Optional local navigation beside a form input, never a submit action. */
   contextLink?: { label: string; route: string };
+  /** Opt-in select-only choice exclusivity within the mounted form. */
+  exclusiveSelect?: { group: string; exemptValues: string[] };
 }
 export interface UidlAction { id: string; label: string; type: "submit" | "cancel"; command?: string; requiresConfirmation?: boolean }
 export interface UidlFormV011 {
