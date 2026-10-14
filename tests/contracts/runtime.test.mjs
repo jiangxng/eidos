@@ -90,3 +90,25 @@ assert.equal(validateUidl({
     initialValue: "forbidden.xlsx"
   }]
 }).ok, false);
+
+
+const fieldLinkDoc = {
+  ...fileDoc,
+  fields: [{
+    ...fileDoc.fields[0],
+    contextLink: {label:"创建企业字段",route:"/object-extensions/from-import?job=abc"}
+  }]
+};
+assert.equal(validateUidl(fieldLinkDoc).ok,true);
+const fieldLinkHtml=renderToHtml(fieldLinkDoc);
+assert.match(fieldLinkHtml,/type="button" data-eidos-field-context-link/);
+assert.match(fieldLinkHtml,/data-eidos-context-route="\/object-extensions\/from-import\?job=abc"/);
+assert.equal(toRenderModel(fieldLinkDoc).fields[0].contextLink.label,"创建企业字段");
+assert.equal(validateUidl({
+  ...fieldLinkDoc,
+  fields:[{...fieldLinkDoc.fields[0],contextLink:{label:"Bad",route:"//evil.example"}}]
+}).ok,false);
+assert.equal(validateUidl({
+  ...fieldLinkDoc,
+  fields:[{...fieldLinkDoc.fields[0],contextLink:{label:"Bad",route:"javascript:alert(1)"}}]
+}).ok,false);
