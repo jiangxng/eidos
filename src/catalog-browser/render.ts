@@ -68,7 +68,7 @@ function assertCatalog(input: CatalogBrowserV010): CatalogBrowserV010 {
   return input;
 }
 
-function actionButton(itemId: string, action: import("./contracts.js").CatalogBrowserActionV010, primary: boolean): string {
+function actionButton(itemId: string | undefined, action: import("./contracts.js").CatalogBrowserActionV010, primary: boolean): string {
   if (action.type === "download") {
     if (!action.href?.startsWith("/")) {
       throw new Error("EIDOS_CATALOG_DOWNLOAD_HREF_INVALID");
@@ -79,7 +79,7 @@ function actionButton(itemId: string, action: import("./contracts.js").CatalogBr
     const help = action.helpText
       ? `<span data-eidos-action-help data-action-id="${esc(action.id)}">${esc(action.helpText)}</span>`
       : "";
-    return `<span data-eidos-action-wrap><a data-eidos-catalog-download="${esc(action.id)}" data-eidos-item-id="${esc(itemId)}" data-eidos-primary="${primary ? "true" : "false"}" href="${esc(action.href)}"${downloadName}>${esc(action.label)}</a>${help}</span>`;
+    return `<span data-eidos-action-wrap><a data-eidos-catalog-download="${esc(action.id)}" ${itemId ? `data-eidos-item-id="${esc(itemId)}"` : ""} data-eidos-primary="${primary ? "true" : "false"}" href="${esc(action.href)}"${downloadName}>${esc(action.label)}</a>${help}</span>`;
   }
   const command = action.command ? ` data-eidos-command="${esc(action.command)}"` : "";
   const values = action.values
@@ -91,7 +91,7 @@ function actionButton(itemId: string, action: import("./contracts.js").CatalogBr
   const disabled = enabled ? "" : " disabled";
   const reason = action.disabledReason ? ` data-eidos-disabled-reason="${esc(action.disabledReason)}" title="${esc(action.disabledReason)}"` : "";
   const help = action.helpText ? `<span data-eidos-action-help data-action-id="${esc(action.id)}">${esc(action.helpText)}</span>` : "";
-  return `<span data-eidos-action-wrap><button type="button" data-eidos-catalog-action="${esc(action.id)}" data-eidos-action-type="${esc(action.type)}" data-eidos-item-id="${esc(itemId)}" data-eidos-confirm="${action.requiresConfirmation === true ? "true" : "false"}" data-eidos-primary="${primary ? "true" : "false"}"${command}${inputVersion}${route}${values}${reason}${disabled}>${esc(action.label)}</button>${help}</span>`;
+  return `<span data-eidos-action-wrap><button type="button" data-eidos-catalog-action="${esc(action.id)}" data-eidos-action-type="${esc(action.type)}" ${itemId ? `data-eidos-item-id="${esc(itemId)}"` : ""} data-eidos-confirm="${action.requiresConfirmation === true ? "true" : "false"}" data-eidos-primary="${primary ? "true" : "false"}"${command}${inputVersion}${route}${values}${reason}${disabled}>${esc(action.label)}</button>${help}</span>`;
 }
 
 export function renderCatalogBrowserToHtml(input: CatalogBrowserV010): string {
@@ -130,7 +130,7 @@ export function renderCatalogBrowserToHtml(input: CatalogBrowserV010): string {
     const records = new Map(model.items.map(item => [item.id, item]));
     const heads = model.table!.columns.map(column =>
       `<th scope="col">${column.sortRoute
-        ? actionButton(undefined as never, {
+        ? actionButton(undefined, {
             id: "sort-" + column.id, label: column.label,
             type: "navigate", route: column.sortRoute
           }, false)
@@ -156,11 +156,11 @@ export function renderCatalogBrowserToHtml(input: CatalogBrowserV010): string {
   const pagination = model.table?.pageInfo ? (() => {
     const page = model.table!.pageInfo!;
     const previous = page.previousRoute
-      ? actionButton(undefined as never, { id: "previous-page", label: page.previousLabel,
+      ? actionButton(undefined, { id: "previous-page", label: page.previousLabel,
           type: "navigate", route: page.previousRoute }, false)
       : "";
     const next = page.nextRoute
-      ? actionButton(undefined as never, { id: "next-page", label: page.nextLabel,
+      ? actionButton(undefined, { id: "next-page", label: page.nextLabel,
           type: "navigate", route: page.nextRoute }, false)
       : "";
     return `<nav data-eidos-catalog-pagination aria-label="Pagination"><span data-eidos-page-summary>${esc(page.summary)}</span><div>${previous}${next}</div></nav>`;
