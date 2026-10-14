@@ -41,7 +41,8 @@ const fieldKeys = new Set([
   "accept",
   "maxBytes",
   "validation",
-  "contextLink"
+  "contextLink",
+  "exclusiveSelect"
 ]);
 const actionKeys = new Set([
   "id",
@@ -105,7 +106,8 @@ function parseField(
     accept,
     maxBytes,
     validation,
-    contextLink
+    contextLink,
+    exclusiveSelect
   } = value;
 
   if (!nonEmpty(key)) {
@@ -224,6 +226,23 @@ function parseField(
         out.push(d("EIDOS_FIELD_CONTEXT_LINK_INVALID", `${path}.contextLink`, "Context link requires a label and a local route"));
       } else {
         parsedContextLink = {label:linkLabel,route};
+      }
+    }
+  }
+
+  let parsedExclusiveSelect: UidlField["exclusiveSelect"];
+  if (exclusiveSelect !== undefined) {
+    if (!isPlainObject(exclusiveSelect)) {
+      out.push(d("EIDOS_EXCLUSIVE_SELECT_INVALID", `${path}.exclusiveSelect`, "exclusiveSelect must be object"));
+    } else {
+      extraKeys(exclusiveSelect, new Set(["group", "exemptValues"]), `${path}.exclusiveSelect`, out);
+      const group=exclusiveSelect.group;
+      const exempt=exclusiveSelect.exemptValues;
+      if (control !== "select" || !nonEmpty(group) || !group.trim()
+        || !Array.isArray(exempt) || exempt.some(item=>typeof item!=="string")) {
+        out.push(d("EIDOS_EXCLUSIVE_SELECT_INVALID", `${path}.exclusiveSelect`, "Select requires a group and string exempt values"));
+      } else {
+        parsedExclusiveSelect={group,exemptValues:[...new Set(exempt)]};
       }
     }
   }
@@ -407,7 +426,8 @@ function parseField(
         : {}
     ),
     ...(parsedValidation ? { validation: parsedValidation } : {}),
-    ...(parsedContextLink ? { contextLink: parsedContextLink } : {})
+    ...(parsedContextLink ? { contextLink: parsedContextLink } : {}),
+    ...(parsedExclusiveSelect ? { exclusiveSelect: parsedExclusiveSelect } : {})
   };
 }
 
