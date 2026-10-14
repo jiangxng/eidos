@@ -352,6 +352,19 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
     };
   }
 
+  // A field context link only navigates. It never submits the form.
+  const fieldContextLinkHandler = (event: Event) => {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+    const button = target.closest<HTMLButtonElement>("[data-eidos-field-context-link]");
+    if (!button || !container.contains(button)) return;
+    const route = button.dataset.eidosContextRoute;
+    if (!route || !route.startsWith("/") || route.startsWith("//")) return;
+    void options.onNavigate?.(route);
+  };
+  container.addEventListener("click", fieldContextLinkHandler);
+  listeners.push(() => container.removeEventListener("click", fieldContextLinkHandler));
+
   const serverSearchForm = container.querySelector<HTMLFormElement>("[data-eidos-catalog-server-search]");
   if (serverSearchForm) {
     const onServerSearch = (event: Event) => {
