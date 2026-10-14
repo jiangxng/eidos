@@ -27,6 +27,8 @@ test("Eidos renders native read-only table, same mobile cards and governed navig
  assert.doesNotMatch(html, /<Acme>/);
  assert.match(html, /data-eidos-catalog-item="s-1"/);
  assert.match(html, /data-eidos-catalog-server-search/);
+ assert.match(html, /<span data-eidos-catalog-search-label>Search suppliers<\/span>/);
+ assert.match(html, /data-eidos-catalog-action="sort-name"/);
  assert.match(html, /data-eidos-search-route="\/suppliers\?page=0"/);
  assert.match(html, /data-eidos-route="\/suppliers\?page=1"/);
  assert.match(html, /data-eidos-catalog-has-table="true"/);
