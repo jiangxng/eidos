@@ -50,7 +50,7 @@
 
 ## 4. 流程与人机交互的前序参考（不扩大已读声称）
 
-2026-10-15 BEX 流程研究另外记录了以下实用性来源和阅读状态。详细原始研究及对照见 [EVO 流程研究文档](https://github.com/jiangxng/EVO-App-Platform/blob/docs/bex01-import-ux-simplification-research-20261015/docs/plans/foundation-list-experience/BEX-01-IMPORT-UX-SIMPLIFICATION-RESEARCH-20261015.md) 与 [BEX 研究决策索引](https://github.com/jiangxng/EVO-App-Platform/blob/main/docs/plans/foundation-list-experience/BEX-01-RESEARCH-DECISION-REFERENCE-INDEX-20261015.md)。
+2026-10-15 BEX 流程研究另外记录了以下实用性来源和阅读状态。详细原始研究及对照见 [EVO 流程研究文档](https://github.com/jiangxng/EVO-App-Platform/blob/main/docs/plans/foundation-list-experience/BEX-01-IMPORT-UX-SIMPLIFICATION-RESEARCH-20261015.md) 与 [BEX 研究决策索引](https://github.com/jiangxng/EVO-App-Platform/blob/main/docs/plans/foundation-list-experience/BEX-01-RESEARCH-DECISION-REFERENCE-INDEX-20261015.md)。
 
 | 编号 | 来源与原始网址 | 前序阅读状态 | 对设计的作用 |
 |---|---|---|---|
