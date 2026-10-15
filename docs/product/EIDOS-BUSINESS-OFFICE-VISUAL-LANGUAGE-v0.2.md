@@ -30,6 +30,18 @@ Neutral surfaces establish hierarchy.
 
 Domain/application colors are allowed for application identity, category recognition, diagrams and charts. They do not recolor ordinary shell controls.
 
+## Business-first interaction character (2026-10-15)
+
+The visual personality must make the Productive Design Language's **功能就近、信息就地、系统记忆、异常驱动、操作连续** readable without adding noise. Use spatial hierarchy, proximity and quiet surfaces to show what belongs together and which action is currently useful; do not impose a fixed four-stat-card dashboard on unrelated tasks.
+
+- Prioritize a clear scan path: business context/title → current object/record → meaningful state or blockers → the right nearby action → supporting full details → one primary forward action.
+- Explain an error in business language at the record/field concerned; supporting diagnostics/technical IDs remain secondary.
+- Use quiet neutral surfaces for context and semantic color only for actual status; do not style every pending item as a warning or give each plugin a new palette.
+- A desktop data table may become **readable actionable cards** on mobile. Verify the actual control is in view rather than merely checking the overall document for horizontal overflow.
+- A high-fidelity preview must look like a credible business task while keeping synthetic fixtures and incomplete backend behavior disclosed outside the product UI to reviewers.
+
+This is a design realization of the existing Eidos Productive/Experience authorities, **not** a new brand color or a copy of Feishu/Jiandaoyun proprietary visuals.
+
 ## Surface hierarchy
 
 The visual stack is intentionally shallow:
