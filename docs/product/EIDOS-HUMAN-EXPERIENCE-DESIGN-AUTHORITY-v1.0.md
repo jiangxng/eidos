@@ -104,6 +104,24 @@ Therefore:
 
 This principle applies to UI design, navigation, workflow design, Agent products and EC learning priorities.
 
+## 4A. Core interaction principle — no hunt, no forced recall (2026-10-15)
+
+**核心交互原则：让复杂留在系统内部，让简单发生在用户面前。**
+
+**五条产品默认要求：功能就近、信息就地、系统记忆、异常驱动、操作连续。**
+
+This is **normative**, not an optional aesthetic slogan. The detailed behavior contracts, counterexamples, measurable review and Chinese business examples are in [Productive Design Language — Core interaction principle](EIDOS-PRODUCTIVE-DESIGN-LANGUAGE-v0.1.md#core-interaction-principle--work-in-context-not-by-hunting-2026-10-15). Every plugin Experience and human-facing work surface MUST follow these defaults unless an applicable business/security/accessibility authority requires a different safe flow.
+
+- **Functional proximity:** frequent actions appear next to their object/error and in predictable contextual positions; stable global navigation remains for actual destinations. Hiding functions does not count as simplicity.
+- **Information proximity:** the current decision displays the necessary values, alternatives, consequences and source context, rather than outsourcing them to a different screen or the Human's memory.
+- **System memory:** authorized history/recipes/drafts, page state and corrections are recoverable where supported, without covertly copying data across contexts or inferring unresolved business identity.
+- **Exceptions-first:** isolate and repair actual blockers while retaining access to all underlying source data and audit evidence.
+- **Continuous operation:** support start, direct repair, validation, independent side-effect authorization, completion, failure recovery and continuation with minimal unnecessary transitions.
+
+**AI-specific implication:** intelligent matching is a proposal and continuity mechanism, not an excuse to replace good direct UI with mandatory chat or to perform ambiguous writes without Human/Owner approval. The goal is reduced Human effort, not maximal automation or shortest number of screens.
+
+**High-fidelity evidence rule:** user-facing prototypes speak business language and show complete plausible tasks. Synthetic fixture provenance, implementation limits and real-Host non-claims belong in review/PR evidence; never substitute a visually successful mock for authenticated business acceptance. Review Chinese font rendering and actual operable phone controls, not only JS assertions or page-level overflow.
+
 ## 5. Consequence: UI design has a higher bar
 
 Because direct interaction remains the preferred path for simple work, AI does **not** reduce the need for careful UI design. It increases it.
