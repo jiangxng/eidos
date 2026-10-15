@@ -18,4 +18,6 @@ If context budget is tight, read this file plus the relevant Capability and Cont
 
 **Human customization:** use direct manipulation when faster; explicit human choice outranks EC inference unless higher-order integrity/policy constraints apply.
 
+**Mandatory for Human UI work:** read `docs/product/EIDOS-HUMAN-EXPERIENCE-DESIGN-AUTHORITY-v1.0.md` and `docs/product/EIDOS-HUMAN-UI-DESIGN-REVIEW-CHECKLIST-v1.0.md` first; review the normative navigation/color/interaction documents before proposing or changing UI. Include the required UI review record in the implementation PR and distinguish machine checks from Human acceptance. Do not jump straight to markup or CSS.
+
 **Read next:** `llm/TOOL-USAGE.md`, then the relevant `capabilities/**/CAPABILITY.md`.
