@@ -51,6 +51,58 @@ When sources disagree:
 
 Do not copy a visual trend merely because it is popular.
 
+## Core interaction principle — work in context, not by hunting (2026-10-15)
+
+**Authoritative product requirement:**
+
+> **让复杂留在系统内部，让简单发生在用户面前。**  
+> **功能就近，信息就地，系统记忆，异常驱动，操作连续。**
+
+This is a durable Eidos interaction principle for Workbench, App Host, plugins, business forms, data import, graph tools and Agent-assisted work. It strengthens the existing Human Directness and Journey rules; it does not override security, accessibility, stable navigation or Owner authorization.
+
+In ordinary business language: **功能不必四处找；信息不必靠人记；异常有明确办法；当前任务不被不必要的跳转打断。**
+
+### Five enforceable defaults
+
+| Principle | Required behavior | Failure example |
+|---|---|---|
+| **Contextual actions / 功能就近** | Put the next safe, frequent action beside its business object, error or selection; retain stable location/label and discoverability. | Show “field mismatch” in a row but force the user into unrelated Settings or Agent chat to correct it. |
+| **Co-located evidence / 信息就地** | Present the values, meaning, provenance, effect and candidate differences needed to decide **at the point of decision**; deep explanations may open a contextual detail without losing place. | Two “开户银行” candidates shown only by identical names, or a separate page users must memorize. |
+| **System-held context / 系统记忆** | Restore previously valid choices, recipes, current record, progress, filtering, drafts and interrupted steps where supported by authorized persistence; distinguish restored vs suggested vs unverified state. | Ask users to repeat matching 22 columns after every import or browser return. |
+| **Exceptions-first / 异常驱动** | Show a compact truthful summary, surface blockers with exact affected records and direct repair controls, retain a stable “view all” route to full evidence. | Force all 22 fields to become 22 large forms, or hide unverified columns merely to look tidy. |
+| **Continuous journey / 操作连续** | Keep the complete Human task coherent: input → review → amend → validate → explicit authorized commit → meaningful result, with back, undo/compensation and retry paths. | Jump between import, field admin, and a separate Agent window for normal corrections, or silently commit on preview. |
+
+**Non-negotiable distinction:** “No hunting” is **not** hiding capabilities. A frequently needed control remains visible or predictably contextual; infrequent options have stable search/navigation/overflow. “System remembers” is **not** permission to infer identity, overwrite a user's choice, or silently perform a side effect. Authoritative Host persistence, enterprise boundaries, human permission and the ability to change a recommendation are maintained.
+
+### Decision proximity and the memory budget
+
+- A decision surface should contain **the question + relevant evidence + available choices + consequence + feedback** without requiring the Human to recall data from another page. If these must be separated, provide immediate contextual recall and a stable path back.
+- Minimize user *remembering*, *searching*, *re-entering* and *re-navigating*, not essential business review. Prefer recognition over recall, progressive disclosure over deleting information, and truthful labels over technical jargon.
+- Suggested and confirmed field mappings must be visibly distinguishable. An AI suggestion may save effort, but cannot silently decide a legally or operationally ambiguous identity, company field, payment target or destructive transformation.
+- A dangerous or irreversible write still needs the Owner's independent authorization, even if reducing steps would appear more convenient.
+- Avoid compulsory Agent interactions for short deterministic tasks. Agent can prepare options, explain provenance and handle cross-system ambiguity; the Human retains a direct control to review, override and commit.
+
+### Work-surface design and responsive realization
+
+- On desktop, compact business tables can preserve overview and bulk review, with inline repair and meaningful summaries.
+- On phone, the same semantic rows may transform into cards or sheets so **the actual control and candidate information remain visible**; a page that does not overflow horizontally can still fail when an inner scroll area hides the required action.
+- Keep the Business Office calm: neutral content surfaces, restrained blue for actions, semantic colors for true statuses, clear group spacing and typography; do not create a plugin-specific “Feishu skin”.
+- Product UI uses business language. High-fidelity test fixtures and backend/prototype caveats are documented in review materials, **not repeated beside every business input**. Never present a mock as a real business action or conceal its synthetic status in accompanying reviewer information.
+
+### Design review: measurable questions
+
+Every new/modified Human workflow MUST answer with a concrete screenshot or behavior:
+
+1. What is the user's current business task, and where is the next safe action located?
+2. Which context must be understood to make that decision, and is it visible beside the action?
+3. Which previous, authorized choices does the system retain? What happens on reload, back navigation or interruption?
+4. Can every blocker be found and repaired **at the affected item**? Is complete data still accessible?
+5. What happens after validation fails, an approval changes, or the final commit fails?
+6. At desktop, phone width, Chinese text rendering and text scaling, is the *actual interactive control* reachable and readable?
+7. Which evidence is static design review, automated Chromium, human screenshot review, real Host behavior and final Human signoff? Label each separately.
+
+**Reference example (not a copied template):** EVO BEX-01 high-fidelity supplier import, [design analysis and evidence](https://github.com/jiangxng/EVO-App-Platform/blob/docs/bex01-v2-human-design-review-20261015/docs/plans/foundation-list-experience/BEX-01-BUSINESS-OFFICE-HIGH-FIDELITY-QUALITY-REFERENCE-20261015.md). Chinese product sources including Feishu and Jiandaoyun inform task continuity/field matching patterns. Eidos governs the reusable semantics, components and tokens: do not reproduce another company's proprietary visual assets or mistake a synthetic prototype for a shipped Host integration.
+
 ## Design character
 
 Eidos interaction foundation remains **productive, quiet and precise**; the current visual character is **business, calm, approachable, productive and trustworthy**.
