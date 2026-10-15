@@ -336,6 +336,14 @@ A plugin does not own a competing shell, design system, mobile shell, standard i
 | Which icon should be used? | Icon System |
 | Can a plugin invent its own shell/style? | No; extend Eidos first |
 
+## 15A. Mandatory Human UI design review (2026-10-15 expansion)
+
+Every Human-facing UI change by a Human or LLM **MUST** pass [EIDOS-HUMAN-UI-DESIGN-REVIEW-CHECKLIST-v1.0.md](EIDOS-HUMAN-UI-DESIGN-REVIEW-CHECKLIST-v1.0.md) **before implementation** and attach a task-specific review record to its PR. The review covers current Experience Architecture, navigation placement, Productive interaction rules, existing Business Office palette/tokens, visual hierarchy, memory/attention, age-inclusive accessibility, error recovery and data/Agent boundaries. This is an **extension of the existing design authority**, not a competing design system.
+
+The new supporting [visual and cognitive reference index](EIDOS-VISUAL-COGNITIVE-RESEARCH-REFERENCE-INDEX-v1.0.md) archives source URLs, previous reading statuses, applicable evidence and caveats. The checklist is mandatory; its external studies are advisory where they conflict with authority/security/accessibility.
+
+A PR gate should verify a review artifact for UI diffs, but automated checks only guarantee the presence/structure of review evidence, not that Human UX has actually been accepted. UI implementation work without the review is **not delivery-complete**.
+
 ## 16. Fresh-LLM workflow
 
 For any Human-facing UI task:

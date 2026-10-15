@@ -145,6 +145,14 @@ Use for: recurring practical questions about button placement, icons, forms, nav
 
 Community answers are evidence leads, not Eidos authority.
 
+## 2026-10-15 — Visual perception, memory, attention and age-inclusive UX
+
+The previous Enterprise Navigation/IA and Business Office color decisions remain the normative Eidos foundations. A newly curated **24-item** visual and cognitive research inventory (plus 5 prior workflow references) now lives in [EIDOS-VISUAL-COGNITIVE-RESEARCH-REFERENCE-INDEX-v1.0.md](EIDOS-VISUAL-COGNITIVE-RESEARCH-REFERENCE-INDEX-v1.0.md).
+
+It preserves authors/titles, original URLs, research date, prior full-page vs abstract-only vs search-summary reading status, topic, applicable finding and limitations. **Do not claim the index was re-researched in this window.**
+
+Every new UI design or modification must follow [EIDOS-HUMAN-UI-DESIGN-REVIEW-CHECKLIST-v1.0.md](EIDOS-HUMAN-UI-DESIGN-REVIEW-CHECKLIST-v1.0.md), including reduced visual noise, recognition rather than recall, interruption recovery, age-inclusive controls, and task evidence. Continue to use existing Eidos visual and navigation tokens, not imported competing CSS.
+
 ## Review cadence
 
 Do not continuously chase trends.
