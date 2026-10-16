@@ -21,13 +21,27 @@ export interface UidlField {
   exclusiveSelect?: { group: string; exemptValues: string[] };
 }
 export interface UidlAction { id: string; label: string; type: "submit" | "cancel"; command?: string; requiresConfirmation?: boolean }
+/** Generic grouped decision surface: a primary field stays operable, while
+ * secondary form inputs remain in an accessible native disclosure.
+ * The Host/application provides business data and owns action execution. */
+export interface UidlFormReviewGroupV010 {
+  id: string;
+  title: string;
+  summary?: string;
+  primaryFieldKey: string;
+  detailFieldKeys: string[];
+  detailsLabel?: string;
+  defaultExpanded?: boolean;
+}
 export interface UidlFormV011 {
+  reviewGroups?: UidlFormReviewGroupV010[];
   contractVersion: "0.1.1"; kind: "form"; id: string; title: string; purpose: "execute-command";
   command: { code: string; inputVersion: string };
   fields: UidlField[]; actions: UidlAction[]; metadata?: Record<string, JsonValue>;
 }
 export interface RenderFieldV010 extends UidlField { inputName: string }
 export interface FormRenderModelV010 {
+  reviewGroups?: UidlFormReviewGroupV010[];
   modelVersion: "0.1.0"; sourceContractVersion: "0.1.1"; kind: "form";
   id: string; title: string; command: { code: string; inputVersion: string };
   fields: RenderFieldV010[];
