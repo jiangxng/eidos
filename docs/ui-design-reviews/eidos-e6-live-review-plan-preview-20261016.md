@@ -33,3 +33,7 @@
 ## 证据与剩余问题
 
 Eidos `npm run release:check`、UI gate、真实 Platform Host 172×22 desktop/390px Chromium 均需在准确 PR HEAD 通过。当前 Eidos 测试包含状态覆盖、错误来源字段、危险 HTML 转义。后续 Platform 应只同步该通用能力并配置四种决策标签/label/type 字段引用，核对实际更新。用户真实 Excel、Railway 登录现场、Human V3 签收依然未完成；本预览**不是**已生效 Schema 变更、也不能替代后端审批。
+
+## E6.1｜零项目类别的完整性修正（2026-10-16）
+
+准确源码改动：`src/runtime/validate.ts`、`tests/design-language/design-language.test.mjs`。实际 Host 供应商批次可能没有任何真实「复用已有字段」候选，但 UI 必须允许显示「复用 0 项」，不能因此让整个审批页无法打开。分类 `statusKeys:[]` 只有在该类真实可达状态为零时允许；对任何可达状态仍强制**恰好一个**归类，其他跨行字段引用校验和原生提交/权限均不变。零类别仍保留业务标签和计数，避免用户误判已经有可用目标。此变更不修改 Host 命令或任何业务数据、没有新的按钮和风险性行为。需重新通过 Eidos CI 和 Human 门禁，再在 Platform 真实 Host 浏览器测试中验收。
