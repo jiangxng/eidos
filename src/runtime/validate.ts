@@ -849,7 +849,7 @@ export function validateUidl(
         }
       }
       if (!invalid) {
-        reviewTask = structuredClone(task) as import("./contracts.js").UidlFormReviewTaskV010;
+        reviewTask = structuredClone(task) as unknown as import("./contracts.js").UidlFormReviewTaskV010;
       }
     }
   }
