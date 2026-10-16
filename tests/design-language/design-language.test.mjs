@@ -186,6 +186,7 @@ test("mobile review cards place source and read-only status together without shr
   const mobile = css.slice(css.indexOf("/* Eidos E2:"));
   assert.match(mobile, /@media\(max-width:700px\)\{[\s\S]*grid-template-columns:minmax\(0,1fr\) auto/);
   assert.match(mobile, /tbody th\[data-eidos-review-table-subject\]\{[\s\S]*grid-row:1/);
+  assert.match(mobile, /tbody th\[data-eidos-review-table-subject\]\{[^}]*width:100%/);
   assert.match(mobile, /tbody td\[data-eidos-review-table-status\]\{[\s\S]*grid-row:1/);
   assert.match(mobile, /tbody td\[data-eidos-review-table-evidence\],[\s\S]*tbody td\[data-eidos-review-table-choice\]\{[\s\S]*grid-column:1\/-1/);
   assert.match(mobile, /\[data-eidos-form-review-table\] select,[\s\S]*\[data-eidos-form-review-table\] input\{min-height:44px\}/);
