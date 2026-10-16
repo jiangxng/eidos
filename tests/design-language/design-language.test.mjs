@@ -179,3 +179,15 @@ test("business-office visual revision replaces developer-console defaults", () =
   assert.match(eidosProductiveWorkbenchCss, /data-eidos-activity-label/);
   assert.match(eidosProductiveWorkbenchCss, /font-family:var\(--eidos-font-family\)/);
 });
+
+
+test("mobile review cards place source and read-only status together without shrinking controls", () => {
+  const css = eidosProductiveWorkbenchCss;
+  const mobile = css.slice(css.indexOf("/* Eidos E2:"));
+  assert.match(mobile, /@media\(max-width:700px\)\{[\s\S]*grid-template-columns:minmax\(0,1fr\) auto/);
+  assert.match(mobile, /tbody th\[data-eidos-review-table-subject\]\{[\s\S]*grid-row:1/);
+  assert.match(mobile, /tbody td\[data-eidos-review-table-status\]\{[\s\S]*grid-row:1/);
+  assert.match(mobile, /tbody td\[data-eidos-review-table-evidence\],[\s\S]*tbody td\[data-eidos-review-table-choice\]\{[\s\S]*grid-column:1\/-1/);
+  assert.match(mobile, /\[data-eidos-form-review-table\] select,[\s\S]*\[data-eidos-form-review-table\] input\{min-height:44px\}/);
+  assert.match(mobile, /data-eidos-review-table-status\]\[data-heading\]:before\{[\s\S]*display:none/);
+});
