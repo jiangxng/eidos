@@ -3102,9 +3102,6 @@ form[data-eidos-id] button:hover,
   [data-eidos-form-task-issues] li{flex-wrap:wrap;gap:var(--eidos-space-sm)}
   [data-eidos-form-task-issues] li button{min-height:44px}
 }
-`;
-
-
 /* E6: evidence-led decision preview; presentation only, never Host approval. */
 [data-eidos-form-review-plan]{
   margin-block:var(--eidos-space-lg);
@@ -3151,3 +3148,4 @@ form[data-eidos-id] button:hover,
 [data-eidos-review-plan-warning]{
   margin:0;color:var(--eidos-fg-muted);font-size:var(--eidos-font-meta);
 }
+`;
