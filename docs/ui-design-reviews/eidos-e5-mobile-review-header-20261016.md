@@ -39,3 +39,11 @@ CSS 不移动 DOM 节点，原四列表头、行表头、原生 select、details
 - 首先以 Eidos `tests/design-language/design-language.test.mjs` 对移动双列标题、状态定位、选择器完整宽度、44px 触控作合同回归，保持 `npm run release:check` 与 Human UI gate。
 - Platform 后续再检验 390px 与 1280px 同一业务页、连续截图、所有 22 项映射和原审批动作；须对比实测高度变化，不能凭 CSS 推断。
 - 用户实际登录后的 Railway /map **尚未取得**；用户原 Excel 和二个同名开户银行 field ID、主体类型样例真实值均未取得。CI 合格≠Human V3 签收。
+
+## 补充：E5.1 短中文字段名不得因桌面列宽残留而强制换行
+
+在 Platform #981 新真实 Host 390px 截图中，虽然来源与状态同行，但「往来名称」「主体类型」等较短中文字段名仍可能被不必要地压成两行。直接定位 Eidos 原桌面 `[data-eidos-form-review-table] th:first-child{width:20%}` 的 CSS 优先级高于旧手机 `tbody th{width:100%}`，且新 `tbody th[data-eidos-review-table-subject]` 未明确覆盖宽度。因此本轮以**更精确的通用移动选择器**加 `width:100%`，不改列格定义、不减少状态与表格内容、不引入产品 CSS。
+
+目标是让正常中文业务字段名在剩余弹性网格轨道内自然显示，必要时仍能根据极长名称换行；保持状态右对齐、选择控件≥44px。原用户是否满意移动端密度需要独立 Human 签收；新代码及可测 390px 截图验证和回归记录在后续 Platform 同步 PR，不以 CSS 推断效果。
+
+**准确 UI 源码路径：** `src/design-language/productive-workbench-css.ts`；`tests/design-language/design-language.test.mjs` 新增宽度约束，Eidos 自有 Design Gate、CI 需重新通过。本次八个审核域沿用同页既有记录，只针对已证实的字段名宽度问题做窄范围修正。
