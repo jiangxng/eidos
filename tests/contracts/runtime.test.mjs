@@ -207,6 +207,37 @@ assert.equal(createActionRequest(tableDoc,{map_0:"__IGNORE__",map_1:"name"}).com
   exclusiveDoc.command.code,
   "Presentation must never create a separate Host save/command");
 
+// E4: when full evidence exists, its native disclosure lives INSIDE the same
+// source evidence cell. Collapsed rows must not produce a second visible row.
+const inlineDetailDoc={
+  ...tableDoc,
+  fields:[...tableDoc.fields,{
+    key:"sourceEvidence_0",label:"Source examples",control:"text",
+    semanticType:"data-import-original-source-evidence",readOnly:true,
+    initialValue:"172 original rows · sample 1 · sample 2",required:false
+  }],
+  reviewGroups:[
+    {...tableDoc.reviewGroups[0],detailFieldKeys:["sourceEvidence_0"],
+      detailsLabel:"Inspect evidence"},
+    tableDoc.reviewGroups[1]
+  ]
+};
+assert.equal(validateUidl(inlineDetailDoc).ok,true,
+  JSON.stringify(validateUidl(inlineDetailDoc).diagnostics));
+const inlineDetailHtml=renderToHtml(inlineDetailDoc);
+const evidenceCellAt=inlineDetailHtml.indexOf("<td data-eidos-review-table-evidence");
+const detailAt=inlineDetailHtml.indexOf("<details data-eidos-review-group-detail");
+const evidenceEnd=inlineDetailHtml.indexOf("</td>",evidenceCellAt);
+assert.ok(evidenceCellAt>=0 && detailAt>evidenceCellAt && detailAt<evidenceEnd,
+  "Disclosure belongs within the visible source evidence cell");
+assert.doesNotMatch(inlineDetailHtml,/data-eidos-review-table-detail-row/,
+  "Do not reserve a separate row for each collapsed disclosure");
+assert.equal((inlineDetailHtml.match(/name="sourceEvidence_0"/g)??[]).length,1);
+assert.equal((inlineDetailHtml.match(/name="map_0"/g)??[]).length,1);
+assert.equal(createActionRequest(inlineDetailDoc,{map_0:"code",map_1:"__IGNORE__"}).command.code,
+  exclusiveDoc.command.code,"Presentation cannot change the Host command");
+
+
 // Failed contracts must never render a table with missing/duplicated sources.
 for(const reviewTable of [
  {...tableDoc.reviewTable,columnLabels:{subject:"x"}},
