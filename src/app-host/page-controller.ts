@@ -477,8 +477,8 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
     ));
     const supported = new Set<string>();
     for (const row of reviewChoiceStatuses) {
-      const statuses = JSON.parse(row.dataset.eidosReviewStatusByChoice ?? "{}")
-        as Record<string,{key:string;label:string;tone?:"neutral"|"warning"|"positive"}>;
+      const statuses = (JSON.parse(row.dataset.eidosReviewStatusByChoice ?? "{}")
+        as Record<string,{key:string;label:string;tone?:"neutral"|"warning"|"positive"}>);
       Object.values(statuses).forEach(status => supported.add(status.key));
     }
     const updateCounts = () => {
@@ -500,8 +500,8 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
         "[data-eidos-form-review-table-row][data-eidos-review-status-by-choice]");
       if (!row || !container.contains(row)
         || !target.closest("[data-eidos-review-table-choice]")) return;
-      const statuses=JSON.parse(row.dataset.eidosReviewStatusByChoice ?? "{}")
-        as Record<string,{key:string;label:string;tone?:"neutral"|"warning"|"positive"}>;
+      const statuses=(JSON.parse(row.dataset.eidosReviewStatusByChoice ?? "{}")
+        as Record<string,{key:string;label:string;tone?:"neutral"|"warning"|"positive"}>);
       const status=Object.prototype.hasOwnProperty.call(statuses,target.value)
         ? statuses[target.value] : undefined;
       if (!status) return;
