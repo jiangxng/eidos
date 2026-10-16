@@ -132,3 +132,37 @@ assert.deepEqual(toRenderModel(exclusiveDoc).fields[0].exclusiveSelect,
 assert.match(renderToHtml(exclusiveDoc),/data-eidos-exclusive-group="import-fields"/);
 assert.equal(validateUidl({...exclusiveDoc,fields:[{...exclusiveDoc.fields[0],control:"text"}]}).ok,false);
 assert.equal(validateUidl({...exclusiveDoc,fields:[{...exclusiveDoc.fields[0],exclusiveSelect:{group:"",exemptValues:["__IGNORE__"]}}]}).ok,false);
+
+const grouped={
+ ...exclusiveDoc,
+ id:"generic-review-groups",
+ reviewGroups:[
+  {id:"first",title:"First source",summary:"2 examples",
+   primaryFieldKey:"map_0",detailFieldKeys:[],detailsLabel:"More"},
+  {id:"second",title:"Second source",summary:"2 examples",
+   primaryFieldKey:"map_1",detailFieldKeys:[],defaultExpanded:true}
+ ]
+};
+assert.equal(validateUidl(grouped).ok,true);
+const groupedRender=renderToHtml(grouped);
+assert.match(groupedRender,/data-eidos-form-review-groups/);
+assert.match(groupedRender,/data-eidos-form-review-group="first"/);
+assert.match(groupedRender,/First source/);
+assert.match(groupedRender,/data-eidos-exclusive-group="import-fields"/);
+assert.equal((groupedRender.match(/name="map_0"/g)??[]).length,1);
+assert.equal((groupedRender.match(/name="map_1"/g)??[]).length,1);
+assert.equal(toRenderModel(grouped).reviewGroups[0].primaryFieldKey,"map_0");
+const groupedDetails={...grouped,reviewGroups:[
+ {...grouped.reviewGroups[0],detailFieldKeys:["map_1"]}]};
+assert.equal(validateUidl(groupedDetails).ok,true);
+assert.match(renderToHtml(groupedDetails),/<details data-eidos-review-group-detail/);
+assert.equal(validateUidl({...grouped,reviewGroups:[
+ {...grouped.reviewGroups[0],primaryFieldKey:"missing"}]}).ok,false);
+assert.equal(validateUidl({...grouped,reviewGroups:[
+ {...grouped.reviewGroups[0],detailFieldKeys:["map_0"]}]}).ok,false);
+assert.equal(validateUidl({...grouped,reviewGroups:[
+ {...grouped.reviewGroups[0]},{...grouped.reviewGroups[0]}]}).ok,false);
+assert.equal(validateUidl({...grouped,reviewGroups:[{...grouped.reviewGroups[0],
+ summary:"<script>alert(1)</script>"}]}).ok,true);
+assert.doesNotMatch(renderToHtml({...grouped,reviewGroups:[{
+ ...grouped.reviewGroups[0],summary:"<script>alert(1)</script>"}]}),/<script>/);
