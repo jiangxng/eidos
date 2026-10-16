@@ -404,6 +404,36 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
     listeners.push(() => catalogSearch.removeEventListener("input", filterCatalog));
   }
 
+  // View-only Review Queue state filtering. All decisions and evidence remain
+  // on the authorized Host page, and every item is recoverable via "all".
+  const reviewStateFilter = container.querySelector<HTMLSelectElement>(
+    "[data-eidos-review-state-filter]"
+  );
+  if (reviewStateFilter) {
+    const reviewItems = Array.from(
+      container.querySelectorAll<HTMLElement>("[data-eidos-review-item]")
+    );
+    const summary = container.querySelector<HTMLElement>("[data-eidos-review-results]");
+    const noMatches = container.querySelector<HTMLElement>("[data-eidos-review-filter-empty]");
+    const applyReviewFilter = () => {
+      const selected = reviewStateFilter.selectedOptions.item(0);
+      const states = new Set(
+        (selected?.dataset.eidosReviewFilterStates ?? "").split(",").filter(Boolean)
+      );
+      let visible = 0;
+      for (const item of reviewItems) {
+        const allowed = states.has(item.dataset.state ?? "");
+        item.hidden = !allowed;
+        if (allowed) visible++;
+      }
+      if (summary) summary.textContent = visible + " / " + reviewItems.length;
+      if (noMatches) noMatches.hidden = visible !== 0;
+    };
+    reviewStateFilter.addEventListener("change", applyReviewFilter);
+    listeners.push(() => reviewStateFilter.removeEventListener("change", applyReviewFilter));
+    applyReviewFilter();
+  }
+
   const hostActionButtons = container.querySelectorAll<HTMLButtonElement>(
     "[data-eidos-catalog-action],[data-eidos-extension-action],[data-eidos-setup-action],[data-eidos-chat-action],[data-eidos-review-action],[data-eidos-task-action]"
   );
