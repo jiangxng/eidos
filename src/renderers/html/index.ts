@@ -76,6 +76,7 @@ function renderReviewTask(task: import("../../runtime/contracts.js").UidlFormRev
   </ol>` : "";
   const metrics=task.metrics?.length ? `<section data-eidos-form-task-metrics>
     ${task.metrics.map(metric=>`<div data-eidos-form-task-metric
+      data-eidos-form-task-metric-id="${esc(metric.id)}"
       data-tone="${esc(metric.tone ?? "neutral")}"><strong>${esc(metric.value)}</strong>
       <span>${esc(metric.label)}</span></div>`).join("")}
   </section>` : "";
