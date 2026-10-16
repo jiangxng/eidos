@@ -32,9 +32,22 @@ export interface UidlFormReviewGroupV010 {
   detailFieldKeys: string[];
   detailsLabel?: string;
   defaultExpanded?: boolean;
+  /** Neutral presentation state supplied by the owning application. */
+  reviewStatus?: { key: string; label: string; tone?: "neutral" | "warning" | "positive" };
+}
+/** Optional table realization of existing reviewGroups, preserving form field identity. */
+export interface UidlFormReviewTableV010 {
+  columnLabels: { subject: string; evidence: string; decision: string; status: string };
+  filter?: {
+    label: string;
+    selectedId: string;
+    noMatchesMessage: string;
+    options: { id: string; label: string; statusKeys: string[] }[];
+  };
 }
 export interface UidlFormV011 {
   reviewGroups?: UidlFormReviewGroupV010[];
+  reviewTable?: UidlFormReviewTableV010;
   contractVersion: "0.1.1"; kind: "form"; id: string; title: string; purpose: "execute-command";
   command: { code: string; inputVersion: string };
   fields: UidlField[]; actions: UidlAction[]; metadata?: Record<string, JsonValue>;
@@ -42,6 +55,7 @@ export interface UidlFormV011 {
 export interface RenderFieldV010 extends UidlField { inputName: string }
 export interface FormRenderModelV010 {
   reviewGroups?: UidlFormReviewGroupV010[];
+  reviewTable?: UidlFormReviewTableV010;
   modelVersion: "0.1.0"; sourceContractVersion: "0.1.1"; kind: "form";
   id: string; title: string; command: { code: string; inputVersion: string };
   fields: RenderFieldV010[];
