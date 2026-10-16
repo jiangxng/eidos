@@ -1,3 +1,5 @@
+import { validateUidl } from "../../dist/runtime/validate.js";
+import { renderToHtml } from "../../dist/renderers/html/index.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 
@@ -191,4 +193,42 @@ test("mobile review cards place source and read-only status together without shr
   assert.match(mobile, /tbody td\[data-eidos-review-table-evidence\],[\s\S]*tbody td\[data-eidos-review-table-choice\]\{[\s\S]*grid-column:1\/-1/);
   assert.match(mobile, /\[data-eidos-form-review-table\] select,[\s\S]*\[data-eidos-form-review-table\] input\{min-height:44px\}/);
   assert.match(mobile, /data-eidos-review-table-status\]\[data-heading\]:before\{[\s\S]*display:none/);
+});
+
+test("decision-first review task hides none of the Host facts and requires explicit opt-in", () => {
+  const doc={
+    contractVersion:"0.1.1",kind:"form",id:"eidos.example.decision-review",
+    title:"Review",purpose:"execute-command",
+    command:{code:"test.action",inputVersion:"0.1.0"},
+    fields:[{key:"choice",label:"Choose",semanticType:"test-choice",
+      control:"select",required:true,initialValue:"keep",
+      options:[{value:"keep",label:"Keep"}]}],
+    actions:[{id:"submit",label:"Submit",type:"submit",
+      command:"test.action",requiresConfirmation:true}],
+    reviewTask:{
+      presentation:"decision-first",
+      subject:{title:"Supplier file.xlsx",facts:[{id:"rows",label:"Rows",value:"172"}]},
+      steps:[{id:"upload",label:"Upload",state:"complete"},
+             {id:"review",label:"Review",state:"current"}],
+      metrics:[{id:"issues",label:"Needs review",value:"1"}],
+      issuesTitle:"Needs attention",
+      issues:[{id:"bank",title:"Bank field",focusGroupId:undefined}],
+      helpText:"Only approved schema changes are saved."
+    }
+  };
+  const result=validateUidl(doc);
+  assert.equal(result.ok,true,JSON.stringify(result));
+  const html=renderToHtml(doc);
+  assert.match(html,/data-eidos-task-presentation="decision-first"/);
+  assert.match(html,/<details data-eidos-form-task-details>/);
+  assert.match(html,/<summary><strong>Supplier file\.xlsx<\/strong>/);
+  assert.match(html,/data-eidos-form-task-metric/);
+  assert.match(html,/data-eidos-form-task-issue="bank"/);
+  assert.match(html,/Only approved schema changes are saved/);
+  assert.doesNotMatch(html,/<details data-eidos-form-task-details open/);
+  const malformed={...doc,reviewTask:{...doc.reviewTask,presentation:"invisible"}};
+  assert.equal(validateUidl(malformed).ok,false,
+    "unknown layouts must not quietly hide task evidence");
+  assert.match(eidosProductiveWorkbenchCss,/data-eidos-task-presentation="decision-first"/);
+  assert.match(eidosProductiveWorkbenchCss,/data-eidos-form-task-details\]>summary\{[\s\S]*min-height:44px/);
 });
