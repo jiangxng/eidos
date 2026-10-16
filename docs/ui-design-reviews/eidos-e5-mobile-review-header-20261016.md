@@ -1,5 +1,7 @@
 # Eidos E5｜移动端核对卡片：来源与状态同行（2026-10-16）
 
+> **准确变更 UI 路径：** `src/design-language/productive-workbench-css.ts`；设计检查回归为 `tests/design-language/design-language.test.mjs`。
+
 > 通用设计语言的小范围升级，不增加业务专用皮肤或新命令。原始证据来自 **Platform #978 的真实隔离 Host /map Chromium 连续滚动**：1280px 桌面滚动层 3981px，390px 手机滚动层 9139px，包含 22 个来源字段。证据源：[GitHub Actions run 38895420715](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38895420715)、[artifact 12044215349](https://github.com/jiangxng/EVO-App-Platform/actions/runs/38895420715/artifacts/12044215349)。这是合成 172×22 测试数据，**不是用户原 Excel，也不是授权 Railway 页面签收**。
 >
 > 参考既有设计权威：Eidos Human Experience Design Authority、Productive Design Language、Business Office Visual v0.2、Human UI Design Review Checklist；延续 [E2 四列表](eidos-e2-editable-review-table-20261016.md) 与 [E4 行内来源证据](eidos-e4-inline-review-evidence-20261016.md)。新需求仅来源于可复查的局部截图和原 CSS，不额外引用未读网络资料。
