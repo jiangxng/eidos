@@ -232,3 +232,65 @@ test("decision-first review task hides none of the Host facts and requires expli
   assert.match(eidosProductiveWorkbenchCss,/data-eidos-task-presentation="decision-first"/);
   assert.match(eidosProductiveWorkbenchCss,/data-eidos-form-task-details\]>summary\{[\s\S]*min-height:44px/);
 });
+
+
+test("E6 review plan validates real field references and renders an escaped local preview", () => {
+  const doc={
+    contractVersion:"0.1.1",kind:"form",id:"eidos.preview.test",
+    title:"Review",purpose:"execute-command",
+    command:{code:"test.approve",inputVersion:"0.1.0"},
+    fields:[
+      {key:"choice_0",label:"Target",semanticType:"test.target",control:"select",
+        required:true,initialValue:"__CREATE__",options:[
+          {value:"__CREATE__",label:"Create"},
+          {value:"__IGNORE__",label:"Ignore"},
+          {value:"__REVIEW__",label:"Review"},
+          {value:"field.1",label:"Reuse"}]},
+      {key:"label_0",label:"Name",semanticType:"test.name",control:"text",
+        required:true,initialValue:"Legal <alert>"},
+      {key:"type_0",label:"Type",semanticType:"test.type",control:"select",
+        required:true,initialValue:"STRING",options:[
+          {value:"STRING",label:"Text"},{value:"NUMBER",label:"Number"}]}
+    ],
+    reviewGroups:[{
+      id:"r0",title:"Excel <script>alert(1)</script>",
+      primaryFieldKey:"choice_0",detailFieldKeys:["label_0","type_0"],
+      reviewStatus:{key:"proposed",label:"Proposed"},
+      statusByChoice:{
+        "__CREATE__":{key:"proposed",label:"Proposed"},
+        "__IGNORE__":{key:"ignored",label:"Excluded"},
+        "__REVIEW__":{key:"attention",label:"Review",tone:"warning"},
+        "field.1":{key:"suggested",label:"Reuse"}
+      }
+    }],
+    reviewTable:{columnLabels:{subject:"Source",evidence:"Evidence",
+      decision:"Target",status:"Status"}},
+    reviewPlan:{
+      title:"Review before approving",warning:"Preview only. No fields created.",
+      categories:[
+        {id:"create",label:"Create",statusKeys:["proposed"]},
+        {id:"reuse",label:"Reuse",statusKeys:["suggested"]},
+        {id:"ignore",label:"Ignore",statusKeys:["ignored"]},
+        {id:"pending",label:"Pending",statusKeys:["attention"]}
+      ],
+      proposedFields:[{groupId:"r0",labelFieldKey:"label_0",typeFieldKey:"type_0"}]
+    },
+    actions:[{id:"submit",label:"Approve",type:"submit",requiresConfirmation:true}]
+  };
+  assert.equal(validateUidl(doc).ok,true,JSON.stringify(validateUidl(doc).diagnostics));
+  const html=renderToHtml(doc);
+  assert.match(html,/data-eidos-form-review-plan/);
+  assert.match(html,/data-eidos-plan-label-field="label_0"/);
+  assert.match(html,/data-eidos-review-plan-categories/);
+  assert.match(html,/Excel &lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.doesNotMatch(html,/<script>alert\(1\)<\/script>/);
+  assert.match(eidosProductiveWorkbenchCss,/data-eidos-review-plan-items/);
+  assert.equal(validateUidl({...doc,reviewPlan:{...doc.reviewPlan,
+    categories:doc.reviewPlan.categories.slice(1)}}).ok,false,
+    "missing a reachable status cannot be silently omitted");
+  assert.equal(validateUidl({...doc,reviewPlan:{...doc.reviewPlan,
+    proposedFields:[{groupId:"r0",labelFieldKey:"choice_0",typeFieldKey:"type_0"}]}}).ok,false,
+    "the preview must not read a select masquerading as an editable field name");
+  assert.equal(validateUidl({...doc,reviewPlan:{...doc.reviewPlan,
+    proposedFields:[{groupId:"r0",labelFieldKey:"label_0",typeFieldKey:"unknown"}]}}).ok,false);
+});
