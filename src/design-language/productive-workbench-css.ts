@@ -2887,6 +2887,7 @@ form[data-eidos-id] button:hover,
   max-width:100%;
   overflow-x:auto;
 }
+[data-eidos-form-review-table-row][hidden]{display:none !important}
 [data-eidos-form-review-table]{
   width:100%;
   min-width:680px;
