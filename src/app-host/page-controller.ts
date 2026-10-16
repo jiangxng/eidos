@@ -487,7 +487,7 @@ export function mountAppHostLoadedPage(options: MountAppHostPageOptions): Mounte
       );
       if (filter) {
         const allKeys = new Set(rows.map(item =>
-          item.dataset.eidosReviewTableStatusKey).filter(Boolean));
+          item.dataset.eidosReviewTableStatusKey).filter((key): key is string => Boolean(key)));
         const all = Array.from(filter.options).find(option => {
           const keys = new Set((option.dataset.eidosReviewTableFilterKeys ?? "")
             .split(",").filter(Boolean));
