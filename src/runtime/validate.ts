@@ -825,7 +825,8 @@ export function validateUidl(
       extraKeys(task, new Set(["subject","steps","metrics","issuesTitle",
         "issuesDescription","issues","helpText","presentation"]),path,out);
       if (task.presentation !== undefined
-        && !["full","decision-first"].includes(task.presentation)) {
+        && (typeof task.presentation !== "string"
+          || !["full","decision-first"].includes(task.presentation))) {
         fail(path+".presentation","Unknown review task presentation mode");
       }
       extraKeys(task.subject,new Set(["title","subtitle","statusLabel","facts"]),
