@@ -207,6 +207,46 @@ assert.equal(createActionRequest(tableDoc,{map_0:"__IGNORE__",map_1:"name"}).com
   exclusiveDoc.command.code,
   "Presentation must never create a separate Host save/command");
 
+// E5: local select changes can update status, filter and opt-in metrics
+// without changing the original selection values or executing Host commands.
+const reactiveDoc={
+ ...tableDoc,
+ reviewGroups:[
+   {...tableDoc.reviewGroups[0],statusByChoice:{
+     "__IGNORE__":{key:"ignored",label:"Not imported"},
+     "code":{key:"confirmed",label:"Confirmed",tone:"positive"},
+     "name":{key:"suggested",label:"Needs confirmation"}
+   }},
+   tableDoc.reviewGroups[1]
+ ],
+ reviewTable:{...tableDoc.reviewTable,filter:{
+   ...tableDoc.reviewTable.filter,
+   options:[{id:"attention",label:"Needs attention",statusKeys:["attention","suggested"]},
+     {id:"all",label:"All fields",statusKeys:["attention","confirmed","suggested","ignored"]}]
+ }}
+};
+assert.equal(validateUidl(reactiveDoc).ok,true,
+ JSON.stringify(validateUidl(reactiveDoc).diagnostics));
+const liveHtml=renderToHtml(reactiveDoc);
+assert.match(liveHtml,/data-eidos-review-status-by-choice="/);
+assert.match(liveHtml,/&quot;__IGNORE__&quot;/);
+assert.match(liveHtml,/&quot;ignored&quot;/);
+assert.equal(toRenderModel(reactiveDoc).reviewGroups[0].statusByChoice.code.key,"confirmed");
+assert.equal(createActionRequest(reactiveDoc,{map_0:"__IGNORE__",map_1:"name"}).command.code,
+ exclusiveDoc.command.code,"Reactive labels cannot change Host command");
+for (const wrong of [
+ {"bad-target":{key:"ignored",label:"Ignore"}},
+ {"__IGNORE__":{key:"invalid,filter",label:"Ignore"}},
+ {"code":{key:"confirmed",label:"",tone:"positive"}},
+ {"code":{key:"confirmed",label:"Okay",tone:"unverified"}}
+]){
+ const invalid={...reactiveDoc,reviewGroups:[
+   {...reactiveDoc.reviewGroups[0],statusByChoice:wrong},
+   reactiveDoc.reviewGroups[1]
+ ]};
+ assert.equal(validateUidl(invalid).ok,false,"Invalid local statuses must be rejected");
+}
+
 // E4: when full evidence exists, its native disclosure lives INSIDE the same
 // source evidence cell. Collapsed rows must not produce a second visible row.
 const inlineDetailDoc={
