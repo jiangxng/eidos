@@ -710,7 +710,8 @@ export function validateUidl(
     const table = document.reviewTable;
     if (!isPlainObject(table) || !isPlainObject(table.columnLabels)
       || !["subject","evidence","decision","status"].every(k =>
-        nonEmpty(table.columnLabels[k]) && table.columnLabels[k].trim().length > 0)
+        isPlainObject(table.columnLabels)
+        && nonEmpty(table.columnLabels[k]) && table.columnLabels[k].trim().length > 0)
       || reviewGroups.length === 0
       || reviewGroups.some(g => !g.reviewStatus?.key?.trim()
         || !g.reviewStatus.label?.trim())) {
@@ -720,7 +721,7 @@ export function validateUidl(
       extraKeys(table, new Set(["columnLabels","filter"]),p,out);
       extraKeys(table.columnLabels,
         new Set(["subject","evidence","decision","status"]),p+".columnLabels",out);
-      const labels = table.columnLabels;
+      const labels = table.columnLabels as Record<"subject"|"evidence"|"decision"|"status",string>;
       let filter: import("./contracts.js").UidlFormReviewTableV010["filter"];
       if (table.filter !== undefined) {
         const f = table.filter;
