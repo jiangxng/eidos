@@ -32,7 +32,7 @@
 
 这只是前端布局：Host 的身份、权限、审批、schema owner、source evidence、mapping command 和数据提交完全不受影响。容器内容仍由 esc 做 HTML 转义，`presentation` 严格白名单验证以免不受控页面隐去业务资料。展开的定位按钮保持原属 Eidos form 元素并沿原事件处理，不新增任意脚本或不受授权的操作。
 
-## 验证和边界
+## 证据与剩余问题
 
 - 新 Eidos 设计语言测试验证：合法 opt-in、非法模式 fail closed、默认关闭原生 details、内部任务/指标/问题仍在 HTML、summary >=44px。
 - Eidos 全套 CI + Human UI gate 通过后再选择性在 Platform 批次字段审核页面 opt-in。**只有真实隔离 Host Chromium + 用户截图复核，才可以声称该业务页面达到 V3 决策首屏；本 PR 不能代替 Platform 落地。**
