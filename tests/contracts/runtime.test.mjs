@@ -203,7 +203,7 @@ assert.equal((tableHtml.match(/name="map_1"/g)??[]).length,1);
 assert.match(tableHtml,/data-eidos-exclusive-group="import-fields"/);
 assert.equal(toRenderModel(tableDoc).reviewTable.filter.selectedId,"attention");
 assert.doesNotMatch(tableHtml,/data-eidos-form-review-groups>/);
-assert.equal(createActionRequest(tableDoc,{map_0:"__IGNORE__",map_1:"field_two"}).command.code,
+assert.equal(createActionRequest(tableDoc,{map_0:"__IGNORE__",map_1:"name"}).command.code,
   exclusiveDoc.command.code,
   "Presentation must never create a separate Host save/command");
 
