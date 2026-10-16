@@ -2704,4 +2704,140 @@ form[data-eidos-id] button:hover,
  [data-eidos-review-group-heading]{grid-template-columns:minmax(0,1fr);gap:var(--eidos-space-sm)}
  [data-eidos-review-group-fields]{grid-template-columns:minmax(0,1fr)}
 }
+
+/* Eidos E1: calm, content-first overview of an existing Review Queue task. */
+[data-eidos-review-context]{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:var(--eidos-space-sm) var(--eidos-space-lg);
+  margin-bottom:var(--eidos-space-md);
+  padding:var(--eidos-space-lg);
+  background:var(--eidos-bg);
+  border:1px solid var(--eidos-border);
+  border-radius:var(--eidos-radius-lg);
+}
+[data-eidos-review-context-heading]{
+  display:grid;
+  align-content:center;
+  min-width:0;
+  gap:var(--eidos-space-xs);
+}
+[data-eidos-review-context-heading] strong{
+  overflow-wrap:anywhere;
+  font-size:var(--eidos-font-section);
+}
+[data-eidos-review-context-heading] span{
+  color:var(--eidos-fg-muted);
+  font-size:var(--eidos-font-compact);
+  overflow-wrap:anywhere;
+}
+[data-eidos-review-context-status]{
+  padding:var(--eidos-space-xs) var(--eidos-space-sm);
+  border-radius:var(--eidos-radius-md);
+  background:var(--eidos-bg-subtle);
+  color:var(--eidos-fg-muted);
+  align-self:center;
+  font-size:var(--eidos-font-meta);
+}
+[data-eidos-review-context-facts]{
+  display:flex;
+  flex-wrap:wrap;
+  gap:var(--eidos-space-md);
+  grid-column:1/-1;
+  padding:var(--eidos-space-sm) 0 0;
+  margin:0;
+  border-top:1px solid var(--eidos-border);
+}
+[data-eidos-review-context-fact]{
+  display:grid;
+  gap:var(--eidos-space-xs);
+  min-width:0;
+}
+[data-eidos-review-context-fact] dt{
+  color:var(--eidos-fg-subtle);
+  font-size:var(--eidos-font-meta);
+}
+[data-eidos-review-context-fact] dd{
+  margin:0;
+  overflow-wrap:anywhere;
+  font-size:var(--eidos-font-compact);
+}
+[data-eidos-review-overview]{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,148px),1fr));
+  gap:var(--eidos-space-sm);
+  margin-bottom:var(--eidos-space-lg);
+}
+[data-eidos-review-overview-metric]{
+  display:grid;
+  gap:var(--eidos-space-xs);
+  padding:var(--eidos-space-lg);
+  min-width:0;
+  background:var(--eidos-bg);
+  border:1px solid var(--eidos-border);
+  border-radius:var(--eidos-radius-lg);
+}
+[data-eidos-review-overview-metric] strong{
+  font-size:var(--eidos-font-page);
+  line-height:1.2;
+  color:var(--eidos-fg);
+  font-variant-numeric:tabular-nums;
+}
+[data-eidos-review-overview-metric] span{
+  color:var(--eidos-fg-muted);
+  font-size:var(--eidos-font-compact);
+  overflow-wrap:anywhere;
+}
+[data-eidos-review-overview-metric][data-tone="warning"] strong{
+  color:var(--eidos-warning);
+}
+[data-eidos-review-overview-metric][data-tone="danger"] strong{
+  color:var(--eidos-danger);
+}
+[data-eidos-review-filter-toolbar]{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  align-items:center;
+  gap:var(--eidos-space-md);
+  margin-bottom:var(--eidos-space-md);
+  border-top:1px solid var(--eidos-border);
+  padding-top:var(--eidos-space-md);
+}
+[data-eidos-review-filter-toolbar] label{
+  display:flex;
+  flex-wrap:wrap;
+  gap:var(--eidos-space-sm);
+  align-items:center;
+  font-size:var(--eidos-font-compact);
+}
+[data-eidos-review-filter-toolbar] select{
+  max-width:100%;
+  min-width:150px;
+  min-height:var(--eidos-control-normal);
+  border:1px solid var(--eidos-border-strong);
+  border-radius:var(--eidos-radius-md);
+  padding:0 var(--eidos-space-sm);
+  background:var(--eidos-bg);
+  color:var(--eidos-fg);
+}
+[data-eidos-review-filter-toolbar] select:focus-visible{
+  outline:2px solid var(--eidos-focus);
+  outline-offset:2px;
+}
+[data-eidos-review-results]{
+  color:var(--eidos-fg-muted);
+  font-size:var(--eidos-font-meta);
+  font-variant-numeric:tabular-nums;
+}
+[data-eidos-review-filter-empty]{
+  color:var(--eidos-fg-muted);
+  padding:var(--eidos-space-lg);
+}
+@media(max-width:680px){
+  [data-eidos-review-context]{grid-template-columns:minmax(0,1fr)}
+  [data-eidos-review-context-status]{justify-self:start}
+  [data-eidos-review-filter-toolbar] label{width:100%}
+  [data-eidos-review-filter-toolbar] select{flex:1;min-width:0}
+}
 `;

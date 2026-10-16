@@ -373,6 +373,64 @@ export function localizeAppHostPageDefinition(
         definition.technicalDetailsLabel
       );
     }
+    if (isObject(definition.context)) {
+      if (typeof definition.context.title === "string") {
+        definition.context.title = localization.resolve(
+          namespace, `review.${reviewId}.context.title`, definition.context.title
+        );
+      }
+      if (typeof definition.context.subtitle === "string") {
+        definition.context.subtitle = localization.resolve(
+          namespace, `review.${reviewId}.context.subtitle`, definition.context.subtitle
+        );
+      }
+      if (typeof definition.context.statusLabel === "string") {
+        definition.context.statusLabel = localization.resolve(
+          namespace, `review.${reviewId}.context.status.label`, definition.context.statusLabel
+        );
+      }
+      if (Array.isArray(definition.context.facts)) {
+        for (const fact of definition.context.facts) {
+          if (!isObject(fact) || typeof fact.id !== "string"
+            || typeof fact.label !== "string") continue;
+          fact.label = localization.resolve(
+            namespace, `review.${reviewId}.context.fact.${fact.id}.label`, fact.label
+          );
+        }
+      }
+    }
+    if (Array.isArray(definition.overviewMetrics)) {
+      for (const metric of definition.overviewMetrics) {
+        if (!isObject(metric) || typeof metric.id !== "string"
+          || typeof metric.label !== "string") continue;
+        metric.label = localization.resolve(
+          namespace, `review.${reviewId}.overview.${metric.id}.label`, metric.label
+        );
+      }
+    }
+    if (isObject(definition.stateFilter)) {
+      if (typeof definition.stateFilter.label === "string") {
+        definition.stateFilter.label = localization.resolve(
+          namespace, `review.${reviewId}.filter.label`, definition.stateFilter.label
+        );
+      }
+      if (typeof definition.stateFilter.noMatchesMessage === "string") {
+        definition.stateFilter.noMatchesMessage = localization.resolve(
+          namespace, `review.${reviewId}.filter.empty`,
+          definition.stateFilter.noMatchesMessage
+        );
+      }
+      if (Array.isArray(definition.stateFilter.options)) {
+        for (const option of definition.stateFilter.options) {
+          if (!isObject(option) || typeof option.id !== "string"
+            || typeof option.label !== "string") continue;
+          option.label = localization.resolve(
+            namespace, `review.${reviewId}.filter.option.${option.id}.label`,
+            option.label
+          );
+        }
+      }
+    }
     if (Array.isArray(definition.items)) {
       for (const item of definition.items) {
         if (!isObject(item) || typeof item.id !== "string") continue;

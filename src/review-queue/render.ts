@@ -2,6 +2,7 @@ import type {
   ReviewQueueActionV010,
   ReviewQueueFieldV010,
   ReviewQueueItemV010,
+  ReviewQueueStateFilterV010,
   ReviewQueueV010
 } from "./contracts.js";
 
@@ -71,7 +72,8 @@ function renderField(field: ReviewQueueFieldV010): string {
     + `<input type="text"${common}${attr("value", encodedValue(field.value))}></label>`;
 }
 
-function renderItem(item: ReviewQueueItemV010, technicalDetailsLabel: string): string {
+function renderItem(item: ReviewQueueItemV010, technicalDetailsLabel: string,
+  includedStates?: readonly string[]): string {
   const metrics = (item.metrics ?? []).map(metric =>
     "<span data-eidos-review-metric"
       + attr("data-metric-id", metric.id)
@@ -106,6 +108,7 @@ function renderItem(item: ReviewQueueItemV010, technicalDetailsLabel: string): s
   return "<li data-eidos-review-item"
     + attr("data-item-id", item.id)
     + attr("data-state", item.state)
+    + (includedStates && !includedStates.includes(item.state) ? " hidden" : "")
     + "><form data-eidos-review-form" + attr("data-item-id", item.id) + ">"
     + "<header data-eidos-review-item-header><div><strong>" + esc(item.title) + "</strong>"
     + (item.summary ? "<p>" + esc(item.summary) + "</p>" : "")
@@ -118,24 +121,121 @@ function renderItem(item: ReviewQueueItemV010, technicalDetailsLabel: string): s
     + "</form></li>";
 }
 
+const ALL_STATES = ["pending", "attention", "accepted", "rejected"] as const;
+
+function reviewFilterOptions(filter: ReviewQueueStateFilterV010) {
+  if (!filter.label?.trim() || !filter.noMatchesMessage?.trim()
+    || !Array.isArray(filter.options) || !filter.options.length
+    || filter.options.length > 8 || !filter.selectedId?.trim()) {
+    throw new Error("EIDOS_REVIEW_STATE_FILTER_INVALID");
+  }
+  const ids = new Set<string>();
+  let coversAll = false;
+  for (const option of filter.options) {
+    if (!option.id?.trim() || !option.label?.trim() || ids.has(option.id)
+      || !Array.isArray(option.states) || !option.states.length
+      || new Set(option.states).size !== option.states.length
+      || option.states.some(state => !ALL_STATES.includes(state))) {
+      throw new Error("EIDOS_REVIEW_STATE_FILTER_INVALID");
+    }
+    ids.add(option.id);
+    if (ALL_STATES.every(state => option.states.includes(state))) coversAll = true;
+  }
+  if (!coversAll || !ids.has(filter.selectedId)) {
+    throw new Error("EIDOS_REVIEW_STATE_FILTER_MISSING_ALL");
+  }
+  return filter.options;
+}
+
 export function renderReviewQueueToHtml(document: ReviewQueueV010): string {
   const ids = new Set<string>();
   for (const item of document.items) {
     if (ids.has(item.id)) throw new Error("EIDOS_REVIEW_ITEM_DUPLICATE: " + item.id);
     ids.add(item.id);
   }
-
+  const context = document.context ? (() => {
+    const subject = document.context!;
+    if (!subject.title?.trim() || (subject.facts?.length ?? 0) > 8) {
+      throw new Error("EIDOS_REVIEW_CONTEXT_INVALID");
+    }
+    const facts = (subject.facts ?? []).map(fact =>
+      "<div data-eidos-review-context-fact"
+      + attr("data-fact-id", fact.id)
+      + "><dt>" + esc(fact.label) + "</dt><dd>" + esc(fact.value)
+      + "</dd></div>"
+    ).join("");
+    if (new Set((subject.facts ?? []).map(fact => fact.id)).size
+      !== (subject.facts ?? []).length
+      || (subject.facts ?? []).some(fact =>
+        !fact.id?.trim() || !fact.label?.trim())) {
+      throw new Error("EIDOS_REVIEW_CONTEXT_INVALID");
+    }
+    return "<section data-eidos-review-context aria-label=" + `"${esc(subject.title)}"` + ">"
+      + "<div data-eidos-review-context-heading><strong>" + esc(subject.title) + "</strong>"
+      + (subject.subtitle ? "<span>" + esc(subject.subtitle) + "</span>" : "")
+      + "</div>"
+      + (subject.statusLabel ? "<span data-eidos-review-context-status>"
+        + esc(subject.statusLabel) + "</span>" : "")
+      + (facts ? "<dl data-eidos-review-context-facts>" + facts + "</dl>" : "")
+      + "</section>";
+  })() : "";
+  const overview = document.overviewMetrics ? (() => {
+    if (document.overviewMetrics!.length > 8 || new Set(
+      document.overviewMetrics!.map(metric => metric.id)
+    ).size !== document.overviewMetrics!.length
+      || document.overviewMetrics!.some(metric =>
+        !metric.id?.trim() || !metric.label?.trim()
+        || !["neutral", "positive", "warning", "danger"].includes(metric.tone ?? "neutral"))) {
+      throw new Error("EIDOS_REVIEW_OVERVIEW_INVALID");
+    }
+    const metrics = document.overviewMetrics!.map(metric =>
+      "<div data-eidos-review-overview-metric"
+      + attr("data-metric-id", metric.id)
+      + attr("data-tone", metric.tone ?? "neutral")
+      + "><strong>" + esc(metric.value) + "</strong>"
+      + "<span>" + esc(metric.label) + "</span></div>"
+    ).join("");
+    return "<section data-eidos-review-overview aria-label=" + `"${esc(document.title)}"` + ">"
+      + metrics + "</section>";
+  })() : "";
+  const filter = document.stateFilter;
+  const options = filter ? reviewFilterOptions(filter) : [];
+  const selected = options.find(option => option.id === filter?.selectedId);
+  const includedStates = selected?.states;
   const technicalDetailsLabel = document.technicalDetailsLabel ?? "Technical details";
-  const items = document.items.map(item => renderItem(item, technicalDetailsLabel)).join("");
+  const items = document.items.map(item =>
+    renderItem(item, technicalDetailsLabel, includedStates)
+  ).join("");
+  const count = document.items.filter(item =>
+    !includedStates || includedStates.includes(item.state)).length;
+  const stateFilter = filter
+    ? "<div data-eidos-review-filter-toolbar>"
+      + "<label>" + esc(filter.label)
+      + "<select data-eidos-review-state-filter>"
+      + options.map(option =>
+        "<option" + attr("value", option.id)
+        + attr("data-eidos-review-filter-states", option.states.join(","))
+        + (option.id === filter.selectedId ? " selected" : "")
+        + ">" + esc(option.label) + "</option>"
+      ).join("")
+      + "</select></label>"
+      + "<span data-eidos-review-results role=\"status\" aria-live=\"polite\">"
+      + String(count) + " / " + String(document.items.length) + "</span></div>"
+    : "";
+  const filteredEmpty = filter
+    ? "<p data-eidos-review-filter-empty"
+      + (count ? " hidden" : "")
+      + ">" + esc(filter.noMatchesMessage) + "</p>"
+    : "";
   const empty = document.items.length === 0
     ? "<div data-eidos-review-empty>" + esc(document.emptyMessage ?? "Nothing to review.") + "</div>"
     : "";
-
   return "<section data-eidos-review-queue" + attr("data-review-id", document.id) + ">"
     + "<header data-eidos-review-header><h1>" + esc(document.title) + "</h1>"
     + (document.description ? "<p>" + esc(document.description) + "</p>" : "")
     + "</header>"
-    + empty
-    + (items ? "<ol data-eidos-review-items>" + items + "</ol>" : "")
+    + context + overview + stateFilter
+    + empty + (items ? "<ol data-eidos-review-items>" + items + "</ol>" : "")
+    + (document.items.length ? filteredEmpty : "")
     + "</section>";
 }

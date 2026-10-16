@@ -71,6 +71,25 @@ export interface ReviewQueueItemV010 {
   metadata?: Record<string, JsonValue>;
 }
 
+/** Object/file/task context; meaning and provenance come only from the owning Host. */
+export interface ReviewQueueContextV010 {
+  title: string;
+  subtitle?: string;
+  statusLabel?: string;
+  facts?: { id: string; label: string; value: string }[];
+}
+/** View-only state filter: never authorizes a business decision or hides source data in the Host. */
+export interface ReviewQueueStateFilterV010 {
+  label: string;
+  selectedId: string;
+  options: {
+    id: string;
+    label: string;
+    states: ReviewQueueItemStateV010[];
+  }[];
+  noMatchesMessage: string;
+}
+
 export interface ReviewQueueV010 {
   contractVersion: "0.1.0";
   kind: "review-queue";
@@ -79,6 +98,10 @@ export interface ReviewQueueV010 {
   description?: string;
   emptyMessage?: string;
   technicalDetailsLabel?: string;
+  context?: ReviewQueueContextV010;
+  /** High-level task metrics, distinct from per-item evidence. */
+  overviewMetrics?: ReviewQueueMetricV010[];
+  stateFilter?: ReviewQueueStateFilterV010;
   items: ReviewQueueItemV010[];
   metadata?: Record<string, JsonValue>;
 }
