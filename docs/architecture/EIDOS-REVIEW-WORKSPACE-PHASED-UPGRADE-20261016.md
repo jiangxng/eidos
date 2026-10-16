@@ -60,3 +60,17 @@ Eidos 的五项正式原则为**功能就近、信息就地、系统记忆、异
 4. 每段报告 **目标｜完成｜验收｜距离最终 V3 还缺什么**，不能用 PR 个数作为倒计时。  
 
 **当前完成范围：** E1 在独立 PR 开发验证中；E2/E3/E4 均未实施，不得宣称 Railway 已获得 V3 原型全体验。
+
+## 阶段签收更新（2026-10-16，覆盖上文最初计划时态）
+
+| 阶段 | 正式证据 | 截止本次状态 |
+| --- | --- | --- |
+| E1 通用 Review Queue 上下文/概览/状态筛选 | [Eidos PR #188](https://github.com/jiangxng/eidos/pull/188)，`main@844b88042ee3f9de7e87215cd90fffa6faf1e1c8` | Eidos Framework CI 与 Human UI Gate PASS、已合并 |
+| E2 Form `reviewTable` 四列就地选择、状态筛选和手机可操作卡片 | [Eidos PR #189](https://github.com/jiangxng/eidos/pull/189)，`main@0d72472f86ebb5fc29ca4cc6e7974bd39691f009` | Eidos Framework CI 与 Human UI Gate PASS、已合并 |
+| E4 — E2 最小消费切片（只覆盖用户实际 `/map` 四列表格） | [Platform PR #964](https://github.com/jiangxng/EVO-App-Platform/pull/964)，`main@66f29a9d1f864f5386a4c1f303b71d784cc436f2` | **14/14 CI PASS**（含隔离 Host Chromium 22 行桌面/390px、172 行导入与数据落库、跨项目浏览器）；Railway `main` 版本 SUCCESS/Online |
+| E3 工作任务上下文、保存反馈、重检/继续/恢复 | 尚未实施 | OPEN，不能将单纯 E2 表格视为用户认可的完整高保真 V3 |
+| E4 — E3 业务消费与客户视觉/Human 签收 | 尚未实施 | OPEN，须以用户原实际 Import Job 的界面和完整高保真原型逐项对照 |
+
+**重要边界：** Platform 的 22 行、172 条、18 项企业业务字段证据为独立**合成** XLSX/Host 回归，不是客户原文件 `往来账户2026_10_08_10_15_23.xlsx` 的最终导入签收，也不是客户同名“开户银行”字段用途或三条缺失主体类型的自动裁决。用户实际线上 screenshot 对照尚未签收。
+
+**下一阶段优先级：** E3 不应为单一客户制作 CSS 或复写原型 HTML；根据 Eidos Experience/Design Language，补齐可由 Platform Host 提供真实值的当前对象/文件上下文、概览指标、集中异常、步骤状态及明确反馈/恢复。必要时抽象 Review Queue E1 既有语义供 Form 表格消费，严格杜绝用浏览器状态冒充 Host 持久化。完成 Eidos 独立认证后，Platform 才可以把该通用工作台能力组合到**同一个 /map 页面**；Railway 只跟随 Platform main。
