@@ -106,6 +106,8 @@ export interface FormRenderModelV010 {
   id: string; title: string; command: { code: string; inputVersion: string };
   fields: RenderFieldV010[];
   submitAction: { id: string; label: string; requiresConfirmation: boolean };
+  /** All explicitly declared submit intents; the first remains the primary. */
+  submitActions: Array<{ id: string; label: string; command: string; requiresConfirmation: boolean }>;
   cancelActions: Array<{ id: string; label: string }>;
 }
 export interface ActionRequestV010 {
