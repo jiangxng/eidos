@@ -704,7 +704,7 @@ export function validateUidl(
               "Choice states require a select and bounded, real option values"));
           } else {
             for (const [value,status] of entries) {
-              extraKeys(status,new Set(["key","label","tone"]),
+              extraKeys(status as Record<string,unknown>,new Set(["key","label","tone"]),
                 path + ".statusByChoice." + value,out);
             }
             statusByChoice=Object.fromEntries(entries.map(([value,raw]) => {
