@@ -166,3 +166,67 @@ assert.equal(validateUidl({...grouped,reviewGroups:[{...grouped.reviewGroups[0],
  summary:"<script>alert(1)</script>"}]}).ok,true);
 assert.doesNotMatch(renderToHtml({...grouped,reviewGroups:[{
  ...grouped.reviewGroups[0],summary:"<script>alert(1)</script>"}]}),/<script>/);
+
+
+const tableDoc = {
+ ...exclusiveDoc,
+ id:"public-editable-review-table",
+ reviewGroups:[
+   {id:"source-0",title:"First source",summary:"3 original samples",
+    primaryFieldKey:"map_0",detailFieldKeys:[],
+    reviewStatus:{key:"attention",label:"Needs review",tone:"warning"}},
+   {id:"source-1",title:"Second source",summary:"1 original sample",
+    primaryFieldKey:"map_1",detailFieldKeys:[],
+    reviewStatus:{key:"confirmed",label:"Confirmed",tone:"positive"}}
+ ],
+ reviewTable:{
+   columnLabels:{subject:"Source",evidence:"Examples",
+     decision:"Target field",status:"Status"},
+   filter:{label:"Show",selectedId:"attention",noMatchesMessage:"No matches.",
+    options:[
+      {id:"attention",label:"Needs attention",statusKeys:["attention"]},
+      {id:"all",label:"All columns",statusKeys:["attention","confirmed"]}
+    ]}
+ }
+};
+assert.equal(validateUidl(tableDoc).ok,true,JSON.stringify(validateUidl(tableDoc).diagnostics));
+const tableHtml=renderToHtml(tableDoc);
+assert.match(tableHtml,/<table data-eidos-form-review-table/);
+assert.match(tableHtml,/<th scope="col">Source<\/th>/);
+assert.match(tableHtml,/data-eidos-review-table-evidence/);
+assert.match(tableHtml,/3 original samples/);
+assert.match(tableHtml,/data-eidos-review-table-status-key="confirmed" hidden/);
+assert.match(tableHtml,/data-eidos-form-review-table-count role="status" aria-live="polite">1 \/ 2/);
+assert.match(tableHtml,/data-eidos-form-review-table-filter/);
+assert.equal((tableHtml.match(/name="map_0"/g)??[]).length,1);
+assert.equal((tableHtml.match(/name="map_1"/g)??[]).length,1);
+assert.match(tableHtml,/data-eidos-exclusive-group="import-fields"/);
+assert.equal(toRenderModel(tableDoc).reviewTable.filter.selectedId,"attention");
+assert.doesNotMatch(tableHtml,/data-eidos-form-review-groups>/);
+assert.equal(createActionRequest(tableDoc,{map_0:"__IGNORE__",map_1:"field_two"}).command.code,
+  exclusiveDoc.command.code,
+  "Presentation must never create a separate Host save/command");
+
+// Failed contracts must never render a table with missing/duplicated sources.
+for(const reviewTable of [
+ {...tableDoc.reviewTable,columnLabels:{subject:"x"}},
+ {...tableDoc.reviewTable,filter:{...tableDoc.reviewTable.filter,
+   options:[tableDoc.reviewTable.filter.options[0]]}},
+ {...tableDoc.reviewTable,filter:{...tableDoc.reviewTable.filter,
+   selectedId:"not-a-filter"}},
+ {...tableDoc.reviewTable,filter:{...tableDoc.reviewTable.filter,
+   options:[...tableDoc.reviewTable.filter.options,
+     tableDoc.reviewTable.filter.options[0]]}}
+]){
+ assert.equal(validateUidl({...tableDoc,reviewTable}).ok,false);
+}
+assert.equal(validateUidl({...tableDoc,reviewGroups:[
+ {...tableDoc.reviewGroups[0],reviewStatus:undefined},tableDoc.reviewGroups[1]]}).ok,false);
+assert.equal(validateUidl({...tableDoc,reviewGroups:[
+ {...tableDoc.reviewGroups[0],reviewStatus:{
+   key:"has,separator",label:"Break filter"}} ,tableDoc.reviewGroups[1]]}).ok,false);
+const dangerous={...tableDoc,
+  reviewGroups:[{...tableDoc.reviewGroups[0],title:"<script>alert(1)</script>"},
+    tableDoc.reviewGroups[1]]};
+assert.doesNotMatch(renderToHtml(dangerous),/<script>/);
+assert.match(renderToHtml(dangerous),/&lt;script&gt;/);
