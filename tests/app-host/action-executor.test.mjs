@@ -109,3 +109,30 @@ test("locally rendered form results are preserved across Workbench chrome refres
   assert.notEqual(formResult, -1);
   assert.ok(preserve > formResult);
 });
+
+
+test("App Host executes only the explicitly declared secondary submit command",async()=>{
+  const page={definition:{
+    contractVersion:"0.1.1",kind:"form",purpose:"execute-command",
+    id:"test.batch",title:"Batch review",
+    command:{code:"batch.approve",inputVersion:"0.1.0"},
+    fields:[{key:"decision",label:"Decision",control:"text",
+      semanticType:"review-decision",required:true}],
+    actions:[
+      {id:"approve",label:"Approve",type:"submit",command:"batch.approve",requiresConfirmation:true},
+      {id:"draft",label:"Save Draft",type:"submit",command:"batch.save-draft",requiresConfirmation:false}
+    ]}};
+  const seen=[];
+  const host={async execute(req){seen.push(req);return {ok:true,result:{saved:true}};}};
+  await executeAppHostPageAction(page,{decision:"Human choice"},host,"draft");
+  assert.equal(seen[0].command.code,"batch.save-draft");
+  assert.equal(seen[0].requiresConfirmation,false);
+  await executeAppHostPageAction(page,{decision:"Human choice"},host,"approve");
+  assert.equal(seen[1].command.code,"batch.approve");
+  assert.equal(seen[1].requiresConfirmation,true);
+  await assert.rejects(
+    ()=>executeAppHostPageAction(page,{decision:"Human choice"},host,"forged"),
+    /Selected submit action is not declared/
+  );
+  assert.equal(seen.length,2,"Forged action must never reach ActionHost");
+});

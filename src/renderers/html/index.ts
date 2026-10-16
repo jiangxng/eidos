@@ -215,5 +215,5 @@ export function renderToHtml(document: unknown): string {
     )
     .join("");
 
-  return `<form data-eidos-id="${esc(model.id)}" data-command="${esc(model.command.code)}" data-model-version="${model.modelVersion}"><h1>${esc(model.title)}</h1>${taskOverview}${fields}${preview}<button type="submit" data-eidos-action="${esc(model.submitAction.id)}">${esc(model.submitAction.label)}</button>${cancels}</form>`;
+  return `<form data-eidos-id="${esc(model.id)}" data-command="${esc(model.command.code)}" data-model-version="${model.modelVersion}"><h1>${esc(model.title)}</h1>${taskOverview}${fields}${preview}${model.submitActions.map(action=>`<button type="submit" data-eidos-action="${esc(action.id)}" data-eidos-declared-command="${esc(action.command)}">${esc(action.label)}</button>`).join("")}${cancels}</form>`;
 }

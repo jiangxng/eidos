@@ -9,6 +9,31 @@ assert.equal(request.contractVersion,"0.1.0"); assert.equal(request.actionId,"ap
 assert.equal(validateValues(doc,{orderNo:"BAD",productId:"P-1",quantity:0,currency:"EUR",extra:1}).ok,false);
 const badVersion={...doc,contractVersion:"0.1.0"}; const vr=validateUidl(badVersion); assert.equal(vr.ok,false); assert.ok(vr.diagnostics.some(x=>x.code==="EIDOS_VERSION_UNSUPPORTED"));
 const multi={...doc,actions:[...doc.actions,{id:"approve2",label:"Approve2",type:"submit"}]}; assert.equal(validateUidl(multi).ok,false);
+
+const multiDeclared={...doc,actions:[
+  ...doc.actions,
+  {id:"save-draft",label:"Save draft",type:"submit",
+    command:"trading-lite.save-draft",requiresConfirmation:false}
+]};
+assert.equal(validateUidl(multiDeclared).ok,true,
+  JSON.stringify(validateUidl(multiDeclared).diagnostics));
+const multiHtml=renderToHtml(multiDeclared);
+assert.equal((multiHtml.match(/type="submit"/g)??[]).length,2);
+assert.match(multiHtml,/data-eidos-action="save-draft"/);
+const values={orderNo:"SO-1001",productId:"P-1",quantity:2,currency:"USD"};
+const draftRequest=createActionRequest(multiDeclared,values,{actionId:"save-draft"});
+assert.equal(draftRequest.actionId,"save-draft");
+assert.equal(draftRequest.command.code,"trading-lite.save-draft");
+assert.equal(draftRequest.requiresConfirmation,false);
+const primaryRequest=createActionRequest(multiDeclared,values,{actionId:"approve"});
+assert.equal(primaryRequest.command.code,doc.command.code);
+assert.equal(primaryRequest.requiresConfirmation,true);
+assert.throws(()=>createActionRequest(multiDeclared,values,{actionId:"unauthorized"}),
+  /Selected submit action is not declared/);
+assert.equal(validateUidl({...doc,actions:[
+  ...doc.actions,{id:"save-draft",label:"Save",type:"submit"}
+]}).ok,false,"Secondary submit needs a declared command");
+
 console.log("EIDOS convergence runtime contracts PASS");
 
 const editDoc = {
