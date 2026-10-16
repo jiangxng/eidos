@@ -230,3 +230,51 @@ const dangerous={...tableDoc,
     tableDoc.reviewGroups[1]]};
 assert.doesNotMatch(renderToHtml(dangerous),/<script>/);
 assert.match(renderToHtml(dangerous),/&lt;script&gt;/);
+
+
+const taskDoc={
+  ...tableDoc,
+  reviewTask:{
+    subject:{title:"Current source file",subtitle:"172 records · 22 columns",
+      statusLabel:"File received",facts:[{id:"source",label:"Source",value:"Supplier records"}]},
+    steps:[{id:"choose",label:"Select source",state:"complete"},
+      {id:"review",label:"Review and continue",state:"current"}],
+    metrics:[{id:"matched",label:"Matched",value:"16",tone:"positive"},
+      {id:"issues",label:"Needs attention",value:"3",tone:"warning"}],
+    issuesTitle:"Needs review",issuesDescription:"Resolve before validation",
+    issues:[{id:"bank",title:"Two same-name targets",
+      description:"Select the intended destination.",
+      focusGroupId:"source-0",actionLabel:"Review field"}],
+    helpText:"Changes are saved when you submit this form."
+  }
+};
+assert.equal(validateUidl(taskDoc).ok,true,JSON.stringify(validateUidl(taskDoc).diagnostics));
+const taskHtml=renderToHtml(taskDoc);
+assert.match(taskHtml,/data-eidos-form-task-overview/);
+assert.match(taskHtml,/data-eidos-form-task-steps/);
+assert.match(taskHtml,/data-eidos-form-task-context/);
+assert.match(taskHtml,/data-eidos-form-task-metrics/);
+assert.match(taskHtml,/data-eidos-form-task-issues/);
+assert.match(taskHtml,/data-eidos-form-task-focus="source-0"/);
+assert.match(taskHtml,/Changes are saved when you submit this form/);
+assert.equal((taskHtml.match(/name="map_0"/g)??[]).length,1);
+assert.equal(createActionRequest(taskDoc,{map_0:"__IGNORE__",map_1:"name"}).command.code,
+  exclusiveDoc.command.code);
+for(const invalidTask of [
+ {...taskDoc.reviewTask,subject:{title:""}},
+ {...taskDoc.reviewTask,steps:[{id:"x",label:"Step",state:"complete"}]},
+ {...taskDoc.reviewTask,issues:[{id:"wrong",title:"Invalid focus",focusGroupId:"missing"}]},
+ {...taskDoc.reviewTask,metrics:[{id:"a",label:"Metric",value:"1"},
+   {id:"a",label:"Duplicate",value:"2"}]},
+ {...taskDoc.reviewTask,issues:[{id:"a",title:"Wrong item",actionLabel:"Do it"}]}
+]){
+ assert.equal(validateUidl({...taskDoc,reviewTask:invalidTask}).ok,false);
+}
+const escapedTask=renderToHtml({...taskDoc,reviewTask:{
+ ...taskDoc.reviewTask,subject:{title:"<script>alert(1)</script>"},
+ issues:[{id:"x",title:"<img src=x onerror=evil()>",focusGroupId:"source-0",
+  actionLabel:"<svg onload=evil()>"}]
+}});
+assert.doesNotMatch(escapedTask,/<script>|<img|<svg onload/);
+assert.match(escapedTask,/&lt;script&gt;/);
+assert.match(escapedTask,/&lt;img/);
