@@ -658,6 +658,7 @@ export function validateUidl(
           || group.reviewStatus !== undefined
             && (!isPlainObject(group.reviewStatus)
               || !nonEmpty(group.reviewStatus.key)
+              || !/^[A-Za-z0-9._:-]{1,80}$/.test(group.reviewStatus.key)
               || !nonEmpty(group.reviewStatus.label)
               || group.reviewStatus.tone !== undefined
                 && !["neutral","warning","positive"].includes(group.reviewStatus.tone as string))) {
