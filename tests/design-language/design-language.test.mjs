@@ -291,6 +291,20 @@ test("E6 review plan validates real field references and renders an escaped loca
   assert.equal(validateUidl({...doc,reviewPlan:{...doc.reviewPlan,
     proposedFields:[{groupId:"r0",labelFieldKey:"choice_0",typeFieldKey:"type_0"}]}}).ok,false,
     "the preview must not read a select masquerading as an editable field name");
+  const zeroReuse={
+    ...doc,
+    fields:[{...doc.fields[0],options:doc.fields[0].options.filter(x=>x.value!=="field.1")},
+      ...doc.fields.slice(1)],
+    reviewGroups:[{...doc.reviewGroups[0],statusByChoice:{
+      "__CREATE__":{key:"proposed",label:"Proposed"},
+      "__IGNORE__":{key:"ignored",label:"Excluded"},
+      "__REVIEW__":{key:"attention",label:"Review"}
+    }}],
+    reviewPlan:{...doc.reviewPlan,categories:doc.reviewPlan.categories.map(c=>
+      c.id==="reuse"?{...c,statusKeys:[]}:c)}
+  };
+  assert.equal(validateUidl(zeroReuse).ok,true,
+    "a zero-count category is valid when no real option has that outcome");
   assert.equal(validateUidl({...doc,reviewPlan:{...doc.reviewPlan,
     proposedFields:[{groupId:"r0",labelFieldKey:"label_0",typeFieldKey:"unknown"}]}}).ok,false);
 });
