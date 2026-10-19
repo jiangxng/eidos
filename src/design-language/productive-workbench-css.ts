@@ -179,6 +179,30 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 }
 [data-side-panel-visible="false"] [data-eidos-workbench-splitter]{display:none}
 
+
+/* A Host-selected focused workflow is not a permanent user preference.
+   Keep the activity strip visible and allow toolbar navigation restore. */
+@media (min-width:701px){
+  [data-eidos-app-host-layout="workbench"][data-eidos-workspace-focused="true"]{
+    grid-template-columns:var(--eidos-activity-width) 0 0 minmax(0,1fr)
+  }
+  [data-eidos-workspace-focused="true"] [data-eidos-side-panel],
+  [data-eidos-workspace-focused="true"] [data-eidos-workbench-splitter]{
+    display:none
+  }
+  [data-eidos-workspace-focused="true"] [data-eidos-workspace]{
+    grid-column:2/5
+  }
+  [data-eidos-workspace-focused="true"] form[data-eidos-id]{
+    width:min(var(--eidos-focused-workspace-content-max,1200px),100%)
+  }
+}
+[data-eidos-workspace-focus-toggle]{justify-self:start;min-width:44px;min-height:44px}
+[data-eidos-workspace-focus-toggle][hidden]{display:none!important}
+@media(max-width:700px){
+  [data-eidos-workspace-focus-toggle]{display:none!important}
+}
+
 [data-eidos-workspace]{
   grid-column:4;grid-row:1;min-width:0;min-height:0;
   display:flex;flex-direction:column;overflow:hidden;background:var(--eidos-bg);
@@ -2067,6 +2091,18 @@ body{
 }
 [data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"] [data-eidos-browser-toolbar]{
   grid-template-columns:minmax(0,1fr);
+}
+[data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"][data-eidos-workspace-focus-eligible="true"] [data-eidos-browser-toolbar]{
+  grid-template-columns:auto minmax(0,1fr);
+}
+[data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"][data-eidos-workspace-focus-eligible="true"] [data-eidos-global-controls]{
+  grid-column:2;
+}
+@media(max-width:700px){
+  [data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"][data-eidos-workspace-focus-eligible="true"] [data-eidos-global-controls]{grid-column:1}
+  [data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"][data-eidos-workspace-focus-eligible="true"] [data-eidos-browser-toolbar]{
+    grid-template-columns:minmax(0,1fr)
+  }
 }
 [data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"] [data-eidos-browser-address],
 [data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"] [data-eidos-browser-go],

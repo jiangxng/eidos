@@ -105,7 +105,7 @@ test("standard business Workbench does not render browser address chrome", async
   assert.doesNotMatch(source, /data-eidos-browser-go/);
   assert.doesNotMatch(source, /data-eidos-browser-external/);
   assert.doesNotMatch(source, /\bbrowserAddress\b|\bbrowserGo\b|\bbrowserExternal\b/);
-  assert.match(source, /browserToolbar\.append\(globalControls\)/);
+  assert.match(source, /browserToolbar\.append\(focusToggle,globalControls\)/);
 });
 
 
@@ -139,4 +139,31 @@ test("Workbench owns successful internal action-result navigation", async () => 
     /const navigateTo = actionResultNavigateToV010\(result\);/
   );
   assert.match(source, /await navigateWorkspace\(navigateTo\)/);
+});
+
+
+test("route-scoped focus retains independent persisted panel preference and reversible layout",async()=>{
+  const fs=await import("node:fs/promises");
+  const source=await fs.readFile(new URL("../../src/workbench/shell.ts",import.meta.url),"utf8");
+  const css=await fs.readFile(new URL("../../src/design-language/productive-workbench-css.ts",import.meta.url),"utf8");
+  assert.match(source,/shouldFocusWorkspaceRoute\?: \(route: string\) => boolean/);
+  assert.match(source,/options\.shouldFocusWorkspaceRoute\?\.\(state\.workspaceTarget\)/);
+  assert.match(source,/focusToggle\.addEventListener\("click"/);
+  assert.match(source,/if \(focusedRouteIdentity && state\.sidePanelVisible\)/);
+  assert.match(source,/expandedForFocusedRoute = !expandedForFocusedRoute/);
+  assert.match(source,/Navigation activities must also be accessible from a saved hidden panel/);
+  assert.match(source,/expandedForFocusedRoute = !expandedForFocusedRoute/);
+  assert.match(source,/focusedRouteIdentity !== state\.workspaceTarget/);
+  assert.match(source,/const focused = eligible && \(!state\.sidePanelVisible \|\| !expandedForFocusedRoute\)/);
+  assert.match(source,/function preserveExplicitNavigationReveal\(\)/);
+  assert.match(source,/preserveExplicitNavigationReveal\(\);/);
+  assert.match(source,/const canToggle = eligible && state\.sidePanelVisible/);
+  assert.match(source,/data-eidos-workspace-focused/);
+  assert.match(source,/focusToggle\.setAttribute\("aria-pressed"/);
+  assert.match(source,/focusToggle\.hidden = !canToggle/);
+  assert.doesNotMatch(source,/state\.sidePanelVisible\s*=\s*(?:eligible|focused|!focused)/);
+  assert.match(css,/data-eidos-workspace-focused="true"/);
+  assert.match(css,/\[data-eidos-workspace-focus-toggle\]\[hidden\]/);
+  assert.match(css,/grid-column:2\/5/);
+  assert.match(css,/grid-template-columns:auto minmax\(0,1fr\)/);
 });
