@@ -139,7 +139,7 @@ export function renderToHtml(document: unknown): string {
     </section>`;
   }).join("");
   const standalone = model.fields.filter(field => !used.has(field.key))
-    .map(renderField).join("");
+    .map(field => renderField(field)).join("");
   // Table is a second, optional presentation of the SAME Form group keys.
   // It does not create a new command, synthetic field or separate save path.
   const reviewTable = model.reviewTable ? (() => {
