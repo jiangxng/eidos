@@ -460,8 +460,8 @@ export async function mountWorkbenchShell(
     focusToggle.hidden = !eligible;
     if (eligible) {
       const label = focused
-        ? hostText("workbench.showNavigation","Show navigation")
-        : hostText("workbench.focusWorkspace","Focus workspace");
+        ? hostText("workbench.showSidePanel","Show side panel")
+        : hostText("workbench.hideSidePanel","Hide side panel");
       setIconButton(focusToggle,"sidebar",label);
       focusToggle.setAttribute("aria-pressed",focused ? "true" : "false");
     }
