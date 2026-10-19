@@ -358,6 +358,10 @@ test("workbench presentation keeps actual file, steps, counts and issues visible
       control:"select",required:true,initialValue:"pending",options:[
         {value:"pending",label:"Human decision required"},
         {value:"id.bank",label:"Approved bank field"}]}],
+    reviewGroups:[{
+      id:"bank-row",title:"开户银行",primaryFieldKey:"choice",detailFieldKeys:[],
+      reviewStatus:{key:"attention",label:"Needs Human review"}
+    }],
     reviewTask:{
       presentation:"workbench",
       subject:{title:"Source <bank>.xlsx",subtitle:"22 columns",statusLabel:"Source retained",
