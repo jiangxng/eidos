@@ -64,7 +64,7 @@ export interface UidlFormReviewPlanV010 {
 /** Reusable task context; all facts and issue semantics are Host/app supplied. */
 export interface UidlFormReviewTaskV010 {
   /** Opt-in disclosure of supporting context so Human decisions lead the page. */
-  presentation?: "full" | "decision-first";
+  presentation?: "full" | "decision-first" | "workbench";
   subject: {
     title: string;
     subtitle?: string;
