@@ -383,7 +383,7 @@ test("workbench presentation keeps actual file, steps, counts and issues visible
   for(const selector of ["data-eidos-form-task-steps","data-eidos-form-task-context",
     "data-eidos-form-task-metrics","data-eidos-form-task-issues",
     'data-eidos-form-task-focus="bank-row"'])assert.ok(html.includes(selector),selector);
-  assert.ok(html.indexOf("data-eidos-form-task-issues")<html.indexOf('data-eidos-form-fields'),
+  assert.ok(html.indexOf("data-eidos-form-task-issues")<html.indexOf('data-eidos-form-review-groups'),
     "source blockers precede field decisions");
   assert.match(html,/Source &lt;bank&gt;.xlsx/);
   assert.doesNotMatch(html,/Source <bank>.xlsx/);
