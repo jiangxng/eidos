@@ -149,6 +149,9 @@ test("route-scoped focus retains independent persisted panel preference and reve
   assert.match(source,/shouldFocusWorkspaceRoute\?: \(route: string\) => boolean/);
   assert.match(source,/options\.shouldFocusWorkspaceRoute\?\.\(state\.workspaceTarget\)/);
   assert.match(source,/focusToggle\.addEventListener\("click"/);
+  assert.match(source,/if \(focusedRouteIdentity && state\.sidePanelVisible\)/);
+  assert.match(source,/expandedForFocusedRoute = !expandedForFocusedRoute/);
+  assert.match(source,/Clicking a navigation activity in a focused workflow/);
   assert.match(source,/expandedForFocusedRoute = !expandedForFocusedRoute/);
   assert.match(source,/focusedRouteIdentity !== state\.workspaceTarget/);
   assert.match(source,/data-eidos-workspace-focused/);
