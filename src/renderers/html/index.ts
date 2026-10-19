@@ -104,6 +104,13 @@ function renderReviewTask(task: import("../../runtime/contracts.js").UidlFormRev
       </details>
     </div>`;
   }
+  if(task.presentation === "workbench") {
+    // Real file and task blockers stay visible before the review decisions.
+    // This view is an opt-in workflow layout, never a synthetic approval.
+    return `<div data-eidos-form-task-overview data-eidos-task-presentation="workbench">
+      ${steps}${context}${metrics}${issues}${help}
+    </div>`;
+  }
   return `<div data-eidos-form-task-overview>${steps}${context}${metrics}${issues}${help}</div>`;
 }
 

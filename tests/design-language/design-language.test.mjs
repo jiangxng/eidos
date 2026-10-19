@@ -348,3 +348,46 @@ test("compact review table preserves accessible choices and defers optional navi
   assert.equal(validateUidl({...doc,reviewTable:{...doc.reviewTable,
     presentation:"hidden"}}).ok,false);
 });
+
+
+test("workbench presentation keeps actual file, steps, counts and issues visible before choices",()=>{
+  const document={
+    contractVersion:"0.1.1",kind:"form",id:"workbench.review",title:"Review",
+    purpose:"execute-command",command:{code:"review",inputVersion:"0.1.0"},
+    fields:[{key:"choice",label:"Target",semanticType:"field.match",
+      control:"select",required:true,initialValue:"pending",options:[
+        {value:"pending",label:"Human decision required"},
+        {value:"id.bank",label:"Approved bank field"}]}],
+    reviewGroups:[{
+      id:"bank-row",title:"开户银行",primaryFieldKey:"choice",detailFieldKeys:[],
+      reviewStatus:{key:"attention",label:"Needs Human review"}
+    }],
+    reviewTask:{
+      presentation:"workbench",
+      subject:{title:"Source <bank>.xlsx",subtitle:"22 columns",statusLabel:"Source retained",
+        facts:[{id:"rows",label:"Rows",value:"172"}]},
+      steps:[{id:"file",label:"Choose file",state:"complete"},
+        {id:"review",label:"Review",state:"current"}],
+      metrics:[{id:"unmatched",label:"Unmatched",value:"3",tone:"warning"}],
+      issuesTitle:"Needs attention",
+      issues:[{id:"bank",title:"开户银行 ambiguous",focusGroupId:"bank-row",
+        actionLabel:"Review source"}],
+      helpText:"Not committed"
+    },
+    actions:[{id:"save",type:"submit",label:"Save",command:"review"}]
+  };
+  assert.equal(validateUidl(document).ok,true,JSON.stringify(validateUidl(document)));
+  const html=renderToHtml(document);
+  assert.match(html,/data-eidos-task-presentation="workbench"/);
+  assert.doesNotMatch(html,/<details data-eidos-form-task-details>/);
+  for(const selector of ["data-eidos-form-task-steps","data-eidos-form-task-context",
+    "data-eidos-form-task-metrics","data-eidos-form-task-issues",
+    'data-eidos-form-task-focus="bank-row"'])assert.ok(html.includes(selector),selector);
+  assert.ok(html.indexOf("data-eidos-form-task-issues")<html.indexOf('data-eidos-form-review-groups'),
+    "source blockers precede field decisions");
+  assert.match(html,/Source &lt;bank&gt;.xlsx/);
+  assert.doesNotMatch(html,/Source <bank>.xlsx/);
+  assert.match(eidosProductiveWorkbenchCss,/data-eidos-task-presentation="workbench"/);
+  assert.equal(validateUidl({...document,reviewTask:{...document.reviewTask,
+    presentation:"nonexistent"}}).ok,false);
+});
