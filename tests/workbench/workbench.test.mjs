@@ -151,12 +151,16 @@ test("route-scoped focus retains independent persisted panel preference and reve
   assert.match(source,/focusToggle\.addEventListener\("click"/);
   assert.match(source,/if \(focusedRouteIdentity && state\.sidePanelVisible\)/);
   assert.match(source,/expandedForFocusedRoute = !expandedForFocusedRoute/);
-  assert.match(source,/Clicking a navigation activity in a focused workflow/);
+  assert.match(source,/Navigation activities must also be accessible from a saved hidden panel/);
   assert.match(source,/expandedForFocusedRoute = !expandedForFocusedRoute/);
   assert.match(source,/focusedRouteIdentity !== state\.workspaceTarget/);
+  assert.match(source,/const focused = eligible && \(!state\.sidePanelVisible \|\| !expandedForFocusedRoute\)/);
+  assert.match(source,/function preserveExplicitNavigationReveal\(\)/);
+  assert.match(source,/preserveExplicitNavigationReveal\(\);/);
+  assert.match(source,/const canToggle = eligible && state\.sidePanelVisible/);
   assert.match(source,/data-eidos-workspace-focused/);
   assert.match(source,/focusToggle\.setAttribute\("aria-pressed"/);
-  assert.match(source,/focusToggle\.hidden = !eligible/);
+  assert.match(source,/focusToggle\.hidden = !canToggle/);
   assert.doesNotMatch(source,/state\.sidePanelVisible\s*=\s*(?:eligible|focused|!focused)/);
   assert.match(css,/data-eidos-workspace-focused="true"/);
   assert.match(css,/\[data-eidos-workspace-focus-toggle\]\[hidden\]/);
