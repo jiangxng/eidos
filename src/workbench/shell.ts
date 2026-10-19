@@ -446,7 +446,9 @@ export async function mountWorkbenchShell(
   }
 
   function updateFocusedRoutePresentation(): void {
-    const eligible = workspaceMode === "app"
+    // A user who already hides the panel is already full-width. Do not
+    // offer a misleading "show navigation" override to an absent panel.
+    const eligible = workspaceMode === "app" && state.sidePanelVisible
       && options.shouldFocusWorkspaceRoute?.(state.workspaceTarget) === true;
     if (!eligible || focusedRouteIdentity !== state.workspaceTarget) {
       expandedForFocusedRoute = false;
