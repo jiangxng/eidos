@@ -193,6 +193,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   [data-eidos-workspace-focused="true"] [data-eidos-workspace]{
     grid-column:2/5
   }
+  [data-eidos-workspace-focused="true"] form[data-eidos-id]{
+    width:min(var(--eidos-focused-workspace-content-max,1200px),100%)
+  }
 }
 [data-eidos-workspace-focus-toggle]{justify-self:start;min-width:44px;min-height:44px}
 [data-eidos-workspace-focus-toggle][hidden]{display:none!important}
