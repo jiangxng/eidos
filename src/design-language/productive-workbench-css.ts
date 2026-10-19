@@ -2092,11 +2092,11 @@ body{
 [data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"][data-eidos-workspace-focus-eligible="true"] [data-eidos-browser-toolbar]{
   grid-template-columns:auto minmax(0,1fr);
 }
-[data-eidos-workspace-focus-eligible="true"] [data-eidos-global-controls]{
+[data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"][data-eidos-workspace-focus-eligible="true"] [data-eidos-global-controls]{
   grid-column:2;
 }
 @media(max-width:700px){
-  [data-eidos-workspace-focus-eligible="true"] [data-eidos-global-controls]{grid-column:1}
+  [data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"][data-eidos-workspace-focus-eligible="true"] [data-eidos-global-controls]{grid-column:1}
   [data-eidos-app-host-layout="workbench"][data-eidos-workspace-mode="app"][data-eidos-workspace-focus-eligible="true"] [data-eidos-browser-toolbar]{
     grid-template-columns:minmax(0,1fr)
   }
