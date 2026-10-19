@@ -308,3 +308,43 @@ test("E6 review plan validates real field references and renders an escaped loca
   assert.equal(validateUidl({...doc,reviewPlan:{...doc.reviewPlan,
     proposedFields:[{groupId:"r0",labelFieldKey:"label_0",typeFieldKey:"unknown"}]}}).ok,false);
 });
+
+
+test("compact review table preserves accessible choices and defers optional navigation", () => {
+  const doc={
+    contractVersion:"0.1.1",kind:"form",id:"eidos.compact-review",
+    title:"Review source columns",purpose:"execute-command",
+    command:{code:"review.source",inputVersion:"0.1.0"},
+    fields:[
+      {key:"choice",label:"原始列-安全<label>",semanticType:"review.choice",control:"select",
+       required:true,initialValue:"__CREATE__",
+       options:[{value:"__CREATE__",label:"Propose new field"},{value:"__IGNORE__",label:"Do not import"}],
+       contextLink:{label:"Review enterprise field creation",route:"/review-field"}},
+      {key:"original",label:"Source evidence",semanticType:"review.source",
+       control:"text",required:false,readOnly:true,initialValue:"Original"}
+    ],
+    reviewGroups:[{id:"row-0",title:"原始列-安全<label>",summary:"S001",
+      primaryFieldKey:"choice",detailFieldKeys:["original"],
+      detailsLabel:"Inspect source",reviewStatus:{key:"proposed",label:"Proposed"}}],
+    reviewTable:{presentation:"compact",columnLabels:{
+      subject:"Source",evidence:"Evidence",decision:"Target",status:"Status"}},
+    actions:[{id:"review",type:"submit",label:"Review",command:"review.source"}]
+  };
+  assert.equal(validateUidl(doc).ok,true,JSON.stringify(validateUidl(doc)));
+  const html=renderToHtml(doc);
+  assert.match(html,/data-eidos-review-table-presentation="compact"/);
+  assert.match(html,/data-eidos-review-table-choice-label>原始列-安全&lt;label&gt;/);
+  assert.match(html,/name="choice"/);
+  assert.equal((html.match(/data-eidos-field-context-link/g) ?? []).length,1);
+  const evidenceCell=html.match(/<td data-eidos-review-table-evidence[\s\S]*?<\/td>/)?.[0]??"";
+  const choiceCell=html.match(/<td data-eidos-review-table-choice[\s\S]*?<\/td>/)?.[0]??"";
+  assert.match(evidenceCell,/data-eidos-field-context-link/);
+  assert.doesNotMatch(choiceCell,/data-eidos-field-context-link/);
+  assert.match(eidosProductiveWorkbenchCss,/data-eidos-review-table-presentation="compact"/);
+  const defaultHtml=renderToHtml({...doc,reviewTable:{
+    columnLabels:doc.reviewTable.columnLabels}});
+  assert.match(defaultHtml,/data-eidos-review-table-presentation="standard"/);
+  assert.doesNotMatch(defaultHtml,/data-eidos-review-table-choice-label/);
+  assert.equal(validateUidl({...doc,reviewTable:{...doc.reviewTable,
+    presentation:"hidden"}}).ok,false);
+});
