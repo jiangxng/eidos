@@ -33,3 +33,11 @@ Host 向 Workbench 提供 `shouldFocusWorkspaceRoute(path): boolean`；进入匹
 ## 证据与剩余问题
 
 修改 `src/workbench/shell.ts`、`src/design-language/productive-workbench-css.ts`，并追加 Workbench 测试。精确 Eidos HEAD CI、Human UI 门禁必须通过，再由 Platform #1054 在两个确切 V3 路由（/map、集中审核 batch）显式选择；通过 1280px/390px 隔离 Chromium 验证聚焦与导航恢复，不越权合并未完成的 Draft。工程总状态 M01–M03 完成、M04/M05/M06 仍 OPEN，3/6。
+
+## 2026-10-20 接续 #06：已隐藏侧栏的宽表与导航恢复
+
+**新增直接源码事实（R）：** 上轮的实现把 `state.sidePanelVisible` 当作是否启用聚焦布局的总前提。对于已经保存“隐藏侧栏”的用户，此路径会沿用默认约 1100px 的表单宽度，而不是 V3 目标容器上限 1200px；如果其使用 `Ctrl/Cmd+B` 或点击活动栏显式打开导航，自动聚焦又可能立即将刚打开的侧栏隐藏。此前“已经关掉侧栏即无需处理”的推断因此不能保留为成立的方案。
+
+**修正设计（D）：** 将路由是否需要宽布局（Host predicate）与是否有可临时恢复的侧栏（用户偏好）分开计算。即使侧栏默认关闭，命中路由的表单仍使用宽布局；这种情形隐藏冗余的聚焦开关。若用户主动通过原快捷键、原侧栏操作或活动栏重新打开导航，显示导航的意图优先，不被路由默认样式立刻覆盖。普通页面的侧栏可见性与宽度仍按原有偏好管理，不将临时聚焦结果写入持久化布局。
+
+**验证等级：** Eidos Workbench 增补源码级回归；Platform #1054 加入单独的 1280px 隔离 Host 用户会话，预设侧栏已关闭，核对实际宽表为 1120–1220px、聚焦按钮不显示，并验证 `Ctrl+B` 可重新打开侧栏。原始源码直接已读、代码已提交；**精确 HEAD Eidos CI/Platform Chromium 仍在 GitHub Actions 队列，不得声称通过**。不改变 M01–M06 既定 3/6 状态，不做真实客户业务验收或 Human 签收。
