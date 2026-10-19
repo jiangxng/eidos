@@ -1008,7 +1008,13 @@ export async function mountWorkbenchShell(
       return;
     }
 
-    if (state.activeActivityId === activity.id && state.sidePanelVisible) {
+    // Clicking a navigation activity in a focused workflow should actually
+    // reveal that activity's panel, not leave it visually hidden by focus CSS.
+    if (focusedRouteIdentity && state.sidePanelVisible) {
+      expandedForFocusedRoute = true;
+    }
+    if (state.activeActivityId === activity.id && state.sidePanelVisible
+      && !focusedRouteIdentity) {
       state.sidePanelVisible = false;
     } else {
       state.activeActivityId = activity.id;
@@ -1023,6 +1029,15 @@ export async function mountWorkbenchShell(
   }
 
   async function toggleSidePanel(): Promise<void> {
+    // In an eligible wide workflow, the existing sidebar button and Cmd/Ctrl+B
+    // use the same temporary reveal as the new toolbar toggle. No saved user
+    // sidebar preference is touched by this route-only view change.
+    if (focusedRouteIdentity && state.sidePanelVisible) {
+      expandedForFocusedRoute = !expandedForFocusedRoute;
+      updateFocusedRoutePresentation();
+      if (expandedForFocusedRoute) await renderSidePanel();
+      return;
+    }
     state.sidePanelVisible = !state.sidePanelVisible;
     persist();
     updateLayoutAttributes();
