@@ -54,6 +54,30 @@ assert.equal(
   "SO-1001"
 );
 
+const hiddenDoc = {
+  ...doc,
+  id: "hidden-host-identity",
+  fields: [{
+    key: "importJobId",
+    label: "Import job identity",
+    semanticType: "data-import-job-id",
+    control: "text",
+    required: true,
+    hidden: true,
+    initialValue: "job-123"
+  }]
+};
+assert.equal(validateUidl(hiddenDoc).ok, true,
+  JSON.stringify(validateUidl(hiddenDoc).diagnostics));
+const hiddenHtml = renderToHtml(hiddenDoc);
+assert.match(hiddenHtml, /<input type="hidden" name="importJobId"[^>]*value="job-123"/);
+assert.doesNotMatch(hiddenHtml, /<label>Import job identity/);
+assert.equal(toRenderModel(hiddenDoc).fields[0].hidden, true);
+assert.equal(createActionRequest(hiddenDoc, {importJobId:"job-123"}).values.importJobId,"job-123");
+assert.equal(validateUidl({...hiddenDoc,fields:[{...hiddenDoc.fields[0],hidden:"yes"}]}).ok,false);
+assert.equal(validateUidl({...hiddenDoc,fields:[{...hiddenDoc.fields[0],initialValue:undefined}]}).ok,false);
+
+
 
 const fileDoc = {
   contractVersion: "0.1.1",
