@@ -66,8 +66,11 @@ function renderReviewTask(task: import("../../runtime/contracts.js").UidlFormRev
     `<div data-eidos-form-task-fact><dt>${esc(fact.label)}</dt><dd>${esc(fact.value)}</dd></div>`
   ).join("");
   const context=`<section data-eidos-form-task-context>
-    <div data-eidos-form-task-identity><strong>${esc(subject.title)}</strong>
-      ${subject.subtitle ? `<p>${esc(subject.subtitle)}</p>` : ""}</div>
+    <div data-eidos-form-task-identity${subject.iconLabel ? ' data-eidos-form-task-has-icon="true"' : ""}>
+      ${subject.iconLabel ? `<span data-eidos-form-task-icon aria-hidden="true">${esc(subject.iconLabel)}</span>` : ""}
+      <div data-eidos-form-task-copy><strong>${esc(subject.title)}</strong>
+        ${subject.subtitle ? `<p>${esc(subject.subtitle)}</p>` : ""}</div>
+    </div>
     ${subject.statusLabel ? `<span data-eidos-form-task-source-status>${esc(subject.statusLabel)}</span>` : ""}
     ${facts ? `<dl data-eidos-form-task-facts>${facts}</dl>` : ""}
   </section>`;
@@ -119,11 +122,15 @@ export function renderToHtml(document: unknown): string {
   const renderContextLink = (field: RenderFieldV010) => field.contextLink
     ? `<button type="button" data-eidos-field-context-link data-eidos-context-route="${esc(field.contextLink.route)}">${esc(field.contextLink.label)}</button>` : "";
   const renderField = (field: RenderFieldV010, compactLabel = false,
-    includeContextLink = true) =>
-    `<div data-eidos-form-field><label>${compactLabel
+    includeContextLink = true) => {
+    if (field.hidden === true) {
+      return `<input type="hidden" name="${esc(field.inputName)}" data-semantic-type="${esc(field.semanticType)}" data-eidos-hidden-field value="${esc(field.initialValue)}">`;
+    }
+    return `<div data-eidos-form-field><label>${compactLabel
       ? `<span data-eidos-review-table-choice-label>${esc(field.label)}</span>`
       : esc(field.label)}${input(field)}</label>${includeContextLink
       ? renderContextLink(field) : ""}</div>`;
+  };
   const byKey = new Map(model.fields.map(field => [field.key, field]));
   const used = new Set<string>();
   const groups = (model.reviewGroups ?? []).map(group => {

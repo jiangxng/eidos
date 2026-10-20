@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"; import fs from "node:fs";
 import {validateUidl,toRenderModel,createActionRequest,validateValues} from "../../dist/runtime/index.js";
 import {renderToHtml} from "../../dist/renderers/html/index.js";
+import {eidosProductiveWorkbenchCss} from "../../dist/design-language/productive-workbench-css.js";
 const doc=JSON.parse(fs.readFileSync(new URL("../../examples/sales-order.uidl.json",import.meta.url),"utf8"));
 assert.equal(validateUidl(doc).ok,true); assert.deepEqual(toRenderModel(doc),toRenderModel(JSON.parse(JSON.stringify(doc))));
 assert.match(renderToHtml(doc),/data-model-version="0.1.0"/); assert.match(renderToHtml(doc),/data-eidos-action="cancel"/);
@@ -53,6 +54,50 @@ assert.equal(
   toRenderModel(editDoc).fields.find(field => field.key === "orderNo").initialValue,
   "SO-1001"
 );
+
+
+const iconDoc = {
+  ...doc,
+  id: "task-subject-file-icon",
+  reviewTask: {
+    presentation: "workbench",
+    subject: {title:"supplier.xlsx",subtitle:"172 rows · 22 columns",
+      statusLabel:"Source preserved",iconLabel:"XLSX"},
+    steps:[{id:"source",label:"Source",state:"complete"},
+      {id:"review",label:"Review",state:"current"}]
+  }
+};
+assert.equal(validateUidl(iconDoc).ok,true,
+  JSON.stringify(validateUidl(iconDoc).diagnostics));
+const iconHtml=renderToHtml(iconDoc);
+assert.match(iconHtml,/<span data-eidos-form-task-icon aria-hidden="true">XLSX<\/span>/);
+assert.match(eidosProductiveWorkbenchCss,/data-eidos-form-task-icon/);
+assert.equal(validateUidl({...iconDoc,reviewTask:{...iconDoc.reviewTask,
+  subject:{...iconDoc.reviewTask.subject,iconLabel:"VERY-LONG"}}}).ok,false);
+
+const hiddenDoc = {
+  ...doc,
+  id: "hidden-host-identity",
+  fields: [{
+    key: "importJobId",
+    label: "Import job identity",
+    semanticType: "data-import-job-id",
+    control: "text",
+    required: true,
+    hidden: true,
+    initialValue: "job-123"
+  }]
+};
+assert.equal(validateUidl(hiddenDoc).ok, true,
+  JSON.stringify(validateUidl(hiddenDoc).diagnostics));
+const hiddenHtml = renderToHtml(hiddenDoc);
+assert.match(hiddenHtml, /<input type="hidden" name="importJobId"[^>]*value="job-123"/);
+assert.doesNotMatch(hiddenHtml, /<label>Import job identity/);
+assert.equal(toRenderModel(hiddenDoc).fields[0].hidden, true);
+assert.equal(createActionRequest(hiddenDoc, {importJobId:"job-123"}).values.importJobId,"job-123");
+assert.equal(validateUidl({...hiddenDoc,fields:[{...hiddenDoc.fields[0],hidden:"yes"}]}).ok,false);
+assert.equal(validateUidl({...hiddenDoc,fields:[{...hiddenDoc.fields[0],initialValue:undefined}]}).ok,false);
+
 
 
 const fileDoc = {

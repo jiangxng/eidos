@@ -11,6 +11,8 @@ export interface UidlFileValueV010 {
 }
 export interface UidlField {
   key: string; label: string; semanticType: string; control: UidlControl; required: boolean;
+  /** Render as a non-interactive hidden form value while retaining Host submission identity. */
+  hidden?: boolean;
   readOnly?: boolean; initialValue?: UidlOptionValue; unit?: string; options?: UidlOption[];
   accept?: string[];
   maxBytes?: number;
@@ -69,6 +71,8 @@ export interface UidlFormReviewTaskV010 {
     title: string;
     subtitle?: string;
     statusLabel?: string;
+    /** Short file-type marker such as XLSX or CSV; decorative and bounded. */
+    iconLabel?: string;
     facts?: { id: string; label: string; value: string }[];
   };
   steps?: { id: string; label: string; state: "complete" | "current" | "upcoming" }[];

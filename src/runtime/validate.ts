@@ -38,6 +38,7 @@ const fieldKeys = new Set([
   "semanticType",
   "control",
   "required",
+  "hidden",
   "readOnly",
   "initialValue",
   "unit",
@@ -103,6 +104,7 @@ function parseField(
     semanticType,
     control,
     required,
+    hidden,
     readOnly,
     initialValue,
     unit,
@@ -154,6 +156,24 @@ function parseField(
       "EIDOS_SCHEMA_TYPE",
       `${path}.readOnly`,
       "readOnly must be boolean"
+    ));
+  }
+  if (hidden !== undefined && typeof hidden !== "boolean") {
+    out.push(d(
+      "EIDOS_SCHEMA_TYPE",
+      `${path}.hidden`,
+      "hidden must be boolean"
+    ));
+  }
+  if (hidden === true && (
+    !["string", "number", "boolean"].includes(typeof initialValue)
+    || control === "file"
+    || contextLink !== undefined
+  )) {
+    out.push(d(
+      "EIDOS_HIDDEN_FIELD_VALUE_INVALID",
+      path,
+      "Hidden fields require a primitive initialValue and cannot be file inputs or include context links"
     ));
   }
   if (unit !== undefined && typeof unit !== "string") {
@@ -413,6 +433,7 @@ function parseField(
     semanticType,
     control: control as UidlField["control"],
     required,
+    ...(typeof hidden === "boolean" ? { hidden } : {}),
     ...(typeof readOnly === "boolean" ? { readOnly } : {}),
     ...(
       ["string", "number", "boolean"].includes(typeof initialValue)
@@ -914,12 +935,18 @@ export function validateUidl(
           || !["full","decision-first","workbench"].includes(task.presentation))) {
         fail(path+".presentation","Unknown review task presentation mode");
       }
-      extraKeys(task.subject,new Set(["title","subtitle","statusLabel","facts"]),
+      extraKeys(task.subject,new Set(["title","subtitle","statusLabel","iconLabel","facts"]),
         path+".subject",out);
       if ((task.subject.subtitle !== undefined && typeof task.subject.subtitle !== "string")
         || (task.subject.statusLabel !== undefined
           && typeof task.subject.statusLabel !== "string")) {
         fail(path+".subject","Subject copy must be text");
+      }
+      if (task.subject.iconLabel !== undefined
+        && (typeof task.subject.iconLabel !== "string"
+          || !task.subject.iconLabel.trim()
+          || task.subject.iconLabel.trim().length > 8)) {
+        fail(path+".subject.iconLabel","Subject iconLabel must be short decorative text (1-8 characters)");
       }
       const checkIds = (items: unknown, pathName: string, max: number,
         predicate: (item:Record<string,unknown>,at:string)=>boolean) => {

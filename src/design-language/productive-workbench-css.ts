@@ -3074,6 +3074,16 @@ form[data-eidos-id] button:hover,
 [data-eidos-task-presentation="workbench"] [data-eidos-form-task-identity] strong{
   font-size:var(--eidos-font-section)
 }
+[data-eidos-task-presentation="workbench"] [data-eidos-form-task-identity][data-eidos-form-task-has-icon="true"]{
+  grid-template-columns:auto minmax(0,1fr);align-items:center
+}
+[data-eidos-task-presentation="workbench"] [data-eidos-form-task-icon]{
+  display:grid;place-items:center;min-width:44px;min-height:44px;
+  padding:var(--eidos-space-xs);box-sizing:border-box;
+  border:1px solid var(--eidos-border);border-radius:var(--eidos-radius-md);
+  background:var(--eidos-bg-subtle);color:var(--eidos-fg);
+  font-size:var(--eidos-font-compact);font-weight:var(--eidos-weight-semibold)
+}
 [data-eidos-task-presentation="workbench"] [data-eidos-form-task-metrics]{
   grid-template-columns:repeat(4,minmax(0,1fr))
 }
