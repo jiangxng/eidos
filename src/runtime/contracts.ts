@@ -71,6 +71,8 @@ export interface UidlFormReviewTaskV010 {
     title: string;
     subtitle?: string;
     statusLabel?: string;
+    /** Short file-type marker such as XLSX or CSV; decorative and bounded. */
+    iconLabel?: string;
     facts?: { id: string; label: string; value: string }[];
   };
   steps?: { id: string; label: string; state: "complete" | "current" | "upcoming" }[];

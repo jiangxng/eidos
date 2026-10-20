@@ -66,8 +66,11 @@ function renderReviewTask(task: import("../../runtime/contracts.js").UidlFormRev
     `<div data-eidos-form-task-fact><dt>${esc(fact.label)}</dt><dd>${esc(fact.value)}</dd></div>`
   ).join("");
   const context=`<section data-eidos-form-task-context>
-    <div data-eidos-form-task-identity><strong>${esc(subject.title)}</strong>
-      ${subject.subtitle ? `<p>${esc(subject.subtitle)}</p>` : ""}</div>
+    <div data-eidos-form-task-identity${subject.iconLabel ? ' data-eidos-form-task-has-icon="true"' : ""}>
+      ${subject.iconLabel ? `<span data-eidos-form-task-icon aria-hidden="true">${esc(subject.iconLabel)}</span>` : ""}
+      <div data-eidos-form-task-copy><strong>${esc(subject.title)}</strong>
+        ${subject.subtitle ? `<p>${esc(subject.subtitle)}</p>` : ""}</div>
+    </div>
     ${subject.statusLabel ? `<span data-eidos-form-task-source-status>${esc(subject.statusLabel)}</span>` : ""}
     ${facts ? `<dl data-eidos-form-task-facts>${facts}</dl>` : ""}
   </section>`;

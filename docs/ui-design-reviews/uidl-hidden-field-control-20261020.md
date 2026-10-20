@@ -31,3 +31,8 @@
 ## 证据与剩余问题
 
 变更与回归文件：`src/runtime/contracts.ts`、`src/runtime/validate.ts`、`src/renderers/html/index.ts`、`tests/contracts/runtime.test.mjs`。测试覆盖合法 hidden input、无可见 label、render model 保留标记、ActionRequest 保留值、非法标记与缺少初始值。CI 和 Human UI Design Review Gate 必须在该 PR 的精确 HEAD 上通过；当前此文档只记录设计与实现，不等于 UI 质量人工签收或生产授权。
+
+
+## 补充：文件摘要卡图标标记
+
+为支持真实导入工作台原型中的 XLSX/CSV 文件标记，Review Task subject 增加可选的 `iconLabel`（1–8 字符，仅装饰）。Host/应用必须明确提供，不根据文件名猜测业务身份。HTML renderer 将其输出为 `aria-hidden` 的文件类型标记，Eidos CSS 使用现有设计 token；未提供时普通任务标题布局保持不变。回归覆盖合法 XLSX 标记、CSS 规则与超长标记拒绝。图标不承载状态或权限含义。

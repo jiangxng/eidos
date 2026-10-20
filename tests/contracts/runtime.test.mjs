@@ -54,6 +54,26 @@ assert.equal(
   "SO-1001"
 );
 
+
+const iconDoc = {
+  ...doc,
+  id: "task-subject-file-icon",
+  reviewTask: {
+    presentation: "workbench",
+    subject: {title:"supplier.xlsx",subtitle:"172 rows · 22 columns",
+      statusLabel:"Source preserved",iconLabel:"XLSX"},
+    steps:[{id:"source",label:"Source",state:"complete"},
+      {id:"review",label:"Review",state:"current"}]
+  }
+};
+assert.equal(validateUidl(iconDoc).ok,true,
+  JSON.stringify(validateUidl(iconDoc).diagnostics));
+const iconHtml=renderToHtml(iconDoc);
+assert.match(iconHtml,/<span data-eidos-form-task-icon aria-hidden="true">XLSX<\/span>/);
+assert.match(eidosProductiveWorkbenchCss,/data-eidos-form-task-icon/);
+assert.equal(validateUidl({...iconDoc,reviewTask:{...iconDoc.reviewTask,
+  subject:{...iconDoc.reviewTask.subject,iconLabel:"VERY-LONG"}}}).ok,false);
+
 const hiddenDoc = {
   ...doc,
   id: "hidden-host-identity",
