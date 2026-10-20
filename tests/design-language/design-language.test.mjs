@@ -30,6 +30,15 @@ test("productive Workbench CSS exposes stable semantic tokens and shell selector
   assert.match(eidosProductiveWorkbenchCss, /min-height:44px/);
 });
 
+test("workbench issue cards are numbered and keep their actions reachable on mobile", () => {
+  assert.match(eidosProductiveWorkbenchCss, /counter-reset:eidos-workbench-issue/);
+  assert.match(eidosProductiveWorkbenchCss, /li::before/);
+  assert.match(
+    eidosProductiveWorkbenchCss,
+    /@media\(max-width:850px\)[\s\S]*grid-template-columns:28px minmax\(0,1fr\)[\s\S]*grid-column:2/
+  );
+});
+
 
 test("design policy encodes toolbar and action hierarchy for LLM/plugin generation", () => {
   assert.equal(eidosDesignPolicyV010.actions.maxPrimaryPerScope, 1);
