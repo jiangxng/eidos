@@ -38,6 +38,7 @@ const fieldKeys = new Set([
   "semanticType",
   "control",
   "required",
+  "hidden",
   "readOnly",
   "initialValue",
   "unit",
@@ -103,6 +104,7 @@ function parseField(
     semanticType,
     control,
     required,
+    hidden,
     readOnly,
     initialValue,
     unit,
@@ -154,6 +156,24 @@ function parseField(
       "EIDOS_SCHEMA_TYPE",
       `${path}.readOnly`,
       "readOnly must be boolean"
+    ));
+  }
+  if (hidden !== undefined && typeof hidden !== "boolean") {
+    out.push(d(
+      "EIDOS_SCHEMA_TYPE",
+      `${path}.hidden`,
+      "hidden must be boolean"
+    ));
+  }
+  if (hidden === true && (
+    !["string", "number", "boolean"].includes(typeof initialValue)
+    || control === "file"
+    || contextLink !== undefined
+  )) {
+    out.push(d(
+      "EIDOS_HIDDEN_FIELD_VALUE_INVALID",
+      path,
+      "Hidden fields require a primitive initialValue and cannot be file inputs or include context links"
     ));
   }
   if (unit !== undefined && typeof unit !== "string") {
@@ -413,6 +433,7 @@ function parseField(
     semanticType,
     control: control as UidlField["control"],
     required,
+    ...(typeof hidden === "boolean" ? { hidden } : {}),
     ...(typeof readOnly === "boolean" ? { readOnly } : {}),
     ...(
       ["string", "number", "boolean"].includes(typeof initialValue)
