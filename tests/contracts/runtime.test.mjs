@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"; import fs from "node:fs";
 import {validateUidl,toRenderModel,createActionRequest,validateValues} from "../../dist/runtime/index.js";
 import {renderToHtml} from "../../dist/renderers/html/index.js";
+import {eidosProductiveWorkbenchCss} from "../../dist/design-language/productive-workbench-css.js";
 const doc=JSON.parse(fs.readFileSync(new URL("../../examples/sales-order.uidl.json",import.meta.url),"utf8"));
 assert.equal(validateUidl(doc).ok,true); assert.deepEqual(toRenderModel(doc),toRenderModel(JSON.parse(JSON.stringify(doc))));
 assert.match(renderToHtml(doc),/data-model-version="0.1.0"/); assert.match(renderToHtml(doc),/data-eidos-action="cancel"/);
