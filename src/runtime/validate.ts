@@ -754,9 +754,9 @@ export function validateUidl(
       extraKeys(table, new Set(["columnLabels","filter","presentation"]),p,out);
       if (table.presentation !== undefined
         && (!nonEmpty(table.presentation)
-          || !["standard","compact"].includes(table.presentation))) {
+          || !["standard","compact","confirmation"].includes(table.presentation))) {
         out.push(d("EIDOS_REVIEW_TABLE_PRESENTATION_INVALID",p+".presentation",
-          "Review-table presentation must be standard or compact"));
+          "Review-table presentation must be standard, compact or confirmation"));
       }
       extraKeys(table.columnLabels,
         new Set(["subject","evidence","decision","status"]),p+".columnLabels",out);
@@ -809,6 +809,7 @@ export function validateUidl(
       }
       reviewTable={
         ...(table.presentation==="compact" || table.presentation==="standard"
+          || table.presentation==="confirmation"
           ? {presentation:table.presentation} : {}),
         columnLabels:{
           subject:labels.subject,evidence:labels.evidence,

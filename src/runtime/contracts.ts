@@ -42,7 +42,8 @@ export interface UidlFormReviewGroupV010 {
 /** Optional table realization of existing reviewGroups, preserving form field identity. */
 export interface UidlFormReviewTableV010 {
   /** Opt-in compact Human decision rows; default remains standard. */
-  presentation?: "standard" | "compact";
+  /** Three-column confirmation: source, proposed name, editable type. */
+  presentation?: "standard" | "compact" | "confirmation";
   columnLabels: { subject: string; evidence: string; decision: string; status: string };
   filter?: {
     label: string;

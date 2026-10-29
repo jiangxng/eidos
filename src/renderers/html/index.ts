@@ -158,9 +158,10 @@ export function renderToHtml(document: unknown): string {
       const status = group.reviewStatus!;
       const primaryField = byKey.get(group.primaryFieldKey)!;
       const compact = model.reviewTable?.presentation === "compact";
+      const confirmation = model.reviewTable?.presentation === "confirmation";
       const deferLink = compact && Boolean(primaryField.contextLink)
         && group.detailFieldKeys.length > 0;
-      const primary = renderField(primaryField,compact,!deferLink);
+      const primary = renderField(primaryField,compact || confirmation,!deferLink);
       const details = group.detailFieldKeys.map(key =>
         renderField(byKey.get(key)!)
       ).join("") + (deferLink ? renderContextLink(primaryField) : "");
@@ -182,8 +183,8 @@ export function renderToHtml(document: unknown): string {
             </details>` : ""}
           </td>
           <td data-eidos-review-table-choice data-heading="${esc(columns.decision)}">${primary}</td>
-          <td data-eidos-review-table-status data-tone="${esc(status.tone ?? "neutral")}"
-            data-heading="${esc(columns.status)}">${esc(status.label)}</td>
+          ${confirmation ? "" : `<td data-eidos-review-table-status data-tone="${esc(status.tone ?? "neutral")}"
+            data-heading="${esc(columns.status)}">${esc(status.label)}</td>`}
         </tr>
       </tbody>`;
     }).join("");
@@ -204,7 +205,7 @@ export function renderToHtml(document: unknown): string {
           <thead><tr><th scope="col">${esc(columns.subject)}</th>
             <th scope="col">${esc(columns.evidence)}</th>
             <th scope="col">${esc(columns.decision)}</th>
-            <th scope="col">${esc(columns.status)}</th>
+            ${model.reviewTable?.presentation === "confirmation" ? "" : `<th scope="col">${esc(columns.status)}</th>`}
           </tr></thead>${tableRows}
         </table>
       </div>

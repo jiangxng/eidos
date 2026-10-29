@@ -350,6 +350,28 @@ test("compact review table preserves accessible choices and defers optional navi
 });
 
 
+test("confirmation table keeps source, proposed name and editable type in three columns",()=>{
+  const doc={contractVersion:"0.1.1",kind:"form",id:"confirm.fields",title:"Confirm fields",
+    purpose:"execute-command",command:{code:"fields.create",inputVersion:"0.1.0"},
+    fields:[{key:"type",label:"Field type",semanticType:"field.type",control:"select",
+      required:true,initialValue:"STRING",options:[{value:"STRING",label:"Text"}]}],
+    reviewGroups:[{id:"source-0",title:"Original column",summary:"New field",
+      primaryFieldKey:"type",detailFieldKeys:[],
+      reviewStatus:{key:"proposed",label:"Proposed"}}],
+    reviewTable:{presentation:"confirmation",columnLabels:{
+      subject:"Excel column",evidence:"New field name",decision:"Field type",status:"Status"}},
+    actions:[{id:"create",type:"submit",label:"Confirm",command:"fields.create"}]};
+  assert.equal(validateUidl(doc).ok,true,JSON.stringify(validateUidl(doc)));
+  const html=renderToHtml(doc);
+  assert.match(html,/data-eidos-review-table-presentation="confirmation"/);
+  assert.match(html,/<th scope="col">Excel column<\/th>/);
+  assert.match(html,/<th scope="col">New field name<\/th>/);
+  assert.match(html,/<th scope="col">Field type<\/th>/);
+  assert.doesNotMatch(html,/<th scope="col">Status<\/th>/);
+  assert.match(html,/name="type"/);
+  assert.match(eidosProductiveWorkbenchCss,/data-eidos-review-table-presentation="confirmation"/);
+});
+
 test("workbench presentation keeps actual file, steps, counts and issues visible before choices",()=>{
   const document={
     contractVersion:"0.1.1",kind:"form",id:"workbench.review",title:"Review",
