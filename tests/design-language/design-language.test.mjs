@@ -416,3 +416,32 @@ test("workbench presentation keeps actual file, steps, counts and issues visible
   assert.equal(validateUidl({...document,reviewTask:{...document.reviewTask,
     presentation:"nonexistent"}}).ok,false);
 });
+
+test("review heading uses actual column count and only an existing full-data filter",()=>{
+  const document={
+    contractVersion:"0.1.1",kind:"form",id:"review.heading",title:"Review",
+    purpose:"execute-command",command:{code:"review",inputVersion:"0.1.0"},
+    fields:[{key:"choice",label:"Target",semanticType:"field.match",control:"select",
+      required:true,initialValue:"pending",options:[{value:"pending",label:"Pending"}]}],
+    reviewGroups:[{id:"row",title:"Source",primaryFieldKey:"choice",detailFieldKeys:[],
+      reviewStatus:{key:"attention",label:"Needs review"}}],
+    reviewTable:{heading:{title:"Field mappings",description:"Review source columns",
+      totalLabel:"columns",allFieldsAction:{label:"View all fields",filterId:"all",
+        returnLabel:"Only attention",returnFilterId:"attention"}},
+      columnLabels:{subject:"Source",evidence:"Example",decision:"Target",status:"Status"},
+      filter:{label:"Show",selectedId:"attention",noMatchesMessage:"None",options:[
+        {id:"attention",label:"Attention",statusKeys:["attention"]},
+        {id:"all",label:"All",statusKeys:["attention"]}]}},
+    reviewTask:{presentation:"workbench",subject:{title:"source.xlsx"},
+      issuesTitle:"Needs attention",issuesEmptyLabel:"No issues need attention",issues:[]},
+    actions:[{id:"save",type:"submit",label:"Save",command:"review"}]
+  };
+  assert.equal(validateUidl(document).ok,true,JSON.stringify(validateUidl(document)));
+  const html=renderToHtml(document);
+  assert.match(html,/data-eidos-form-review-table-total>1 columns/);
+  assert.match(html,/data-eidos-form-review-table-all-fields="all"/);
+  assert.match(html,/data-eidos-form-task-issues-empty role="status">No issues need attention/);
+  assert.equal(validateUidl({...document,reviewTable:{...document.reviewTable,
+    heading:{...document.reviewTable.heading,allFieldsAction:{
+      ...document.reviewTable.heading.allFieldsAction,filterId:"missing"}}}}).ok,false);
+});

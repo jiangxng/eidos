@@ -80,15 +80,17 @@ function renderReviewTask(task: import("../../runtime/contracts.js").UidlFormRev
       data-tone="${esc(metric.tone ?? "neutral")}"><strong>${esc(metric.value)}</strong>
       <span>${esc(metric.label)}</span></div>`).join("")}
   </section>` : "";
-  const issues=task.issues?.length ? `<section data-eidos-form-task-issues>
+  const issues=task.issues?.length || task.issuesEmptyLabel ? `<section data-eidos-form-task-issues>
     <header><h2>${esc(task.issuesTitle ?? "Needs review")}</h2>
-    ${task.issuesDescription ? `<p>${esc(task.issuesDescription)}</p>` : ""}</header>
-    <ol>${task.issues.map(issue=>`<li data-eidos-form-task-issue="${esc(issue.id)}">
+    ${task.issuesDescription ? `<p>${esc(task.issuesDescription)}</p>` : ""}
+    ${!task.issues?.length && task.issuesEmptyLabel
+      ? `<span data-eidos-form-task-issues-empty role="status">${esc(task.issuesEmptyLabel)}</span>` : ""}</header>
+    ${task.issues?.length ? `<ol>${task.issues.map(issue=>`<li data-eidos-form-task-issue="${esc(issue.id)}">
       <div><strong>${esc(issue.title)}</strong>
       ${issue.description ? `<p>${esc(issue.description)}</p>` : ""}</div>
       ${issue.focusGroupId ? `<button type="button"
         data-eidos-form-task-focus="${esc(issue.focusGroupId)}">${esc(issue.actionLabel ?? "Review")}</button>` : ""}
-    </li>`).join("")}</ol>
+    </li>`).join("")}</ol>` : ""}
   </section>` : "";
   const help=task.helpText ? `<p data-eidos-form-task-help>${esc(task.helpText)}</p>` : "";
   if(task.presentation === "decision-first") {
@@ -198,7 +200,17 @@ export function renderToHtml(document: unknown): string {
           ).join("")}</select></label>
           <span data-eidos-form-review-table-count role="status" aria-live="polite">${count} / ${model.reviewGroups?.length ?? 0}</span></div>`
       : "";
-    return `<section data-eidos-form-review-table-wrap data-eidos-review-table-presentation="${esc(model.reviewTable?.presentation ?? "standard")}">
+    const heading=model.reviewTable?.heading
+      ? `<header data-eidos-form-review-table-heading>
+          <h2>${esc(model.reviewTable.heading.title)}</h2>
+          ${model.reviewTable.heading.description ? `<p>${esc(model.reviewTable.heading.description)}</p>` : ""}
+          ${model.reviewTable.heading.totalLabel || model.reviewTable.heading.allFieldsAction
+            ? `<div data-eidos-form-review-table-heading-actions>
+                ${model.reviewTable.heading.totalLabel ? `<span data-eidos-form-review-table-total>${esc(model.reviewGroups?.length ?? 0)} ${esc(model.reviewTable.heading.totalLabel)}</span>` : ""}
+                ${model.reviewTable.heading.allFieldsAction ? `<button type="button" data-eidos-form-review-table-all-fields="${esc(model.reviewTable.heading.allFieldsAction.filterId)}" data-eidos-form-review-table-return-filter="${esc(model.reviewTable.heading.allFieldsAction.returnFilterId)}" data-eidos-form-review-table-all-label="${esc(model.reviewTable.heading.allFieldsAction.label)}" data-eidos-form-review-table-return-label="${esc(model.reviewTable.heading.allFieldsAction.returnLabel)}">${esc(model.reviewTable.heading.allFieldsAction.label)}</button>` : ""}
+              </div>` : ""}
+        </header>` : "";
+    return `${heading}<section data-eidos-form-review-table-wrap data-eidos-review-table-presentation="${esc(model.reviewTable?.presentation ?? "standard")}">
       ${toolbar}
       <div data-eidos-form-review-table-scroll>
         <table data-eidos-form-review-table aria-label="${esc(model.title)}">

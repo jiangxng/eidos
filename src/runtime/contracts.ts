@@ -44,6 +44,10 @@ export interface UidlFormReviewTableV010 {
   /** Opt-in compact Human decision rows; default remains standard. */
   /** Three-column confirmation: source, proposed name, editable type. */
   presentation?: "standard" | "compact" | "confirmation";
+  /** Optional section context and a direct shortcut to an existing full-data filter. */
+  heading?: { title: string; description?: string; totalLabel?: string;
+    allFieldsAction?: { label: string; filterId: string;
+      returnLabel: string; returnFilterId: string } };
   columnLabels: { subject: string; evidence: string; decision: string; status: string };
   filter?: {
     label: string;
@@ -79,6 +83,8 @@ export interface UidlFormReviewTaskV010 {
   }[];
   issuesTitle?: string;
   issuesDescription?: string;
+  /** Truthful zero-issue feedback, shown only when the app explicitly supplies it. */
+  issuesEmptyLabel?: string;
   issues?: {
     id: string;
     title: string;
