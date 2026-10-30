@@ -3301,4 +3301,37 @@ form[data-eidos-id] [data-eidos-form-confirmation-panel] [data-eidos-form-task-b
 [data-eidos-review-plan-warning]{
   margin:0;color:var(--eidos-fg-muted);font-size:var(--eidos-font-meta);
 }
+[data-eidos-form-review-table-heading]{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;
+  gap:var(--eidos-space-xs) var(--eidos-space-md);
+  align-items:center;margin-top:var(--eidos-space-section);min-width:0
+}
+[data-eidos-form-review-table-heading] h2{grid-column:1;grid-row:1;margin:0}
+[data-eidos-form-review-table-heading] p{grid-column:1;grid-row:2;margin:0;color:var(--eidos-fg-muted)}
+[data-eidos-form-review-table-heading-actions]{
+  grid-column:2;grid-row:1 / span 2;display:flex;align-items:center;
+  gap:var(--eidos-space-sm)
+}
+[data-eidos-form-review-table-total]{
+  border-radius:999px;background:var(--eidos-bg-subtle);
+  color:var(--eidos-fg-muted);padding:var(--eidos-space-xs) var(--eidos-space-sm)
+}
+[data-eidos-form-review-table-all-fields]{
+  border:0;background:transparent;color:var(--eidos-primary);
+  min-height:var(--eidos-control-normal);padding:var(--eidos-space-xs);
+  cursor:pointer;font:inherit;font-weight:600
+}
+[data-eidos-form-review-table-all-fields]:focus-visible{
+  outline:2px solid var(--eidos-focus);outline-offset:2px
+}
+[data-eidos-form-task-issues-empty]{
+  display:inline-flex;align-items:center;padding:var(--eidos-space-xs) var(--eidos-space-sm);
+  border-radius:999px;background:var(--eidos-bg-subtle);color:var(--eidos-success)
+}
+@media(max-width:700px){
+  [data-eidos-form-review-table-heading-actions]{
+    grid-column:1;grid-row:3;justify-self:start;flex-wrap:wrap
+  }
+  [data-eidos-form-review-table-all-fields]{min-height:44px}
+}
 `;

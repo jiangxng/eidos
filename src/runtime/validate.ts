@@ -754,7 +754,7 @@ export function validateUidl(
       out.push(d("EIDOS_REVIEW_TABLE_INVALID",p,
         "Review table needs headings and fully annotated review groups"));
     } else {
-      extraKeys(table, new Set(["columnLabels","filter","presentation"]),p,out);
+      extraKeys(table, new Set(["columnLabels","filter","presentation","heading"]),p,out);
       if (table.presentation !== undefined
         && (!nonEmpty(table.presentation)
           || !["standard","compact","confirmation"].includes(table.presentation))) {
@@ -810,6 +810,45 @@ export function validateUidl(
             noMatchesMessage:f.noMatchesMessage,options};
         }
       }
+      let heading: import("./contracts.js").UidlFormReviewTableV010["heading"];
+      if (table.heading !== undefined) {
+        const h = table.heading;
+        if (!isPlainObject(h) || !nonEmpty(h.title) || !h.title.trim()
+          || (h.description !== undefined && typeof h.description !== "string")
+          || (h.totalLabel !== undefined && !nonEmpty(h.totalLabel))) {
+          out.push(d("EIDOS_REVIEW_TABLE_HEADING_INVALID",p+".heading",
+            "Review table heading requires business-readable copy"));
+        } else {
+          extraKeys(h,new Set(["title","description","totalLabel","allFieldsAction"]),p+".heading",out);
+          let allFieldsAction: {label:string;filterId:string;returnLabel:string;returnFilterId:string}|undefined;
+          if (h.allFieldsAction !== undefined) {
+            const action = h.allFieldsAction;
+            const option = isPlainObject(action)
+              ? filter?.options.find(item => item.id === action.filterId)
+              : undefined;
+            const statusKeys = new Set(reviewGroups.flatMap(group => [
+              group.reviewStatus!.key,
+              ...Object.values(group.statusByChoice ?? {}).map(status => status.key)
+            ]));
+            if (!isPlainObject(action) || !nonEmpty(action.label)
+              || !nonEmpty(action.filterId) || !nonEmpty(action.returnLabel)
+              || !nonEmpty(action.returnFilterId) || !option
+              || !filter?.options.some(item => item.id === action.returnFilterId)
+              || action.returnFilterId === action.filterId
+              || ![...statusKeys].every(key => option.statusKeys.includes(key))) {
+              out.push(d("EIDOS_REVIEW_TABLE_HEADING_INVALID",p+".heading.allFieldsAction",
+                "View-all action must select an existing full-data filter"));
+            } else {
+              extraKeys(action,new Set(["label","filterId","returnLabel","returnFilterId"]),p+".heading.allFieldsAction",out);
+              allFieldsAction={label:action.label,filterId:action.filterId,
+                returnLabel:action.returnLabel,returnFilterId:action.returnFilterId};
+            }
+          }
+          heading={title:h.title,...(h.description!==undefined?{description:h.description}:{}),
+            ...(h.totalLabel!==undefined?{totalLabel:h.totalLabel}:{}),
+            ...(allFieldsAction?{allFieldsAction}:{})};
+        }
+      }
       reviewTable={
         ...(table.presentation==="compact" || table.presentation==="standard"
           || table.presentation==="confirmation"
@@ -819,6 +858,7 @@ export function validateUidl(
           decision:labels.decision,status:labels.status
         },
         ...(filter ? {filter} : {})
+        ,...(heading ? {heading} : {})
       };
     }
   }
@@ -912,7 +952,7 @@ export function validateUidl(
       fail(path, "Review task requires a subject title");
     } else {
       extraKeys(task, new Set(["subject","steps","metrics","issuesTitle",
-        "issuesDescription","issues","helpText","presentation"]),path,out);
+        "issuesDescription","issuesEmptyLabel","issues","helpText","presentation"]),path,out);
       if (task.presentation !== undefined
         && (typeof task.presentation !== "string"
           || !["full","decision-first","workbench"].includes(task.presentation))) {
@@ -971,7 +1011,7 @@ export function validateUidl(
           && (item.actionLabel===undefined || nonEmpty(item.actionLabel))
           && (item.actionLabel===undefined || item.focusGroupId!==undefined);
       });
-      for (const key of ["issuesTitle","issuesDescription","helpText"] as const) {
+      for (const key of ["issuesTitle","issuesDescription","issuesEmptyLabel","helpText"] as const) {
         if (task[key]!==undefined && typeof task[key]!=="string") {
           fail(path+"."+key,"Review task copy must be text");
         }
