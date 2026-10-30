@@ -231,5 +231,10 @@ export function renderToHtml(document: unknown): string {
     )
     .join("");
 
-  return `<form data-eidos-id="${esc(model.id)}" data-command="${esc(model.command.code)}" data-model-version="${model.modelVersion}"><h1>${esc(model.title)}</h1>${taskOverview}${fields}${preview}${model.submitActions.map(action=>`<button type="submit" data-eidos-action="${esc(action.id)}" data-eidos-declared-command="${esc(action.command)}">${esc(action.label)}</button>`).join("")}${cancels}</form>`;
+  const actions=model.submitActions.map(action=>`<button type="submit" data-eidos-action="${esc(action.id)}" data-eidos-declared-command="${esc(action.command)}">${esc(action.label)}</button>`).join("")+cancels;
+  const confirmation=model.reviewTable?.presentation === "confirmation";
+  const decisionContent=confirmation
+    ? `<section data-eidos-form-confirmation-panel>${fields}${preview}<footer data-eidos-form-actions>${actions}</footer></section>`
+    : `${fields}${preview}${actions}`;
+  return `<form data-eidos-id="${esc(model.id)}" data-command="${esc(model.command.code)}" data-model-version="${model.modelVersion}"><h1>${esc(model.title)}</h1>${taskOverview}${decisionContent}</form>`;
 }
