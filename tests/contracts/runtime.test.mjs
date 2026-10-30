@@ -157,6 +157,13 @@ assert.deepEqual(toRenderModel(exclusiveDoc).fields[0].exclusiveSelect,
 assert.match(renderToHtml(exclusiveDoc),/data-eidos-exclusive-group="import-fields"/);
 assert.equal(validateUidl({...exclusiveDoc,fields:[{...exclusiveDoc.fields[0],control:"text"}]}).ok,false);
 assert.equal(validateUidl({...exclusiveDoc,fields:[{...exclusiveDoc.fields[0],exclusiveSelect:{group:"",exemptValues:["__IGNORE__"]}}]}).ok,false);
+const occupiedDoc={...exclusiveDoc,fields:exclusiveDoc.fields.map(field=>({
+  ...field,exclusiveSelect:{...field.exclusiveSelect,occupiedLabel:"已占用"}
+}))};
+assert.equal(validateUidl(occupiedDoc).ok,true);
+assert.equal(toRenderModel(occupiedDoc).fields[0].exclusiveSelect.occupiedLabel,"已占用");
+assert.equal(validateUidl({...exclusiveDoc,fields:[{...exclusiveDoc.fields[0],
+  exclusiveSelect:{...exclusiveDoc.fields[0].exclusiveSelect,occupiedLabel:" "}}]}).ok,false);
 
 const grouped={
  ...exclusiveDoc,
