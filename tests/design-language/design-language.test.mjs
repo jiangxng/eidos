@@ -364,12 +364,15 @@ test("confirmation table keeps source, proposed name and editable type in three 
   assert.equal(validateUidl(doc).ok,true,JSON.stringify(validateUidl(doc)));
   const html=renderToHtml(doc);
   assert.match(html,/data-eidos-review-table-presentation="confirmation"/);
+  assert.match(html,/<section data-eidos-form-confirmation-panel>[\s\S]*data-eidos-form-review-table-wrap[\s\S]*<footer data-eidos-form-actions>/);
+  assert.match(html,/<\/footer>\s*<\/section>\s*<\/form>/);
   assert.match(html,/<th scope="col">Excel column<\/th>/);
   assert.match(html,/<th scope="col">New field name<\/th>/);
   assert.match(html,/<th scope="col">Field type<\/th>/);
   assert.doesNotMatch(html,/<th scope="col">Status<\/th>/);
   assert.match(html,/name="type"/);
   assert.match(eidosProductiveWorkbenchCss,/data-eidos-review-table-presentation="confirmation"/);
+  assert.match(eidosProductiveWorkbenchCss,/\[data-eidos-form-confirmation-panel\]/);
 });
 
 test("workbench presentation keeps actual file, steps, counts and issues visible before choices",()=>{
