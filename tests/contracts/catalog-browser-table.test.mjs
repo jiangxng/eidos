@@ -48,3 +48,36 @@ test("Eidos rejects columns, duplicate rows, unauthorized hidden columns and uns
    ...record.table,search:{...record.table.search,route:"//evil.test/"}
  }}),/EIDOS_CATALOG_TABLE_SEARCH_INVALID/);
 });
+
+test("CV-02 Eidos reuses authorized server-view routes, labels the current view", () => {
+  const html = renderCatalogBrowserToHtml({...record, table: {
+    ...record.table,
+    views: [
+      {id:"all",label:"All suppliers",route:"/suppliers?view=all"},
+      {id:"mine",label:"My suppliers",route:"/suppliers?view=mine",selected:true}
+    ]
+  }});
+  assert.match(html,/data-eidos-catalog-view-navigation/);
+  assert.match(html,/data-eidos-catalog-view-id="mine"/);
+  assert.match(html,/data-eidos-catalog-view-selected="true"/);
+  assert.match(html,/aria-current="page"/);
+  assert.match(html,/data-eidos-route="\/suppliers\?view=mine"/);
+  assert.match(html,/data-eidos-catalog-server-search/);
+  assert.match(html,/data-eidos-catalog-table/);
+});
+
+test("CV-02 catalog view chooser rejects untrusted route, duplicates and ambiguous current state", () => {
+  const render = views => renderCatalogBrowserToHtml({...record,table:{...record.table,views}});
+  assert.throws(() => render([{id:"a",label:"Link",route:"https://evil.test"}]),
+    /EIDOS_CATALOG_TABLE_VIEW_INVALID/);
+  assert.throws(() => render([{id:"a",label:"Link",route:"//evil.test"}]),
+    /EIDOS_CATALOG_TABLE_VIEW_INVALID/);
+  assert.throws(() => render([{id:"a",label:"One",route:"/a"},
+    {id:"a",label:"Two",route:"/b"}]), /EIDOS_CATALOG_TABLE_VIEW_INVALID/);
+  assert.throws(() => render([{id:"a",label:"One",route:"/a",selected:true},
+    {id:"b",label:"Two",route:"/b",selected:true}]),
+    /EIDOS_CATALOG_TABLE_VIEW_SELECTION_INVALID/);
+  assert.throws(() => render([{id:"a",label:"  ",route:"/a"}]),
+    /EIDOS_CATALOG_TABLE_VIEW_INVALID/);
+  assert.doesNotMatch(renderCatalogBrowserToHtml(record),/data-eidos-catalog-view-navigation/);
+});
