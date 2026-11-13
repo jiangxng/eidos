@@ -22,6 +22,7 @@ export interface CatalogBrowserTableV010 {
   };
 }
 
+import type { CatalogAuthorizedAggregateBarsV010 } from "./authorized-bars.js";
 import type { JsonValue } from "../runtime/contracts.js";
 export type CatalogStatusTone = "neutral" | "positive" | "warning";
 
@@ -78,5 +79,7 @@ export interface CatalogBrowserV010 {
   };
   items: CatalogBrowserItemV010[];
   table?: CatalogBrowserTableV010;
+  /** Optional domain/Host-authorized full-query chart, not current-page math. */
+  authorizedChart?: CatalogAuthorizedAggregateBarsV010;
   emptyMessage?: string;
 }
