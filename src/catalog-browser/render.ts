@@ -85,6 +85,7 @@ function assertCatalog(input: CatalogBrowserV010): CatalogBrowserV010 {
       }
     }
   }
+  if (input.authorizedChart) assertAuthorizedAggregateBarsV010(input.authorizedChart);
   return input;
 }
 
