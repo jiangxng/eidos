@@ -206,5 +206,5 @@ export function renderCatalogBrowserToHtml(input: CatalogBrowserV010): string {
     ? `<p data-eidos-catalog-search-empty hidden>${esc(model.search.noResultsMessage ?? "No matching items.")}</p>`
     : "";
 
-  return `<section data-eidos-capability="catalog-browser" data-eidos-id="${esc(model.id)}" data-eidos-catalog-layout="${esc(model.layout ?? "grid")}" data-eidos-catalog-has-table="${model.table ? "true" : "false"}"><header><h1>${esc(model.title)}</h1>${model.description ? `<p>${esc(model.description)}</p>` : ""}</header>${search}${viewNavigation}${serverSearch}${table}<div data-eidos-catalog-items>${items || `<p data-eidos-empty>${esc(model.emptyMessage ?? "No items")}</p>`}</div>${noResults}${pagination}</section>`;
+  return `<section data-eidos-capability="catalog-browser" data-eidos-id="${esc(model.id)}" data-eidos-catalog-layout="${esc(model.layout ?? "grid")}" data-eidos-catalog-has-table="${model.table ? "true" : "false"}"><header><h1>${esc(model.title)}</h1>${model.description ? `<p>${esc(model.description)}</p>` : ""}</header>${search}${viewNavigation}${model.authorizedChart ? renderAuthorizedAggregateBarsToHtmlV010(model.authorizedChart) : ""}${serverSearch}${table}<div data-eidos-catalog-items>${items || `<p data-eidos-empty>${esc(model.emptyMessage ?? "No items")}</p>`}</div>${noResults}${pagination}</section>`;
 }
