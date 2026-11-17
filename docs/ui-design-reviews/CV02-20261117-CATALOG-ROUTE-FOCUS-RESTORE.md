@@ -33,3 +33,8 @@
 ## 证据与剩余问题
 
 上游单元结构性合同 `tests/app-host/browser-shell.test.mjs` 约束焦点捕获、受限恢复、过期请求拒绝；需要 Eidos release-check 精确 HEAD 与 Platform consumer 的真实 Chromium 1280px/390px Owner/CSV 回归才可合并采用。对比 Platform 上轮 #1337～#1340 历史主线失败并保留原证，必须有**合并后 main** 的成功记录。真实登录账号、人操作、实体手机、读屏器尚无签收，不将这次 PR 评为完整 HUMAN_PASS。
+
+
+## 2026-11-17 主线缺口补证：hash 导航前捕获
+
+Platform #1341 首次实际 Host Chromium 原证显示 ACTIVE 状态正确，但新按钮未聚焦；源代码 `renderRoute` 时才捕获焦点可能晚于 hash 导航导致的旧控件失焦。此次上游修正：只有在 `navigate` 已验证目标路由后、真正变更 hash 前记录已聚焦的受限 Catalog 控件标识；仅同一业务 pathname 的目标完整 route 才能使用一次，过期请求与跨页/未知路由不恢复焦点。仍按本页原规定不保存用户身份、数据或秘密，也不能据此把 Human/读屏器签收从 NOT_SIGNED 改成 PASS。后续 Platform 必须针对实际 Host 1280/390、合并 main、东京运行时核对。
