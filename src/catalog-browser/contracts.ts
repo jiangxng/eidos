@@ -3,6 +3,19 @@ export interface CatalogBrowserTableV010 {
   /** The Domain supplies the current order; Eidos never sorts local rows. */
   columns: { id: string; label: string; sortRoute?: string; sortDirection?: "ascending" | "descending" }[];
   search?: { route: string; label: string; placeholder: string; value?: string; submitLabel: string };
+  /** Optional routes for owner-authorized, transient column layouts; not a Saved View write. */
+  columnControls?: {
+    label: string;
+    options: {
+      id: string;
+      label: string;
+      visible: boolean;
+      toggle?: { label: string; route: string };
+      moveUp?: { label: string; route: string };
+      moveDown?: { label: string; route: string };
+    }[];
+    reset?: { label: string; route: string };
+  };
   /** Optional owner-provided, already-authorized view navigation. No query or ACL evaluation occurs in Eidos. */
   views?: {
     id: string;

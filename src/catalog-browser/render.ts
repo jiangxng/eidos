@@ -83,6 +83,36 @@ function assertCatalog(input: CatalogBrowserV010): CatalogBrowserV010 {
     if (sortedColumnCount > 1) {
       throw new Error("EIDOS_CATALOG_TABLE_SORT_SELECTION_INVALID");
     }
+    if (input.table.columnControls !== undefined) {
+      const controls = input.table.columnControls;
+      if (!controls || !controls.label?.trim()
+        || !Array.isArray(controls.options)
+        || controls.options.length < columns.length
+        || controls.options.length > 12) {
+        throw new Error("EIDOS_CATALOG_COLUMN_CONTROLS_INVALID");
+      }
+      const seen = new Set<string>();
+      const visibleIds: string[] = [];
+      const validAction = (action: {label:string;route:string} | undefined) =>
+        action === undefined || (typeof action.label === "string"
+          && action.label.trim().length > 0 && isLocalCatalogRoute(action.route));
+      for (const option of controls.options) {
+        if (!option || !option.id?.trim() || !option.label?.trim()
+          || seen.has(option.id) || typeof option.visible !== "boolean"
+          || !validAction(option.toggle) || !validAction(option.moveUp)
+          || !validAction(option.moveDown)
+          || (!option.visible && (option.moveUp || option.moveDown))) {
+          throw new Error("EIDOS_CATALOG_COLUMN_CONTROLS_INVALID");
+        }
+        seen.add(option.id);
+        if (option.visible) visibleIds.push(option.id);
+      }
+      if (!validAction(controls.reset)
+        || visibleIds.length !== columns.length
+        || visibleIds.some((id,index) => id !== columns[index].id)) {
+        throw new Error("EIDOS_CATALOG_COLUMN_CONTROLS_INVALID");
+      }
+    }
     const itemIds = new Set(input.items.map(item => item.id));
     const rowIds = new Set<string>();
     for (const row of rows) {
@@ -218,6 +248,21 @@ export function renderCatalogBrowserToHtml(input: CatalogBrowserV010): string {
       ).join("")}</nav>`
     : "";
 
+  // Every control route is provided by the current Domain Owner and re-authorized
+  // upon navigation. Eidos does not store column preferences or filter rows.
+  const columnControls = model.table?.columnControls ? (() => {
+    const controls = model.table!.columnControls!;
+    const controlAction = (id: string, verb: string, action?: {label:string;route:string}) =>
+      action ? actionButton(undefined, {
+        id: "column-" + verb + "-" + id, label: action.label,
+        type: "navigate", route: action.route
+      }, false) : "";
+    const options = controls.options.map(option =>
+      `<div data-eidos-column-choice="${esc(option.id)}" data-eidos-column-visible="${option.visible ? "true" : "false"}"><span>${esc(option.label)}</span><span>${controlAction(option.id, "toggle", option.toggle)}${controlAction(option.id, "up", option.moveUp)}${controlAction(option.id, "down", option.moveDown)}</span></div>`
+    ).join("");
+    return `<details data-eidos-catalog-column-controls><summary>${esc(controls.label)}</summary><div data-eidos-catalog-column-options>${options}</div>${controlAction("reset", "reset", controls.reset)}</details>`;
+  })() : "";
+
   const serverSearch = model.table?.search ? `<form data-eidos-catalog-server-search data-eidos-search-route="${esc(model.table.search.route)}" role="search"><label><span data-eidos-catalog-search-label>${esc(model.table.search.label)}</span> <input type="search" name="search" value="${esc(model.table.search.value ?? "")}" maxlength="120" placeholder="${esc(model.table.search.placeholder)}"></label><button type="submit">${esc(model.table.search.submitLabel)}</button></form>` : "";
   const search = model.search
     ? `<div data-eidos-catalog-search><input type="search" data-eidos-catalog-search-input placeholder="${esc(model.search.placeholder ?? "Search")}" aria-label="${esc(model.search.ariaLabel ?? model.search.placeholder ?? "Search catalog")}"></div>`
@@ -226,5 +271,5 @@ export function renderCatalogBrowserToHtml(input: CatalogBrowserV010): string {
     ? `<p data-eidos-catalog-search-empty hidden>${esc(model.search.noResultsMessage ?? "No matching items.")}</p>`
     : "";
 
-  return `<section data-eidos-capability="catalog-browser" data-eidos-id="${esc(model.id)}" data-eidos-catalog-layout="${esc(model.layout ?? "grid")}" data-eidos-catalog-has-table="${model.table ? "true" : "false"}"><header><h1>${esc(model.title)}</h1>${model.description ? `<p>${esc(model.description)}</p>` : ""}</header>${search}${viewNavigation}${model.authorizedChart ? renderAuthorizedAggregateBarsToHtmlV010(model.authorizedChart) : ""}${serverSearch}${table}<div data-eidos-catalog-items>${items || `<p data-eidos-empty>${esc(model.emptyMessage ?? "No items")}</p>`}</div>${noResults}${pagination}</section>`;
+  return `<section data-eidos-capability="catalog-browser" data-eidos-id="${esc(model.id)}" data-eidos-catalog-layout="${esc(model.layout ?? "grid")}" data-eidos-catalog-has-table="${model.table ? "true" : "false"}"><header><h1>${esc(model.title)}</h1>${model.description ? `<p>${esc(model.description)}</p>` : ""}</header>${search}${viewNavigation}${model.authorizedChart ? renderAuthorizedAggregateBarsToHtmlV010(model.authorizedChart) : ""}${serverSearch}${columnControls}${table}<div data-eidos-catalog-items>${items || `<p data-eidos-empty>${esc(model.emptyMessage ?? "No items")}</p>`}</div>${noResults}${pagination}</section>`;
 }
