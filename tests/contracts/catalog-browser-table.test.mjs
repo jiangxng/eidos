@@ -170,3 +170,28 @@ test("CV-02 owner column actions preserve table data and use ordinary governed n
     controls.options[0],{...controls.options[1],moveUp:{label:"Move",route:"/suppliers"}}
   ]}),/EIDOS_CATALOG_COLUMN_CONTROLS_INVALID/);
 });
+test("CV-02 owner quick filters use safe routes and never filter client rows",()=>{
+  const choices={label:"Status filter",options:[
+    {id:"all",label:"All",route:"/suppliers?search=Acme&page=0",selected:false},
+    {id:"active",label:"Active",route:"/suppliers?search=Acme&status=ACTIVE&page=0",selected:true},
+    {id:"inactive",label:"Inactive",route:"/suppliers?search=Acme&status=INACTIVE&page=0"}
+  ]};
+  const render=f=>renderCatalogBrowserToHtml({...record,
+    table:{...record.table,quickFilters:f}});
+  const html=render(choices);
+  assert.match(html,/data-eidos-catalog-quick-filters aria-label="Status filter"/);
+  assert.match(html,/data-eidos-quick-filter-id="active" data-eidos-quick-filter-selected="true"/);
+  assert.match(html,/data-eidos-catalog-action="quick-filter-active"/);
+  assert.match(html,/aria-current="page"/);
+  assert.match(html,/data-eidos-route="\/suppliers\?search=Acme&amp;status=ACTIVE&amp;page=0"/);
+  assert.match(html,/data-eidos-col="name"/);
+  assert.doesNotMatch(renderCatalogBrowserToHtml(record),/data-eidos-catalog-quick-filters/);
+  assert.throws(()=>render({...choices,options:choices.options.map(x=>({...x,selected:false}))}),
+    /EIDOS_CATALOG_QUICK_FILTER_SELECTION_INVALID/);
+  assert.throws(()=>render({...choices,options:[choices.options[0],{...choices.options[1],id:"all"},choices.options[2]]}),
+    /EIDOS_CATALOG_QUICK_FILTER_INVALID/);
+  assert.throws(()=>render({...choices,options:[choices.options[0],{...choices.options[1],route:"//evil.test/"},choices.options[2]]}),
+    /EIDOS_CATALOG_QUICK_FILTER_INVALID/);
+  assert.throws(()=>render({...choices,options:[{...choices.options[0],selected:true},choices.options[1],choices.options[2]]}),
+    /EIDOS_CATALOG_QUICK_FILTER_SELECTION_INVALID/);
+});

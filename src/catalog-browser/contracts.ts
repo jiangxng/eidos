@@ -16,6 +16,11 @@ export interface CatalogBrowserTableV010 {
     }[];
     reset?: { label: string; route: string };
   };
+  /** A single bounded owner-defined quick-filter group; navigation reauthorizes full query. */
+  quickFilters?: {
+    label: string;
+    options: { id: string; label: string; route: string; selected?: boolean }[];
+  };
   /** Optional owner-provided, already-authorized view navigation. No query or ACL evaluation occurs in Eidos. */
   views?: {
     id: string;
