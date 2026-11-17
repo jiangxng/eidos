@@ -81,3 +81,32 @@ test("CV-02 catalog view chooser rejects untrusted route, duplicates and ambiguo
     /EIDOS_CATALOG_TABLE_VIEW_INVALID/);
   assert.doesNotMatch(renderCatalogBrowserToHtml(record),/data-eidos-catalog-view-navigation/);
 });
+test("CV-02 table routes stay on-origin for view, search, sort and pagination",()=>{
+  const unsafeRoutes=[
+    "//outside.invalid/suppliers",
+    "/\\outside.invalid/suppliers",
+    "/suppliers\ncross-line"
+  ];
+  for(const route of unsafeRoutes){
+    const withTable=changes=>renderCatalogBrowserToHtml({
+      ...record,table:{...record.table,...changes}
+    });
+    assert.throws(()=>withTable({views:[{
+      id:"outside",label:"Outside",route
+    }]}),/EIDOS_CATALOG_TABLE_VIEW_INVALID/,route);
+    assert.throws(()=>withTable({search:{
+      ...record.table.search,route
+    }}),/EIDOS_CATALOG_TABLE_SEARCH_INVALID/,route);
+    assert.throws(()=>withTable({columns:[{
+      ...record.table.columns[0],sortRoute:route
+    }]}),/EIDOS_CATALOG_TABLE_COLUMN_INVALID/,route);
+    assert.throws(()=>withTable({pageInfo:{
+      ...record.table.pageInfo,nextRoute:route
+    }}),/EIDOS_CATALOG_TABLE_PAGE_INVALID/,route);
+  }
+  // A legitimate owner-provided local route may retain its encoded query.
+  assert.match(renderCatalogBrowserToHtml({...record,table:{
+    ...record.table,
+    columns:[{...record.table.columns[0],sortRoute:"/suppliers?sort=name&direction=asc"}]
+  }}),/data-eidos-route="\/suppliers\?sort=name&amp;direction=asc"/);
+});
