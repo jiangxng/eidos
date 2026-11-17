@@ -87,3 +87,16 @@ test("Catalog route refresh preserves only focused quick-filter identity or serv
   assert.match(code,/if \(!read\.isCurrent\(\)\) return/);
   assert.doesNotMatch(code,/localStorage\.setItem\(.*[Ff]ocus/);
 });
+
+test("Catalog keyboard focus is captured before hash navigation and never reused across pages", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("../../src/app-host/browser-shell.ts", import.meta.url), "utf8");
+  assert.match(source, /pendingCatalogFocus/);
+  assert.match(source, /const fromPath = activePath\.split\("\?"\)\[0\]/);
+  assert.match(source, /const toPath = resolvedPath\.split\("\?"\)\[0\]/);
+  assert.match(source, /fromPath === toPath/);
+  assert.match(source, /route:resolvedPath,intent/);
+  assert.match(source, /pendingCatalogFocus\?\.route === resolvedPath/);
+  assert.match(source, /pendingCatalogFocus = undefined/);
+  assert.match(source, /if \(!read\.isCurrent\(\)\) return/);
+});

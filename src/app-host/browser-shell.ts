@@ -142,6 +142,11 @@ export async function mountBrowserAppHostShell(
   let activePath = currentPath();
   let mountedPage: MountedAppHostPage | undefined;
   let mountedIdentity: SurfaceInstanceIdentityV010 | undefined;
+  // Hash navigation can blur the old control before the new Owner READ begins.
+  // Hold only the focused control ID for this exact same-page navigation.
+  let pendingCatalogFocus:
+    | { route: string; intent: CatalogRouteFocusIntentV010 }
+    | undefined;
   const routeReadGate = createSupersedingRequestGateV010();
   const runtimeActivity = createRuntimeActivityMonitorV010();
   let activeSurfaceId: string | undefined;
@@ -327,6 +332,9 @@ export async function mountBrowserAppHostShell(
       return;
     }
 
+    const focusRequestedForRoute = pendingCatalogFocus?.route === resolvedPath
+      ? pendingCatalogFocus.intent : undefined;
+    pendingCatalogFocus = undefined;
     const read = routeReadGate.begin();
     let loaded;
     try {
@@ -342,7 +350,8 @@ export async function mountBrowserAppHostShell(
     // The old button/input is still mounted while the bounded Owner READ
     // completes. Preserve only its control identity across the DOM remount.
     // Do not shift focus on initial entry, unrelated navigation or denied READ.
-    const catalogFocus = captureCatalogRouteFocusV010(pageContainer);
+    const catalogFocus = focusRequestedForRoute
+      ?? captureCatalogRouteFocusV010(pageContainer);
     disposeMountedPage();
     pageContainer.replaceChildren();
     runtimeActivity.mark("structuralDomMutations");
@@ -504,6 +513,14 @@ export async function mountBrowserAppHostShell(
     if (!host.resolveRoute(resolvedPath) && surface?.resolution.kind !== "HANDOFF") {
       throw new Error(`EIDOS_APP_HOST_ROUTE_NOT_FOUND: ${resolvedPath}`);
     }
+
+    // Capture before window.hash changes, and never carry focus between
+    // different business pages, enterprises or denied destinations.
+    const fromPath = activePath.split("?")[0];
+    const toPath = resolvedPath.split("?")[0];
+    const intent = fromPath === toPath
+      ? captureCatalogRouteFocusV010(pageContainer) : undefined;
+    pendingCatalogFocus = intent ? {route:resolvedPath,intent} : undefined;
 
     if (surface?.resolution.kind === "HANDOFF") {
       await renderRoute(path);
