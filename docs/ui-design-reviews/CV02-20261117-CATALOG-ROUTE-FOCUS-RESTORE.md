@@ -38,3 +38,8 @@
 ## 2026-11-17 主线缺口补证：hash 导航前捕获
 
 Platform #1341 首次实际 Host Chromium 原证显示 ACTIVE 状态正确，但新按钮未聚焦；源代码 `renderRoute` 时才捕获焦点可能晚于 hash 导航导致的旧控件失焦。此次上游修正：只有在 `navigate` 已验证目标路由后、真正变更 hash 前记录已聚焦的受限 Catalog 控件标识；仅同一业务 pathname 的目标完整 route 才能使用一次，过期请求与跨页/未知路由不恢复焦点。仍按本页原规定不保存用户身份、数据或秘密，也不能据此把 Human/读屏器签收从 NOT_SIGNED 改成 PASS。后续 Platform 必须针对实际 Host 1280/390、合并 main、东京运行时核对。
+
+
+## 2026-11-17 真实 Platform Workbench 入口纠偏
+
+Platform `manager/app-host-client.ts` 在桌面分支调用 `mountDesktopWorkbenchRuntimeV010` → `mountWorkbenchShell`，故此前仅对 Browser Shell 的修改**不能证明实际 Counterparty 桌面页恢复焦点**。通过实际源码而非推测定位该入口后，Eidos 将已存在的受限焦点 helper 提取为单独的 `src/app-host/catalog-route-focus.ts`（Browser Shell 和 Workbench Shell 共用），并只在 `src/workbench/shell.ts` 的同一业务 pathname 导航前捕获控件、正确的有权 Owner READ 之后恢复到新 DOM，遵守 superseding read gate。跨业务页、HANDOFF、隐藏控件或无权状态不转移焦点。本修正还需 Platform 正确 vendor 采用与真 Chromium；不以先前 #215/#216 的 Browser Shell CI 宣称真实 Workbench 通过。真实登录 Human、实体手机和读屏器继续独立 NOT_SIGNED。

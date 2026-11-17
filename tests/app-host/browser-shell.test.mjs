@@ -72,20 +72,23 @@ test("App Host renders Task Inbox definitions through the semantic renderer", ()
 });
 
 
-test("Catalog route refresh preserves only focused quick-filter identity or server-search input", async () => {
+test("Shared Catalog focus helper is bounded to current quick-filter or search only", async () => {
   const { readFile } = await import("node:fs/promises");
-  const code = await readFile(new URL("../../src/app-host/browser-shell.ts", import.meta.url), "utf8");
-  // Structural safety contract; live focus behavior is verified by the
-  // consumer's real Chromium Host test, not simulated with a fake DOM here.
-  assert.match(code,/function captureCatalogRouteFocusV010\(/);
-  assert.match(code,/function restoreCatalogRouteFocusV010\(/);
-  assert.match(code,/slot\.contains\(active\)/);
-  assert.match(code,/data-eidos-catalog-quick-filters/);
-  assert.match(code,/data-eidos-catalog-server-search/);
-  assert.match(code,/button\.dataset\.eidosCatalogAction === intent\.actionId/);
-  assert.match(code,/target\?\.focus\(\{preventScroll:true\}\)/);
-  assert.match(code,/if \(!read\.isCurrent\(\)\) return/);
-  assert.doesNotMatch(code,/localStorage\.setItem\(.*[Ff]ocus/);
+  const helper = await readFile(new URL("../../src/app-host/catalog-route-focus.ts",import.meta.url), "utf8");
+  const browser = await readFile(new URL("../../src/app-host/browser-shell.ts",import.meta.url), "utf8");
+  const workbench = await readFile(new URL("../../src/workbench/shell.ts",import.meta.url), "utf8");
+  assert.match(helper,/export function captureCatalogRouteFocusV010\(/);
+  assert.match(helper,/export function restoreCatalogRouteFocusV010\(/);
+  assert.match(helper,/slot\.contains\(active\)/);
+  assert.match(helper,/data-eidos-catalog-quick-filters/);
+  assert.match(helper,/data-eidos-catalog-server-search/);
+  assert.match(helper,/button\.dataset\.eidosCatalogAction === intent\.actionId/);
+  assert.match(helper,/target\?\.focus\(\{preventScroll:true\}\)/);
+  assert.match(browser,/from "\.\/catalog-route-focus\.js"/);
+  assert.match(workbench,/from "\.\.\/app-host\/catalog-route-focus\.js"/);
+  assert.match(workbench,/pendingCatalogFocus/);
+  assert.match(workbench,/samePage && surface\?\.resolution\.kind !== "HANDOFF"/);
+  assert.match(workbench,/restoreCatalogRouteFocusV010\(workspaceContent, catalogFocus\)/);
 });
 
 test("Catalog keyboard focus is captured before hash navigation and never reused across pages", async () => {
