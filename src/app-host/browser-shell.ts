@@ -31,6 +31,43 @@ import {
   type RuntimeActivitySnapshotV010
 } from "../realtime/runtime-performance.js";
 
+/**
+ * Capture only the control that requested a governed Catalog re-query.
+ * Never persist a free-form selector, row value, Principal, or business data.
+ */
+type CatalogRouteFocusIntentV010 =
+  | { kind: "quick-filter"; actionId: string }
+  | { kind: "server-search" };
+
+function captureCatalogRouteFocusV010(slot: HTMLElement): CatalogRouteFocusIntentV010 | undefined {
+  const active = document.activeElement;
+  if (!(active instanceof HTMLElement) || !slot.contains(active)) return undefined;
+  if (active.matches('[data-eidos-catalog-server-search] input[name="search"]')) {
+    return {kind:"server-search"};
+  }
+  if (active instanceof HTMLButtonElement
+    && active.closest("[data-eidos-catalog-quick-filters]")) {
+    const actionId = active.dataset.eidosCatalogAction;
+    if (actionId?.startsWith("quick-filter-")) {
+      return {kind:"quick-filter",actionId};
+    }
+  }
+  return undefined;
+}
+
+function restoreCatalogRouteFocusV010(
+  slot: HTMLElement,
+  intent: CatalogRouteFocusIntentV010 | undefined
+): void {
+  if (!intent) return;
+  const target = intent.kind === "server-search"
+    ? slot.querySelector<HTMLInputElement>('[data-eidos-catalog-server-search] input[name="search"]')
+    : Array.from(slot.querySelectorAll<HTMLButtonElement>(
+      '[data-eidos-catalog-quick-filters] button[data-eidos-catalog-action]'
+    )).find(button => button.dataset.eidosCatalogAction === intent.actionId);
+  target?.focus({preventScroll:true});
+}
+
 export interface BrowserAppHostShellOptions {
   host: AppHost;
   container: HTMLElement | string;
@@ -302,6 +339,10 @@ export async function mountBrowserAppHostShell(
     }
     if (!read.isCurrent()) return;
 
+    // The old button/input is still mounted while the bounded Owner READ
+    // completes. Preserve only its control identity across the DOM remount.
+    // Do not shift focus on initial entry, unrelated navigation or denied READ.
+    const catalogFocus = captureCatalogRouteFocusV010(pageContainer);
     disposeMountedPage();
     pageContainer.replaceChildren();
     runtimeActivity.mark("structuralDomMutations");
@@ -349,6 +390,7 @@ export async function mountBrowserAppHostShell(
         structuralVersion: "legacy:0"
       });
       runtimeActivity.mark("surfaceMounts");
+      restoreCatalogRouteFocusV010(pageContainer, catalogFocus);
     } catch (error) {
       mountedIdentity = undefined;
       const pre = document.createElement("pre");
