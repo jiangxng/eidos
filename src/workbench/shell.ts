@@ -32,6 +32,11 @@ import {
   type AppHostChatState,
   type MountedAppHostPage
 } from "../app-host/page-controller.js";
+import {
+  captureCatalogRouteFocusV010,
+  restoreCatalogRouteFocusV010,
+  type CatalogRouteFocusIntentV010
+} from "../app-host/catalog-route-focus.js";
 import { renderAppHostPageToHtml } from "../app-host/page-renderer.js";
 import {
   createBrowserWorkbenchLayoutStateStore,
@@ -200,6 +205,10 @@ export async function mountWorkbenchShell(
   let disposed = false;
   let sideMount: MountedAppHostPage | undefined;
   let workspaceMount: MountedAppHostPage | undefined;
+  // Only a same-page Owner re-query may carry a transient Catalog focus ID.
+  let pendingCatalogFocus:
+    | {route:string;intent:CatalogRouteFocusIntentV010}
+    | undefined;
   let sideIdentity: SurfaceInstanceIdentityV010 | undefined;
   let workspaceIdentity: SurfaceInstanceIdentityV010 | undefined;
   let workspaceWebUrl: string | undefined;
@@ -726,6 +735,8 @@ export async function mountWorkbenchShell(
       return;
     }
 
+    const requestedFocus = pendingCatalogFocus?.route === resolvedPath
+      ? pendingCatalogFocus.intent : undefined;
     const read = workspaceReadGate.begin();
     let loaded;
     try {
@@ -738,6 +749,9 @@ export async function mountWorkbenchShell(
     }
     if (!read.isCurrent()) return;
 
+    // The old workbench DOM is still mounted through the Owner READ.
+    const catalogFocus = requestedFocus
+      ?? captureCatalogRouteFocusV010(workspaceContent);
     disposeWorkspaceMount();
     workspaceWebUrl = undefined;
     workspaceContent.replaceChildren();
@@ -791,6 +805,8 @@ export async function mountWorkbenchShell(
     });
     runtimeActivity.mark("surfaceMounts");
     statusRight.textContent = loaded.page.title ?? resolvedPath;
+    restoreCatalogRouteFocusV010(workspaceContent, catalogFocus);
+    if (pendingCatalogFocus?.route === resolvedPath) pendingCatalogFocus = undefined;
   }
 
   async function navigateWorkspace(target: string): Promise<void> {
@@ -813,6 +829,12 @@ export async function mountWorkbenchShell(
         );
       }
 
+      const samePage = state.workspaceTarget.split("?")[0]
+        === resolvedTarget.split("?")[0];
+      const focusIntent = samePage && surface?.resolution.kind !== "HANDOFF"
+        ? captureCatalogRouteFocusV010(workspaceContent) : undefined;
+      pendingCatalogFocus = focusIntent
+        ? {route:resolvedTarget,intent:focusIntent} : undefined;
       state.workspaceTarget = resolvedTarget;
       if (
         surface?.resolution.kind !== "HANDOFF"
