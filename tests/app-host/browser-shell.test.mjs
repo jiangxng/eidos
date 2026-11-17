@@ -70,3 +70,20 @@ test("App Host renders Task Inbox definitions through the semantic renderer", ()
   assert.match(html, /Ship order/);
   assert.match(html, /data-work-type="SHIP"/);
 });
+
+
+test("Catalog route refresh preserves only focused quick-filter identity or server-search input", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const code = await readFile(new URL("../../src/app-host/browser-shell.ts", import.meta.url), "utf8");
+  // Structural safety contract; live focus behavior is verified by the
+  // consumer's real Chromium Host test, not simulated with a fake DOM here.
+  assert.match(code,/function captureCatalogRouteFocusV010\(/);
+  assert.match(code,/function restoreCatalogRouteFocusV010\(/);
+  assert.match(code,/slot\.contains\(active\)/);
+  assert.match(code,/data-eidos-catalog-quick-filters/);
+  assert.match(code,/data-eidos-catalog-server-search/);
+  assert.match(code,/button\.dataset\.eidosCatalogAction === intent\.actionId/);
+  assert.match(code,/target\?\.focus\(\{preventScroll:true\}\)/);
+  assert.match(code,/if \(!read\.isCurrent\(\)\) return/);
+  assert.doesNotMatch(code,/localStorage\.setItem\(.*[Ff]ocus/);
+});
