@@ -110,3 +110,24 @@ test("CV-02 table routes stay on-origin for view, search, sort and pagination",(
     columns:[{...record.table.columns[0],sortRoute:"/suppliers?sort=name&direction=asc"}]
   }}),/data-eidos-route="\/suppliers\?sort=name&amp;direction=asc"/);
 });
+test("CV-02 accessible sorted column stays owner-defined and announces direction",()=>{
+  const render=columns=>renderCatalogBrowserToHtml({...record,table:{
+    ...record.table,columns
+  }});
+  for(const [direction,arrow] of [["ascending","↑"],["descending","↓"]]){
+    const html=render([{...record.table.columns[0],sortDirection:direction}]);
+    assert.match(html,new RegExp('scope="col" aria-sort="'+direction+'"'));
+    assert.match(html,new RegExp('data-eidos-sort-indicator aria-hidden="true">'+arrow));
+    assert.match(html,/data-eidos-catalog-action="sort-name"/);
+    assert.match(html,/data-eidos-route="\/suppliers\?sort=name"/);
+  }
+  assert.doesNotMatch(renderCatalogBrowserToHtml(record),/aria-sort=/);
+  assert.throws(()=>render([{...record.table.columns[0],sortDirection:"sideways"}]),
+    /EIDOS_CATALOG_TABLE_COLUMN_SORT_INVALID/);
+  assert.throws(()=>render([{id:"name",label:"Name",sortDirection:"ascending"}]),
+    /EIDOS_CATALOG_TABLE_COLUMN_SORT_INVALID/);
+  assert.throws(()=>render([
+    {...record.table.columns[0],sortDirection:"ascending"},
+    {id:"code",label:"Code",sortRoute:"/suppliers?sort=code",sortDirection:"descending"}
+  ]),/EIDOS_CATALOG_TABLE_SORT_SELECTION_INVALID/);
+});
