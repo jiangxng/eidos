@@ -131,3 +131,42 @@ test("CV-02 accessible sorted column stays owner-defined and announces direction
     {id:"code",label:"Code",sortRoute:"/suppliers?sort=code",sortDirection:"descending"}
   ]),/EIDOS_CATALOG_TABLE_SORT_SELECTION_INVALID/);
 });
+test("CV-02 owner column actions preserve table data and use ordinary governed navigation",()=>{
+  const controls={
+    label:"Columns",
+    options:[
+      {id:"name",label:"Name",visible:true,
+       toggle:{label:"Hide name",route:"/suppliers?columns=code"},
+       moveDown:{label:"Move down",route:"/suppliers?columns=code,name"}},
+      {id:"code",label:"Code",visible:false,
+       toggle:{label:"Show code",route:"/suppliers?columns=name,code"}}
+    ],
+    reset:{label:"Restore default",route:"/suppliers?view=all"}
+  };
+  const render=col=>renderCatalogBrowserToHtml({...record,table:{
+    ...record.table,columnControls:col
+  }});
+  const html=render(controls);
+  assert.match(html,/<details data-eidos-catalog-column-controls>/);
+  assert.match(html,/<summary>Columns<\/summary>/);
+  assert.match(html,/data-eidos-column-choice="code" data-eidos-column-visible="false"/);
+  assert.match(html,/data-eidos-catalog-action="column-toggle-code"/);
+  assert.match(html,/data-eidos-route="\/suppliers\?columns=name,code"/);
+  assert.match(html,/data-eidos-catalog-action="column-reset-reset"/);
+  assert.match(html,/data-eidos-col="name"/);
+  assert.doesNotMatch(html,/data-eidos-col="code"/);
+  assert.doesNotMatch(renderCatalogBrowserToHtml(record),/data-eidos-catalog-column-controls/);
+  assert.throws(()=>render({...controls,options:[
+    {...controls.options[0],toggle:{label:"Offsite",route:"//outside.invalid/x"}},
+    controls.options[1]
+  ]}),/EIDOS_CATALOG_COLUMN_CONTROLS_INVALID/);
+  assert.throws(()=>render({...controls,options:[
+    controls.options[0],{...controls.options[1],id:"name"}
+  ]}),/EIDOS_CATALOG_COLUMN_CONTROLS_INVALID/);
+  assert.throws(()=>render({...controls,options:[
+    {...controls.options[0],visible:false},controls.options[1]
+  ]}),/EIDOS_CATALOG_COLUMN_CONTROLS_INVALID/);
+  assert.throws(()=>render({...controls,options:[
+    controls.options[0],{...controls.options[1],moveUp:{label:"Move",route:"/suppliers"}}
+  ]}),/EIDOS_CATALOG_COLUMN_CONTROLS_INVALID/);
+});
