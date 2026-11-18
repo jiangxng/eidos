@@ -21,6 +21,17 @@ export interface CatalogBrowserTableV010 {
     label: string;
     options: { id: string; label: string; route: string; selected?: boolean }[];
   };
+  /**
+   * Multiple independent Owner-defined filter groups. Each action is a
+   * presentation-only route back to the Host, which reauthorizes and combines
+   * the complete query. Never derive predicates from browser rows.
+   * Replaces (does not coexist with) the legacy single quickFilters group.
+   */
+  quickFilterGroups?: {
+    id: string;
+    label: string;
+    options: { id: string; label: string; route: string; selected?: boolean }[];
+  }[];
   /** Optional owner-provided, already-authorized view navigation. No query or ACL evaluation occurs in Eidos. */
   views?: {
     id: string;
