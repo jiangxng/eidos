@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {renderCatalogBrowserToHtml} from "../../dist/src/catalog-browser/render.js";
+import {renderCatalogBrowserToHtml} from "../../dist/index.js";
 
 const route = (status,kind) =>
   "/counterparties/my-suppliers?search=Hong+Kong&status=" + status
